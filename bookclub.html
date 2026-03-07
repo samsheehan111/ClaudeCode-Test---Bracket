@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Book Club Tracker — Oprah & Reese × SFPL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:#f0f4f8;font-family:'Inter',system-ui,-apple-system,sans-serif;color:#1e293b}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#f0f4f8}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+
+/* ── HEADER ── */
+#hdr{background:#fff;border-bottom:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.05);padding:14px 20px;position:sticky;top:0;z-index:100}
+.hdr-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;flex-direction:column}
+.brand-title{font-size:18px;font-weight:800;letter-spacing:.2px;color:#0f172a;line-height:1.1}
+.brand-sub{font-size:10px;color:#94a3b8;margin-top:2px;letter-spacing:.3px}
+.hdr-stats{display:flex;gap:16px;flex-shrink:0}
+.stat{text-align:center}
+.stat-num{font-size:20px;font-weight:800;color:#6d28d9;line-height:1}
+.stat-lbl{font-size:9px;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;margin-top:2px;font-weight:600}
+
+/* ── FILTERS ── */
+#filter-bar{background:#fff;border-bottom:1px solid #e2e8f0;padding:10px 20px;position:sticky;top:61px;z-index:99}
+.filter-inner{max-width:1280px;margin:0 auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.filter-group{display:flex;gap:4px;flex-wrap:wrap}
+.filter-lbl{font-size:9px;font-weight:700;color:#94a3b8;letter-spacing:1px;text-transform:uppercase;align-self:center;margin-right:4px}
+.chip{font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;border:1.5px solid #e2e8f0;border-radius:20px;background:#f8fafc;color:#64748b;cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:#a78bfa;color:#6d28d9}
+.chip.active{background:#6d28d9;border-color:#6d28d9;color:#fff}
+.chip.oprah.active{background:#e11d48;border-color:#e11d48}
+.chip.reese.active{background:#0ea5e9;border-color:#0ea5e9}
+.chip.both.active{background:#7c3aed;border-color:#7c3aed}
+.filter-sep{width:1px;background:#e2e8f0;height:24px;flex-shrink:0}
+#search-box{font-family:inherit;font-size:12px;padding:5px 12px;border:1.5px solid #e2e8f0;border-radius:20px;background:#f8fafc;color:#1e293b;outline:none;width:180px;transition:border-color .15s}
+#search-box:focus{border-color:#a78bfa}
+#search-box::placeholder{color:#cbd5e1}
+
+/* ── GRID ── */
+#main{max-width:1280px;margin:0 auto;padding:20px}
+#count-bar{font-size:11px;color:#94a3b8;margin-bottom:14px;font-weight:500}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+#empty{display:none;text-align:center;padding:60px 20px;color:#94a3b8;font-size:13px;line-height:2}
+
+/* ── BOOK CARD ── */
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .2s,transform .2s;display:flex;flex-direction:column}
+.card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-1px)}
+.card-top{padding:16px 16px 12px;flex:1}
+.card-badges{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.badge{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 8px;border-radius:10px}
+.badge-oprah{background:#fce7f3;color:#be185d}
+.badge-reese{background:#e0f2fe;color:#0369a1}
+.badge-both{background:#ede9fe;color:#6d28d9}
+.badge-year{background:#f1f5f9;color:#64748b}
+.badge-month{background:#fef9c3;color:#854d0e}
+.badge-genre{background:#dcfce7;color:#15803d}
+.badge-memoir{background:#fff7ed;color:#c2410c}
+.card-title{font-size:15px;font-weight:700;color:#0f172a;line-height:1.3;margin-bottom:3px}
+.card-author{font-size:12px;color:#64748b;font-weight:500;margin-bottom:8px}
+.card-desc{font-size:11px;color:#64748b;line-height:1.6;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card-bottom{padding:10px 16px 14px;border-top:1px solid #f1f5f9;display:flex;flex-direction:column;gap:8px}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.btn-sfpl{font-family:inherit;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1.5px solid #6d28d9;background:transparent;color:#6d28d9;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-sfpl:hover{background:#6d28d9;color:#fff}
+.btn-libby{font-family:inherit;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1.5px solid #0ea5e9;background:transparent;color:#0ea5e9;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.btn-libby:hover{background:#0ea5e9;color:#fff}
+.status-row{display:flex;gap:4px}
+.status-btn{font-family:inherit;font-size:9px;font-weight:700;padding:4px 8px;border-radius:6px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#94a3b8;cursor:pointer;transition:all .12s;flex:1;text-align:center;letter-spacing:.3px}
+.status-btn:hover{border-color:#94a3b8;color:#475569}
+.status-btn.active-want{background:#fef3c7;border-color:#f59e0b;color:#d97706}
+.status-btn.active-hold{background:#fee2e2;border-color:#f87171;color:#dc2626}
+.status-btn.active-read{background:#dcfce7;border-color:#4ade80;color:#16a34a}
+
+/* ── LIBBY TIP ── */
+#tip{max-width:1280px;margin:12px auto -4px;padding:0 20px}
+.tip-box{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:#92400e;line-height:1.6}
+.tip-box strong{font-weight:700}
+
+/* ── SORT ── */
+.sort-select{font-family:inherit;font-size:11px;font-weight:600;padding:5px 10px;border:1.5px solid #e2e8f0;border-radius:20px;background:#f8fafc;color:#64748b;cursor:pointer;outline:none}
+.sort-select:focus{border-color:#a78bfa}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .hdr-inner{gap:10px}
+  .brand-title{font-size:15px}
+  #filter-bar{top:54px}
+  #grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="hdr">
+  <div class="hdr-inner">
+    <div class="brand">
+      <div class="brand-title">📚 Book Club × SFPL Tracker</div>
+      <div class="brand-sub">Oprah's &amp; Reese's picks · 2024–2026 · SF Public Library ebook wait times</div>
+    </div>
+    <div class="hdr-stats">
+      <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Books</div></div>
+      <div class="stat"><div class="stat-num" id="stat-want" style="color:#d97706">0</div><div class="stat-lbl">Want</div></div>
+      <div class="stat"><div class="stat-num" id="stat-hold" style="color:#dc2626">0</div><div class="stat-lbl">On Hold</div></div>
+      <div class="stat"><div class="stat-num" id="stat-read" style="color:#16a34a">0</div><div class="stat-lbl">Read</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="filter-bar">
+  <div class="filter-inner">
+    <span class="filter-lbl">Club</span>
+    <div class="filter-group" id="club-filters">
+      <button class="chip active" data-club="all">All</button>
+      <button class="chip oprah" data-club="oprah">Oprah</button>
+      <button class="chip reese" data-club="reese">Reese</button>
+    </div>
+    <div class="filter-sep"></div>
+    <span class="filter-lbl">Year</span>
+    <div class="filter-group" id="year-filters">
+      <button class="chip active" data-year="all">All</button>
+      <button class="chip" data-year="2024">2024</button>
+      <button class="chip" data-year="2025">2025</button>
+    </div>
+    <div class="filter-sep"></div>
+    <span class="filter-lbl">Genre</span>
+    <div class="filter-group" id="genre-filters">
+      <button class="chip active" data-genre="all">All</button>
+      <button class="chip" data-genre="Fiction">Fiction</button>
+      <button class="chip" data-genre="Memoir">Memoir</button>
+      <button class="chip" data-genre="Mystery">Mystery</button>
+      <button class="chip" data-genre="Romance">Romance</button>
+    </div>
+    <div class="filter-sep"></div>
+    <span class="filter-lbl">Status</span>
+    <div class="filter-group" id="status-filters">
+      <button class="chip active" data-status="all">All</button>
+      <button class="chip" data-status="want">Want to Read</button>
+      <button class="chip" data-status="hold">On Hold</button>
+      <button class="chip" data-status="read">Read</button>
+    </div>
+    <div class="filter-sep"></div>
+    <select class="sort-select" id="sort-sel">
+      <option value="date-desc">Newest first</option>
+      <option value="date-asc">Oldest first</option>
+      <option value="title">Title A–Z</option>
+      <option value="author">Author A–Z</option>
+    </select>
+    <input type="text" id="search-box" placeholder="Search title or author…" autocomplete="off"/>
+  </div>
+</div>
+
+<div id="tip">
+  <div class="tip-box">
+    <strong>Kindle tip:</strong> SFPL ebooks are on <strong>Libby/OverDrive</strong>. After borrowing, open the Libby app → send to Kindle → read on your Kindle device or app. "Check SFPL Ebook" searches the catalog filtered to ebooks. "Open in Libby" takes you straight to the Libby web app.
+  </div>
+</div>
+
+<div id="main">
+  <div id="count-bar"></div>
+  <div id="grid"></div>
+  <div id="empty">No books match your filters.<br>Try adjusting the filters above.</div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════
+// BOOK DATA  — 2024–2025 Oprah & Reese picks
+// clubs: 'oprah' | 'reese' | 'both'
+// genre: Fiction | Historical Fiction | Mystery | Romance | Memoir | Debut Fiction
+// sortDate: YYYY-MM for ordering
+// ═══════════════════════════════════════════════════════
+const BOOKS = [
+  // ── OPRAH 2024 ──────────────────────────────────────
+  {
+    id:'o24-01', club:'oprah', year:2024, sortDate:'2024-02',
+    month:'Feb 2024', title:'The Many Lives of Mama Love',
+    author:'Lara Love Hardin', genre:'Memoir',
+    desc:'A suburban soccer mom secretly funded a heroin addiction by stealing neighbors\' credit cards. Using her PTA skills she rose in prison ranks — then rebuilt her life as a ghostwriter. A stunning memoir about shame, reinvention, and grace.',
+  },
+  {
+    id:'o24-02', club:'oprah', year:2024, sortDate:'2024-05',
+    month:'May 2024', title:'Long Island',
+    author:'Colm Tóibín', genre:'Fiction',
+    desc:'Sequel to Brooklyn. Eilis Lacey has lived in New York for decades. Then an Irishman appears at her door — announcing his wife is pregnant with her husband Tony\'s child. A luminous novel about secrets, identity, and belonging.',
+  },
+  {
+    id:'o24-03', club:'oprah', year:2024, sortDate:'2024-06',
+    month:'Jun 2024', title:'Familiaris',
+    author:'David Wroblewski', genre:'Historical Fiction',
+    desc:'A prequel to The Story of Edgar Sawtelle. Newlyweds John and Mary Sawtelle settle in 1919 Wisconsin with their two best friends and three extraordinary dogs — hoping for a fresh start in a land stranger and more perilous than they imagined.',
+  },
+  {
+    id:'o24-04', club:'oprah', year:2024, sortDate:'2024-09',
+    month:'Sep 2024', title:'Tell Me Everything',
+    author:'Elizabeth Strout', genre:'Fiction',
+    desc:'Pulitzer Prize winner Elizabeth Strout finally brings her beloved characters — Lucy Barton, Olive Kitteridge, and Bob Burgess — together in one deeply moving novel about stories, connection, and the things we keep to ourselves.',
+  },
+  {
+    id:'o24-05', club:'oprah', year:2024, sortDate:'2024-10',
+    month:'Oct 2024', title:'From Here to the Great Unknown',
+    author:'Lisa Marie Presley & Riley Keough', genre:'Memoir',
+    desc:'Lisa Marie Presley was working on her memoir when she died. Her daughter Riley Keough finished it from recorded tapes — a portrait of grief over Elvis\'s death, complicated marriages (including to Michael Jackson), and addiction.',
+  },
+  {
+    id:'o24-06', club:'oprah', year:2024, sortDate:'2024-12',
+    month:'Dec 2024', title:'Small Things Like These',
+    author:'Claire Keegan', genre:'Historical Fiction',
+    desc:'Ireland, 1985. Coal merchant Bill Furlong discovers a girl locked in a convent coal shed, begging him to find her baby. Everyone tells him to let it go. A devastating, spare novel about moral courage against the Church\'s Magdalene laundries.',
+  },
+  // ── OPRAH 2025 ──────────────────────────────────────
+  {
+    id:'o25-01', club:'oprah', year:2025, sortDate:'2025-02',
+    month:'Feb 2025', title:'Dream State',
+    author:'Eric Puchner', genre:'Fiction',
+    desc:'A sweeping romantic novel chronicling a love triangle between Cece, Charlie, and Garrett — from a 2004 Montana wedding to five decades in the future. "The kind of book you don\'t want to put down," said Oprah. A24 is adapting it for TV.',
+  },
+  {
+    id:'o25-02', club:'both', year:2025, sortDate:'2025-03',
+    month:'Mar 2025', title:'The Tell',
+    author:'Amy Griffin', genre:'Memoir',
+    desc:'A joint pick by Oprah, Reese Witherspoon, and Jenna Bush Hager. Amy Griffin\'s memoir about her traumatic childhood in Amarillo, Texas and her transformative journey through various forms of therapy — including psychedelic-assisted treatment.',
+  },
+  {
+    id:'o25-03', club:'oprah', year:2025, sortDate:'2025-04',
+    month:'Apr 2025', title:'Matriarch',
+    author:'Tina Knowles', genre:'Memoir',
+    desc:'Mother of Beyoncé and Solange Knowles tells her own story — growing up in 1950s Galveston, Texas with Motown everywhere. A memoir about faith, family, fashion, and the matriarch behind two of music\'s biggest superstars.',
+  },
+  {
+    id:'o25-04', club:'oprah', year:2025, sortDate:'2025-05',
+    month:'May 2025', title:'The Emperor of Gladness',
+    author:'Ocean Vuong', genre:'Fiction',
+    desc:'One evening in East Gladness, Connecticut, Hai stands on a bridge ready to end his life. An elderly widow\'s shout changes everything. He becomes her caretaker and their unlikely friendship gives both a second chance. Ocean Vuong\'s deeply tender novel.',
+  },
+  {
+    id:'o25-05', club:'oprah', year:2025, sortDate:'2025-06',
+    month:'Jun 2025', title:'The River Is Waiting',
+    author:'Wally Lamb', genre:'Fiction',
+    desc:'Wally Lamb\'s third Oprah Book Club pick — a masterful novel about family, secrets, and the long shadows the past casts on the present. Oprah called him "one of the most beloved writers of our time."',
+  },
+  {
+    id:'o25-06', club:'oprah', year:2025, sortDate:'2025-07',
+    month:'Jul 2025', title:'Culpability',
+    author:'Bruce Holsinger', genre:'Mystery',
+    desc:'When the Cassidy-Shaw family\'s autonomous minivan collides with another car, they face cascading moral dilemmas about AI responsibility. AI pioneer Lorelei and each family member holds secrets about their own culpability. A propulsive thriller for the machine-learning age.',
+  },
+  {
+    id:'o25-07', club:'oprah', year:2025, sortDate:'2025-08',
+    month:'Aug 2025', title:'Somebody\'s Fool',
+    author:'Richard Russo', genre:'Fiction',
+    desc:'Lucy Lynch has spent sixty years in Thomaston, New York. In this sequel to Nobody\'s Fool, Russo returns to the town and characters readers fell in love with — chronicling the Lynch family empire of convenience stores with warmth, wit, and sharp observation.',
+  },
+  {
+    id:'o25-08', club:'oprah', year:2025, sortDate:'2025-10',
+    month:'Oct 2025', title:'A Guardian and a Thief',
+    author:'Megha Majumdar', genre:'Fiction',
+    desc:'A National Book Award Finalist set in near-future Kolkata ravaged by climate change, where two families clash in desperate attempts at survival. Oprah called it "one of her best selections yet" and praised Majumdar\'s exquisite understanding of humanity.',
+  },
+  {
+    id:'o25-09', club:'oprah', year:2025, sortDate:'2025-11',
+    month:'Nov 2025', title:'Some Bright Nowhere',
+    author:'Ann Packer', genre:'Fiction',
+    desc:'After forty years of marriage, Elliot prepares to lose his wife Claire to cancer. He has been her devoted caregiver for eight years. Then Claire\'s last dying request completely shatters his understanding of their entire marriage.',
+  },
+  // ── REESE 2024 ──────────────────────────────────────
+  {
+    id:'r24-01', club:'reese', year:2024, sortDate:'2024-01',
+    month:'Jan 2024', title:'First Lie Wins',
+    author:'Ashley Elston', genre:'Mystery',
+    desc:'Evie Porter seems to have the perfect life — a doting boyfriend, a house with a picket fence, fancy friends. But Evie is living a double life, using an alias to infiltrate people\'s lives. A sharp, twisty thriller with a lethally clever heroine.',
+  },
+  {
+    id:'r24-02', club:'reese', year:2024, sortDate:'2024-02',
+    month:'Feb 2024', title:'City of Night Birds',
+    author:'Juhea Kim', genre:'Fiction',
+    desc:'The story of a legendary Russian ballerina who must navigate the ruthless politics of a top dance company while confronting her past. A sweeping, gorgeously written novel about ambition, love, and the price of art.',
+  },
+  {
+    id:'r24-03', club:'reese', year:2024, sortDate:'2024-03',
+    month:'Mar 2024', title:'Redwood Court',
+    author:'DéLana R.A. Dameron', genre:'Fiction',
+    desc:'A debut novel following multiple generations of a Black family through loss, joy, and survival — told through interconnected stories set in a single neighborhood. Lyrical, intimate, and deeply moving.',
+  },
+  {
+    id:'r24-04', club:'reese', year:2024, sortDate:'2024-04',
+    month:'Apr 2024', title:'Anita de Monte Laughs Last',
+    author:'Xochitl Gonzalez', genre:'Fiction',
+    desc:'Two timelines: Cuban American conceptual artist Anita de Monte dies under mysterious circumstances in 1985. Decades later, a young Latina art student uncovers the truth about what happened. A glittering, satirical novel about art, power, and erasure.',
+  },
+  {
+    id:'r24-05', club:'reese', year:2024, sortDate:'2024-05',
+    month:'May 2024', title:'Did You Hear About Kitty Karr?',
+    author:'Crystal Smith Paul', genre:'Mystery',
+    desc:'A debut novel about Kitty Karr, a woman who passed as white in 1940s Hollywood and kept an explosive secret for her entire life — a secret her granddaughters discover only after her death. A propulsive family mystery spanning generations.',
+  },
+  {
+    id:'r24-06', club:'reese', year:2024, sortDate:'2024-06',
+    month:'Jun 2024', title:'The Unwedding',
+    author:'Ally Condie', genre:'Romance',
+    desc:'When a destination wedding in a stunning coastal resort goes terribly wrong, stranded guest Ellery Wainwright finds herself drawn into the mystery of what really happened — and into an unexpected connection with a stranger. A sparkling romantic mystery.',
+  },
+  {
+    id:'r24-07', club:'reese', year:2024, sortDate:'2024-07',
+    month:'Jul 2024', title:'The Cliffs',
+    author:'J. Courtney Sullivan', genre:'Fiction',
+    desc:'When Jane inherits a falling-down house on the Maine coast, she discovers a century of secrets in its walls. A multi-generational story about family, place, and the stories we inherit — rich with Sullivan\'s signature warmth and depth.',
+  },
+  {
+    id:'r24-08', club:'reese', year:2024, sortDate:'2024-08',
+    month:'Aug 2024', title:'Slow Dance',
+    author:'Rainbow Rowell', genre:'Romance',
+    desc:'Shiloh and Cary made a promise as teenagers. Now adults, they meet again unexpectedly — and the chemistry between them is impossible to ignore. A bittersweet novel about second chances, childhood promises, and love that refuses to be forgotten.',
+  },
+  {
+    id:'r24-09', club:'reese', year:2024, sortDate:'2024-09',
+    month:'Sep 2024', title:'The Comfort of Crows',
+    author:'Margaret Renkl', genre:'Memoir',
+    desc:'Reese\'s 100th book club pick — a gorgeous, meditative love letter to the natural world, written by Reese\'s own former English teacher. Week by week through one year, Renkl watches her backyard ecosystem with wonder, grief, and fierce attention.',
+  },
+  {
+    id:'r24-10', club:'reese', year:2024, sortDate:'2024-10',
+    month:'Oct 2024', title:'Society of Lies',
+    author:'Lauren Ling Brown', genre:'Mystery',
+    desc:'When Maya\'s estranged sister is found dead after pledging a secret society at an elite college, Maya goes undercover to find the truth. A deliciously dark campus thriller about sisterhood, class, and the secrets institutions keep.',
+  },
+  {
+    id:'r24-11', club:'reese', year:2024, sortDate:'2024-11',
+    month:'Nov 2024', title:'We Will Be Jaguars',
+    author:'Nemonte Nenquimo & Mitch Anderson', genre:'Memoir',
+    desc:'Nemonte Nenquimo — Waorani leader and Goldman Environmental Prize winner — tells the story of growing up in the Ecuadorian Amazon and leading her people\'s landmark legal battle to protect 500,000 acres of forest from oil companies.',
+  },
+  // ── REESE 2025 ──────────────────────────────────────
+  {
+    id:'r25-01', club:'reese', year:2025, sortDate:'2025-01',
+    month:'Jan 2025', title:'The Three Lives of Cate Kay',
+    author:'Kate Fagan', genre:'Fiction',
+    desc:'"This story swept me away with its big dreams, love, and unexpected twists," said Reese. A novel about identity, reinvention, and what happens when the life you\'ve carefully built from the ashes of your past suddenly comes undone.',
+  },
+  {
+    id:'r25-02', club:'reese', year:2025, sortDate:'2025-02',
+    month:'Feb 2025', title:'Isola',
+    author:'Allegra Goodman', genre:'Historical Fiction',
+    desc:'Once a child of privilege who wore gowns and laced pearls in her hair, Marguerite loses her fortune and finds herself alone on a remote island, at the mercy of nature. "Easily one of my favorite historical fiction reads yet," said Reese.',
+  },
+  {
+    id:'r25-03', club:'both', year:2025, sortDate:'2025-03',
+    month:'Mar 2025', title:'The Tell',
+    author:'Amy Griffin', genre:'Memoir',
+    desc:'Joint pick with Oprah and Jenna Bush Hager. Amy Griffin\'s memoir about her traumatic childhood in Amarillo, Texas, and her path through multiple forms of therapy, including psychedelic-assisted treatment — an honest, courageous story of healing.',
+  },
+  {
+    id:'r25-04', club:'reese', year:2025, sortDate:'2025-04',
+    month:'Apr 2025', title:'Broken Country',
+    author:'Clare Leslie Hall', genre:'Fiction',
+    desc:'"An unforgettable story of love, loss, and the choices that shape our lives — and a masterfully crafted mystery that will keep you guessing until the very last page." A debut novel set against the wild landscape of rural England.',
+  },
+  {
+    id:'r25-05', club:'reese', year:2025, sortDate:'2025-05',
+    month:'May 2025', title:'Great Big Beautiful Life',
+    author:'Emily Henry', genre:'Romance',
+    desc:'Journalists Alice Scott and Hayden Anderson are given the same mission: write a biography of mysterious heiress Margaret Ives. Winner of the 2025 Goodreads Choice Award in romance, Emily Henry\'s most anticipated novel is a witty, romantic triumph.',
+  },
+  {
+    id:'r25-06', club:'reese', year:2025, sortDate:'2025-06',
+    month:'Jun 2025', title:'The Phoenix Pencil Company',
+    author:'Allison King', genre:'Historical Fiction',
+    desc:'A debut novel following reclusive coder Monica Tsai who uncovers a legacy of magic, espionage, and family secrets while WWII rages outside her door. A unique, richly imagined story blending history, mystery, and magic.',
+  },
+  {
+    id:'r25-07', club:'reese', year:2025, sortDate:'2025-07',
+    month:'Jul 2025', title:'Spectacular Things',
+    author:'Beck Dorey-Stein', genre:'Fiction',
+    desc:'A novel from the author of the bestselling memoir From the Corner of the Oval. Dorey-Stein returns with a story of ambition, friendship, and the spectacular — and spectacularly messy — lives women lead when they\'re trying to have it all.',
+  },
+  {
+    id:'r25-08', club:'reese', year:2025, sortDate:'2025-08',
+    month:'Aug 2025', title:'Once Upon a Time in Dollywood',
+    author:'Ashley Jordan', genre:'Fiction',
+    desc:'A debut novel set in the glittering world of Dollywood — blending Southern charm, unexpected friendships, and the transformative power of a place that holds magic for everyone who enters. A warm, joyful read about belonging and found family.',
+  },
+  {
+    id:'r25-09', club:'reese', year:2025, sortDate:'2025-12',
+    month:'Dec 2025', title:'The Heir Apparent',
+    author:'Rebecca Armitage', genre:'Romance',
+    desc:'Lexi is a doctor doing her residency in Tasmania when her grandmother gives her one year to decide: become heir to the British throne and future Queen of England — or go home. A debut novel that\'s "so engaging," says Reese.',
+  },
+];
+
+// ── deduplicate 'both' entries (The Tell appears twice in source data, keep single record)
+const seen = new Set();
+const DEDUPED = BOOKS.filter(b => {
+  if (seen.has(b.id)) return false;
+  seen.add(b.id);
+  return true;
+});
+// Remove the duplicate r25-03 since o25-02 covers 'both'
+const DATA = DEDUPED.filter(b => b.id !== 'r25-03');
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const KEY = 'bookclub-status-v1';
+function loadStatus() { try { return JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){ return {}; } }
+function saveStatus(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+let STATUS = loadStatus(); // { bookId: 'want'|'hold'|'read'|'' }
+
+let filters = { club:'all', year:'all', genre:'all', status:'all' };
+let sort = 'date-desc';
+let search = '';
+
+// ═══════════════════════════════════════════════════════
+// SFPL SEARCH URL
+// ═══════════════════════════════════════════════════════
+function sfplUrl(book) {
+  const q = encodeURIComponent(`${book.title} ${book.author}`);
+  return `https://sfpl.bibliocommons.com/v2/search?query=${q}&searchType=keyword&f_FORMAT=EBOOK`;
+}
+function libbyUrl(book) {
+  const q = encodeURIComponent(`${book.title}`);
+  return `https://libbyapp.com/search/sfpl/search/query-${q}/page-1`;
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER + SORT
+// ═══════════════════════════════════════════════════════
+function filtered() {
+  return DATA
+    .filter(b => {
+      if (filters.club !== 'all') {
+        if (filters.club === 'oprah' && b.club === 'reese') return false;
+        if (filters.club === 'reese' && b.club === 'oprah') return false;
+      }
+      if (filters.year !== 'all' && String(b.year) !== filters.year) return false;
+      if (filters.genre !== 'all') {
+        const bg = b.genre.toLowerCase();
+        const fg = filters.genre.toLowerCase();
+        if (!bg.includes(fg)) return false;
+      }
+      if (filters.status !== 'all') {
+        const st = STATUS[b.id] || '';
+        if (st !== filters.status) return false;
+      }
+      if (search) {
+        const q = search.toLowerCase();
+        if (!b.title.toLowerCase().includes(q) && !b.author.toLowerCase().includes(q)) return false;
+      }
+      return true;
+    })
+    .sort((a, b2) => {
+      if (sort === 'date-desc') return b2.sortDate.localeCompare(a.sortDate);
+      if (sort === 'date-asc') return a.sortDate.localeCompare(b2.sortDate);
+      if (sort === 'title') return a.title.localeCompare(b2.title);
+      if (sort === 'author') return a.author.localeCompare(b2.author);
+      return 0;
+    });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function clubBadge(club) {
+  if (club === 'oprah') return '<span class="badge badge-oprah">Oprah</span>';
+  if (club === 'reese') return '<span class="badge badge-reese">Reese</span>';
+  if (club === 'both')  return '<span class="badge badge-both">Oprah + Reese</span>';
+  return '';
+}
+function genreBadge(genre) {
+  const cls = genre.toLowerCase().includes('memoir') ? 'badge-memoir' : 'badge-genre';
+  return `<span class="badge ${cls}">${genre}</span>`;
+}
+function statusClass(id, st) {
+  const cur = STATUS[id] || '';
+  return cur === st ? `active-${st}` : '';
+}
+
+function renderCards() {
+  const books = filtered();
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+  document.getElementById('count-bar').textContent = `Showing ${books.length} of ${DATA.length} books`;
+
+  if (!books.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    grid.innerHTML = books.map(b => {
+      const st = STATUS[b.id] || '';
+      return `
+      <div class="card" id="card-${b.id}">
+        <div class="card-top">
+          <div class="card-badges">
+            ${clubBadge(b.club)}
+            <span class="badge badge-month">${b.month}</span>
+            ${genreBadge(b.genre)}
+          </div>
+          <div class="card-title">${b.title}</div>
+          <div class="card-author">${b.author}</div>
+          <div class="card-desc">${b.desc}</div>
+        </div>
+        <div class="card-bottom">
+          <div class="card-actions">
+            <a class="btn-sfpl" href="${sfplUrl(b)}" target="_blank" rel="noopener">
+              📖 SFPL Ebook
+            </a>
+            <a class="btn-libby" href="${libbyUrl(b)}" target="_blank" rel="noopener">
+              ☁️ Libby
+            </a>
+          </div>
+          <div class="status-row">
+            <button class="status-btn ${statusClass(b.id,'want')}" onclick="setStatus('${b.id}','want')">★ Want</button>
+            <button class="status-btn ${statusClass(b.id,'hold')}" onclick="setStatus('${b.id}','hold')">⏳ On Hold</button>
+            <button class="status-btn ${statusClass(b.id,'read')}" onclick="setStatus('${b.id}','read')">✓ Read</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = DATA.length;
+  document.getElementById('stat-want').textContent = DATA.filter(b => STATUS[b.id]==='want').length;
+  document.getElementById('stat-hold').textContent = DATA.filter(b => STATUS[b.id]==='hold').length;
+  document.getElementById('stat-read').textContent = DATA.filter(b => STATUS[b.id]==='read').length;
+}
+
+function setStatus(id, st) {
+  STATUS[id] = STATUS[id] === st ? '' : st;
+  saveStatus(STATUS);
+  renderCards();
+}
+
+// ═══════════════════════════════════════════════════════
+// FILTER CHIPS
+// ═══════════════════════════════════════════════════════
+function bindChips(groupId, filterKey) {
+  document.getElementById(groupId).addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll(`#${groupId} .chip`).forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    filters[filterKey] = chip.dataset[filterKey];
+    renderCards();
+  });
+}
+
+bindChips('club-filters',   'club');
+bindChips('year-filters',   'year');
+bindChips('genre-filters',  'genre');
+bindChips('status-filters', 'status');
+
+document.getElementById('sort-sel').addEventListener('change', e => {
+  sort = e.target.value;
+  renderCards();
+});
+
+document.getElementById('search-box').addEventListener('input', e => {
+  search = e.target.value.trim();
+  renderCards();
+});
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+renderCards();
+</script>
+</body>
+</html>
