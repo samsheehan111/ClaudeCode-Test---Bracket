@@ -69,6 +69,17 @@ html,body{min-height:100%;background:#f0f4f8;font-family:'Inter',system-ui,-appl
 .btn-sfpl:hover{background:#6d28d9;color:#fff}
 .btn-libby{font-family:inherit;font-size:10px;font-weight:700;padding:5px 10px;border-radius:7px;border:1.5px solid #0ea5e9;background:transparent;color:#0ea5e9;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
 .btn-libby:hover{background:#0ea5e9;color:#fff}
+/* ── HOLD BADGE ── */
+.hold-badge{font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;margin-top:0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.hold-badge.holds{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.hold-badge.available{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.hold-badge.hoopla{background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd}
+.hold-badge.loading{background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0}
+.hold-badge.unknown{background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0}
+.hold-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.hold-dot.holds{background:#ef4444}
+.hold-dot.available{background:#22c55e}
+.hold-dot.loading{background:#cbd5e1}
 .status-row{display:flex;gap:4px}
 .status-btn{font-family:inherit;font-size:9px;font-weight:700;padding:4px 8px;border-radius:6px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#94a3b8;cursor:pointer;transition:all .12s;flex:1;text-align:center;letter-spacing:.3px}
 .status-btn:hover{border-color:#94a3b8;color:#475569}
@@ -156,7 +167,8 @@ html,body{min-height:100%;background:#f0f4f8;font-family:'Inter',system-ui,-appl
 
 <div id="tip">
   <div class="tip-box">
-    <strong>Kindle tip:</strong> SFPL ebooks are on <strong>Libby/OverDrive</strong>. After borrowing, open the Libby app → send to Kindle → read on your Kindle device or app. "Check SFPL Ebook" searches the catalog filtered to ebooks. "Open in Libby" takes you straight to the Libby web app.
+    <strong>Kindle tip:</strong> SFPL ebooks are on <strong>Libby/OverDrive</strong>. After borrowing, open the Libby app → send to Kindle → read on your Kindle device or app.
+    &nbsp;·&nbsp; <span id="holds-updated" style="color:#b45309">Hold counts refresh twice daily via GitHub Actions.</span>
   </div>
 </div>
 
@@ -415,6 +427,50 @@ let sort = 'date-desc';
 let search = '';
 
 // ═══════════════════════════════════════════════════════
+// HOLD DATA  — loaded from holds.json (updated by GitHub Action)
+// ═══════════════════════════════════════════════════════
+let HOLDS = {};   // { bookId: { status, text, holds, copies, available } }
+let holdsUpdated = null;
+
+async function loadHolds() {
+  try {
+    const resp = await fetch('./holds.json?_=' + Date.now());
+    if (!resp.ok) return;
+    const data = await resp.json();
+    HOLDS = data.books || {};
+    holdsUpdated = data.updated || null;
+    // Re-render cards with hold data now available
+    renderCards();
+    // Update tip bar with last-updated time
+    if (holdsUpdated) {
+      const d = new Date(holdsUpdated);
+      const fmt = d.toLocaleString('en-US', {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+      const el = document.getElementById('holds-updated');
+      if (el) el.textContent = `Hold counts last updated: ${fmt}`;
+    }
+  } catch(e) {
+    // holds.json not yet generated — cards show "—" until first Action run
+  }
+}
+
+function holdBadgeHtml(id) {
+  const h = HOLDS[id];
+  if (!h) {
+    return `<div class="hold-badge loading"><span class="hold-dot loading"></span>Checking SFPL…</div>`;
+  }
+  if (h.status === 'holds') {
+    return `<div class="hold-badge holds"><span class="hold-dot holds"></span>${h.text}</div>`;
+  }
+  if (h.status === 'available') {
+    return `<div class="hold-badge available"><span class="hold-dot available"></span>${h.text}</div>`;
+  }
+  if (h.status === 'hoopla') {
+    return `<div class="hold-badge hoopla"><span class="hold-dot available"></span>${h.text}</div>`;
+  }
+  return `<div class="hold-badge unknown">—</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
 // SFPL SEARCH URL
 // ═══════════════════════════════════════════════════════
 function sfplUrl(book) {
@@ -505,6 +561,7 @@ function renderCards() {
           <div class="card-desc">${b.desc}</div>
         </div>
         <div class="card-bottom">
+          ${holdBadgeHtml(b.id)}
           <div class="card-actions">
             <a class="btn-sfpl" href="${sfplUrl(b)}" target="_blank" rel="noopener">
               📖 SFPL Ebook
@@ -572,6 +629,7 @@ document.getElementById('search-box').addEventListener('input', e => {
 // BOOT
 // ═══════════════════════════════════════════════════════
 renderCards();
+loadHolds();  // async — re-renders cards once hold data arrives
 </script>
 </body>
 </html>
