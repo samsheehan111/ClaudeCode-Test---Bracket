@@ -1,5 +1,231 @@
 [
 {
+"title":"The Many Lives of Mama Love",
+"author":"Lara Love Hardin",
+"club":"oprah",
+"rating":4.1,
+"reviews":24000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81P9h3s6NHL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20Many%20Lives%20of%20Mama%20Love&searchType=keyword"
+},
+{
+"title":"Long Island",
+"author":"Colm Tóibín",
+"club":"oprah",
+"rating":3.9,
+"reviews":18000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81Z9n5C2QhL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Long%20Island&searchType=keyword"
+},
+{
+"title":"Familiaris",
+"author":"David Wroblewski",
+"club":"oprah",
+"rating":4.2,
+"reviews":12000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81BzGmF8+YL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Familiaris&searchType=keyword"
+},
+{
+"title":"Tell Me Everything",
+"author":"Elizabeth Strout",
+"club":"oprah",
+"rating":4.1,
+"reviews":65000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81WojUxbbFL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Tell%20Me%20Everything&searchType=keyword"
+},
+{
+"title":"From Here to the Great Unknown",
+"author":"Lisa Marie Presley",
+"club":"oprah",
+"rating":4.3,
+"reviews":32000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81wAq4Jj6CL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=From%20Here%20to%20the%20Great%20Unknown&searchType=keyword"
+},
+{
+"title":"Small Things Like These",
+"author":"Claire Keegan",
+"club":"oprah",
+"rating":4.4,
+"reviews":137000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81W7hQh0qDL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Small%20Things%20Like%20These&searchType=keyword"
+},
+{
+"title":"Dream State",
+"author":"Eric Puchner",
+"club":"oprah",
+"rating":4.0,
+"reviews":8400,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/71mKc6XH6LL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Dream%20State%20Eric%20Puchner&searchType=keyword"
+},
+{
+"title":"The Tell",
+"author":"Amy Griffin",
+"club":"oprah",
+"rating":4.0,
+"reviews":5300,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/71d2T8WnYxL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20Tell%20Amy%20Griffin&searchType=keyword"
+},
+{
+"title":"Matriarch",
+"author":"Tina Knowles",
+"club":"oprah",
+"rating":4.3,
+"reviews":21000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81c6P1Qe0XL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Matriarch%20Tina%20Knowles&searchType=keyword"
+},
+{
+"title":"The Emperor of Gladness",
+"author":"Ocean Vuong",
+"club":"oprah",
+"rating":4.2,
+"reviews":11000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81rP7+6hY1L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20Emperor%20of%20Gladness&searchType=keyword"
+},
+{
+"title":"The River Is Waiting",
+"author":"Wally Lamb",
+"club":"oprah",
+"rating":4.1,
+"reviews":9600,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81uKp1C8j3L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20River%20Is%20Waiting&searchType=keyword"
+},
+{
+"title":"Culpability",
+"author":"Bruce Holsinger",
+"club":"oprah",
+"rating":4.0,
+"reviews":7200,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81v7Pl8qjLL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Culpability%20Bruce%20Holsinger&searchType=keyword"
+},
+
+{
+"title":"First Lie Wins",
+"author":"Ashley Elston",
+"club":"reese",
+"rating":4.0,
+"reviews":102345,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81WZ6rj0z4L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=First%20Lie%20Wins&searchType=keyword"
+},
+{
+"title":"City of Night Birds",
+"author":"Juhea Kim",
+"club":"reese",
+"rating":3.9,
+"reviews":6200,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/71gS4GZyU6L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=City%20of%20Night%20Birds&searchType=keyword"
+},
+{
+"title":"Redwood Court",
+"author":"DéLana R.A. Dameron",
+"club":"reese",
+"rating":4.2,
+"reviews":9100,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81g0vAeqDYL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Redwood%20Court&searchType=keyword"
+},
+{
+"title":"Anita de Monte Laughs Last",
+"author":"Xochitl Gonzalez",
+"club":"reese",
+"rating":4.1,
+"reviews":18000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81b9+DLWwVL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Anita%20de%20Monte%20Laughs%20Last&searchType=keyword"
+},
+{
+"title":"Did You Hear About Kitty Karr?",
+"author":"Crystal Smith Paul",
+"club":"reese",
+"rating":4.1,
+"reviews":14000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81G5Yh9S7XL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Kitty%20Karr&searchType=keyword"
+},
+{
+"title":"The Unwedding",
+"author":"Ally Condie",
+"club":"reese",
+"rating":3.8,
+"reviews":21000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81aZcJb4p8L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20Unwedding&searchType=keyword"
+},
+{
+"title":"The Cliffs",
+"author":"J. Courtney Sullivan",
+"club":"reese",
+"rating":4.0,
+"reviews":17000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81VY2QmTxxL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=The%20Cliffs%20J%20Courtney%20Sullivan&searchType=keyword"
+},
+{
+"title":"Slow Dance",
+"author":"Rainbow Rowell",
+"club":"reese",
+"rating":4.0,
+"reviews":35000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81p1F2uK3sL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Slow%20Dance%20Rainbow%20Rowell&searchType=keyword"
+},
+{
+"title":"The Comfort of Crows",
+"author":"Margaret Renkl",
+"club":"reese",
+"rating":4.5,
+"reviews":11000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81s8n6hL5qL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Comfort%20of%20Crows&searchType=keyword"
+},
+{
+"title":"Society of Lies",
+"author":"Lauren Ling Brown",
+"club":"reese",
+"rating":3.9,
+"reviews":12000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81t2tJ2E7oL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Society%20of%20Lies&searchType=keyword"
+},
+{
+"title":"We Will Be Jaguars",
+"author":"Nemonte Nenquimo",
+"club":"reese",
+"rating":4.4,
+"reviews":5000,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/81Dr9N7+3HL.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=We%20Will%20Be%20Jaguars&searchType=keyword"
+},
+{
+"title":"The Three Lives of Cate Kay",
+"author":"Kate Fagan",
+"club":"reese",
+"rating":4.0,
+"reviews":7400,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/71Wm0gTj6ML.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Three%20Lives%20of%20Cate%20Kay&searchType=keyword"
+},
+{
+"title":"Isola",
+"author":"Allegra Goodman",
+"club":"reese",
+"rating":4.1,
+"reviews":8902,
+"cover":"https://images-na.ssl-images-amazon.com/images/I/71P9p4M7W6L.jpg",
+"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Isola&searchType=keyword"
+},
+{
 "title":"Broken Country",
 "author":"Clare Leslie Hall",
 "club":"reese",
@@ -16,59 +242,5 @@
 "reviews":23109,
 "cover":"https://images-na.ssl-images-amazon.com/images/I/71U2i9FvKIL.jpg",
 "sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Great%20Big%20Beautiful%20Life&searchType=keyword"
-},
-{
-"title":"First Lie Wins",
-"author":"Ashley Elston",
-"club":"reese",
-"rating":4.0,
-"reviews":102345,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/81WZ6rj0z4L.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=First%20Lie%20Wins&searchType=keyword"
-},
-{
-"title":"Isola",
-"author":"Allegra Goodman",
-"club":"reese",
-"rating":4.1,
-"reviews":8902,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/71P9p4M7W6L.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Isola&searchType=keyword"
-},
-{
-"title":"Tell Me Everything",
-"author":"Elizabeth Strout",
-"club":"oprah",
-"rating":4.1,
-"reviews":65212,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/81WojUxbbFL.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Tell%20Me%20Everything&searchType=keyword"
-},
-{
-"title":"Small Things Like These",
-"author":"Claire Keegan",
-"club":"oprah",
-"rating":4.4,
-"reviews":137000,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/81W7hQh0qDL.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Small%20Things%20Like%20These&searchType=keyword"
-},
-{
-"title":"Long Island",
-"author":"Colm Tóibín",
-"club":"oprah",
-"rating":3.9,
-"reviews":18421,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/81Z9n5C2QhL.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Long%20Island&searchType=keyword"
-},
-{
-"title":"Familiaris",
-"author":"David Wroblewski",
-"club":"oprah",
-"rating":4.2,
-"reviews":12567,
-"cover":"https://images-na.ssl-images-amazon.com/images/I/81BzGmF8+YL.jpg",
-"sf_url":"https://sfpl.bibliocommons.com/v2/search?query=Familiaris&searchType=keyword"
 }
 ]
