@@ -1,228 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oprah & Reese Book Club Tracker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f6f8fb;
-            margin: 0;
-            padding: 40px;
-            color: #1e293b;
-        }
+<title>Oprah & Reese Book Club Tracker</title>
 
-        h1 { margin-bottom: 6px; }
-        .subtitle { color: #64748b; margin-bottom: 20px; }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
+<style>
 
-        button.filter {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            background: white;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
+*{
+box-sizing:border-box;
+}
 
-        button.filter.active {
-            background: #2563eb;
-            color: white;
-            border-color: #2563eb;
-        }
+body{
+font-family:'Inter',sans-serif;
+background:#f6f8fb;
+margin:0;
+padding:40px;
+color:#1e293b;
+}
 
-        input {
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            min-width: 250px;
-        }
+h1{
+margin-bottom:6px;
+}
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 22px;
-        }
+.subtitle{
+color:#64748b;
+margin-bottom:20px;
+}
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,.05);
-            border: 1px solid #eef2f7;
-            transition: transform .15s;
-            display: flex;
-            flex-direction: column;
-        }
+.controls{
+display:flex;
+gap:10px;
+margin-bottom:30px;
+flex-wrap:wrap;
+}
 
-        .card:hover { transform: translateY(-5px); }
+button.filter{
+padding:6px 12px;
+border-radius:6px;
+border:1px solid #e2e8f0;
+background:white;
+cursor:pointer;
+font-size:13px;
+}
 
-        .cover-container {
-            background: #f1f5f9;
-            height: 320px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+button.filter.active{
+background:#2563eb;
+color:white;
+}
 
-        .cover {
-            width: 100%;
-            height: 100%;
-            /* 'contain' ensures the whole book cover is visible */
-            object-fit: contain;
-            padding: 10px;
-        }
+input{
+padding:7px 10px;
+border-radius:6px;
+border:1px solid #e2e8f0;
+}
 
-        .card-body {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex-grow: 1;
-        }
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+gap:22px;
+}
 
-        .title { font-size: 16px; font-weight: 700; line-height: 1.2; }
-        .author { font-size: 14px; color: #64748b; }
-        .rating { font-size: 13px; font-weight: 600; color: #b45309; }
+.card{
+background:white;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 6px 18px rgba(0,0,0,.08);
+border:1px solid #eef2f7;
+transition:transform .15s;
+}
 
-        .club {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-top: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+.card:hover{
+transform:translateY(-6px);
+}
 
-        .oprah { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
-        .reese { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
+.cover{
+width:100%;
+height:320px;
+object-fit:cover;
+}
 
-        .links {
-            margin-top: auto;
-            padding-top: 15px;
-            display: flex;
-            gap: 8px;
-        }
+.card-body{
+padding:16px;
+display:flex;
+flex-direction:column;
+gap:6px;
+}
 
-        .link {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-        }
+.title{
+font-size:16px;
+font-weight:700;
+}
 
-        .lib { background: #eff6ff; color: #1d4ed8; }
-        .libby { background: #f0fdf4; color: #15803d; }
-    </style>
+.author{
+font-size:14px;
+color:#64748b;
+}
+
+.rating{
+font-size:13px;
+font-weight:600;
+color:#b45309;
+}
+
+.club{
+font-size:11px;
+font-weight:700;
+padding:4px 8px;
+border-radius:6px;
+display:inline-block;
+margin-top:6px;
+width:max-content;
+}
+
+.oprah{
+background:#faf5ff;
+color:#7c3aed;
+border:1px solid #ddd6fe;
+}
+
+.reese{
+background:#fff1f2;
+color:#e11d48;
+border:1px solid #fecdd3;
+}
+
+.links{
+margin-top:10px;
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+}
+
+button.link{
+padding:6px 10px;
+border:none;
+border-radius:6px;
+font-size:12px;
+font-weight:600;
+cursor:pointer;
+}
+
+.lib{
+background:#eff6ff;
+color:#1d4ed8;
+}
+
+.libby{
+background:#f0fdf4;
+color:#15803d;
+}
+
+</style>
 </head>
+
 <body>
 
-    <h1>📚 Book Club Tracker</h1>
-    <div class="subtitle">Search Oprah and Reese's picks with SF Library shortcuts</div>
+<h1>📚 Oprah & Reese Book Club Tracker</h1>
+<div class="subtitle">Explore book club picks and jump straight to SF Library or Libby</div>
 
-    <div class="controls">
-        <input id="search" placeholder="Search by title or author...">
-        <button class="filter active" onclick="setFilter('all', this)">All</button>
-        <button class="filter" onclick="setFilter('oprah', this)">Oprah</button>
-        <button class="filter" onclick="setFilter('reese', this)">Reese</button>
-    </div>
+<div class="controls">
 
-    <div class="grid" id="grid"></div>
+<input id="search" placeholder="Search books">
 
-    <script>
-        let BOOKS = [];
-        let filter = "all";
+<button class="filter active" onclick="setFilter('all')">All</button>
+<button class="filter" onclick="setFilter('oprah')">Oprah</button>
+<button class="filter" onclick="setFilter('reese')">Reese</button>
 
-        async function loadBooks() {
-            try {
-                const res = await fetch("./books.json");
-                BOOKS = await res.json();
-                render();
-            } catch (err) {
-                console.error("Error loading books.json:", err);
-                document.getElementById("grid").innerHTML = "<p>Error loading book data. Make sure books.json exists!</p>";
-            }
-        }
+</div>
 
-        function setFilter(category, el) {
-            filter = category;
-            // Update button styles
-            document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
-            el.classList.add("active");
-            render();
-        }
+<div class="grid" id="grid"></div>
 
-        document.getElementById("search").addEventListener("input", render);
+<script>
 
-        function render() {
-            const grid = document.getElementById("grid");
-            grid.innerHTML = "";
+let BOOKS=[]
+let filter="all"
 
-            const searchTerm = document.getElementById("search").value.toLowerCase();
+async function loadBooks(){
 
-            const filtered = BOOKS.filter(book => {
-                const matchesFilter = (filter === "all" || book.club === filter);
-                const matchesSearch = book.title.toLowerCase().includes(searchTerm) || 
-                                     book.author.toLowerCase().includes(searchTerm);
-                return matchesFilter && matchesSearch;
-            });
+const res = await fetch("./books.json")
+BOOKS = await res.json()
 
-            // Sort by rating (highest first)
-            filtered.sort((a, b) => b.rating - a.rating);
+render()
 
-            filtered.forEach(book => {
-                const card = document.createElement("div");
-                card.className = "card";
+}
 
-                card.innerHTML = `
-                    <div class="cover-container">
-                        <img class="cover" 
-                             src="${book.cover}" 
-                             alt="${book.title}"
-                             onerror="this.src='https://via.placeholder.com/200x300?text=No+Cover+Found'">
-                    </div>
-                    <div class="card-body">
-                        <div class="title">${book.title}</div>
-                        <div class="author">by ${book.author}</div>
-                        <div class="rating">⭐ ${book.rating} Goodreads</div>
-                        <div>
-                            <span class="club ${book.club}">
-                                ${book.club === "oprah" ? "Oprah's Pick" : "Reese's Pick"}
-                            </span>
-                        </div>
-                        <div class="links">
-                            <button class="link lib" onclick="window.open('${book.sf_url}','_blank')">SF Library</button>
-                            <button class="link libby" onclick="window.open('https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}','_blank')">Libby</button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
+function setFilter(f){
 
-        loadBooks();
-    </script>
+filter=f
+
+document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"))
+event.target.classList.add("active")
+
+render()
+
+}
+
+document.getElementById("search").addEventListener("input",render)
+
+function render(){
+
+const grid=document.getElementById("grid")
+grid.innerHTML=""
+
+const search=document.getElementById("search").value.toLowerCase()
+
+BOOKS
+.filter(book=>{
+
+if(filter!=="all" && book.club!==filter) return false
+
+if(search && !book.title.toLowerCase().includes(search) && !book.author.toLowerCase().includes(search)) return false
+
+return true
+
+})
+.sort((a,b)=>b.rating-a.rating)
+
+.forEach(book=>{
+
+const card=document.createElement("div")
+card.className="card"
+
+card.innerHTML=`
+
+<img class="cover" src="${book.cover}">
+
+<div class="card-body">
+
+<div class="title">${book.title}</div>
+
+<div class="author">${book.author}</div>
+
+<div class="rating">
+⭐ ${book.rating} Goodreads • ${book.reviews.toLocaleString()} ratings
+</div>
+
+<div class="club ${book.club}">
+${book.club==="oprah"?"Oprah's Book Club":"Reese's Book Club"}
+</div>
+
+<div class="links">
+
+<button class="link lib"
+onclick="window.open('${book.sf_url}','_blank')">
+SF Library
+</button>
+
+<button class="link libby"
+onclick="window.open('https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}','_blank')">
+Libby
+</button>
+
+</div>
+
+</div>
+`
+
+grid.appendChild(card)
+
+})
+
+}
+
+loadBooks()
+
+</script>
+
 </body>
 </html>
