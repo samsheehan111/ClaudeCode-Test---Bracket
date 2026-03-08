@@ -26,23 +26,8 @@ header {
   z-index: 10;
 }
 
-header h1 {
-  margin: 0 0 4px;
-  font-size: 20px;
-  font-weight: 800;
-}
-
-header p {
-  margin: 0;
-  font-size: 13px;
-  color: #64748b;
-}
-
-#last-updated {
-  font-size: 12px;
-  color: #94a3b8;
-  margin-top: 4px;
-}
+header h1 { margin: 0; font-size: 20px; font-weight: 800; }
+header p  { margin: 0; font-size: 13px; color: #64748b; }
 
 .filter-bar {
   display: flex;
@@ -64,10 +49,9 @@ header p {
 }
 
 .filter-btn:hover { border-color: #94a3b8; }
-
-.filter-btn.active-oprah  { background: #faf5ff; color: #7c3aed; border-color: #c4b5fd; }
-.filter-btn.active-reese  { background: #fff1f2; color: #e11d48; border-color: #fda4af; }
-.filter-btn.active-all    { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+.filter-btn.active-oprah { background: #faf5ff; color: #7c3aed; border-color: #c4b5fd; }
+.filter-btn.active-reese { background: #fff1f2; color: #e11d48; border-color: #fda4af; }
+.filter-btn.active-all   { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
 
 #grid {
   display: grid;
@@ -108,26 +92,8 @@ header p {
 .club-pill.oprah { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
 .club-pill.reese { background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3; }
 
-.card-title { font-weight: 700; font-size: 14px; line-height: 1.3; }
+.card-title  { font-weight: 700; font-size: 14px; line-height: 1.3; }
 .card-author { font-size: 12px; color: #64748b; }
-.card-year   { font-size: 11px; color: #94a3b8; }
-
-.hold-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-}
-
-.hold-badge.holds     { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-.hold-badge.available { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
-.hold-badge.hoopla    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-.hold-badge.loading   { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
-.hold-badge.unknown   { background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0; }
 
 .card-links {
   display: flex;
@@ -147,29 +113,9 @@ header p {
 
 .card-links a:hover { opacity: 0.8; }
 
-.link-kcls {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-}
-
-.link-libby {
-  background: #f0fdf4;
-  color: #15803d;
-  border: 1px solid #bbf7d0;
-}
-
-.link-gr {
-  background: #fef9f0;
-  color: #b5562b;
-  border: 1px solid #f5cba7;
-}
-
-.gr-rating {
-  font-size: 11px;
-  color: #b5562b;
-  font-weight: 600;
-}
+.link-kcls  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.link-libby { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+.link-gr    { background: #fef9f0; color: #b5562b; border: 1px solid #f5cba7; }
 
 .empty-state {
   grid-column: 1 / -1;
@@ -184,17 +130,15 @@ header p {
 
 <header>
   <h1>📚 Book Club Tracker &times; King County Library</h1>
-  <p>Oprah's Book Club &amp; Reese's Book Club — eBook holds on KCLS</p>
-  <div id="last-updated">Loading hold data…</div>
+  <p>Oprah's Book Club &amp; Reese's Book Club — eBook availability on KCLS</p>
 </header>
 
 <div class="filter-bar">
-  <button class="filter-btn active-all" data-filter="all" onclick="setFilter('all')">All Books</button>
-  <button class="filter-btn" data-filter="oprah" onclick="setFilter('oprah')">Oprah's Club</button>
-  <button class="filter-btn" data-filter="reese" onclick="setFilter('reese')">Reese's Club</button>
-  <button class="filter-btn" data-filter="2025" onclick="setFilter('2025')">2025 Picks</button>
-  <button class="filter-btn" data-filter="2024" onclick="setFilter('2024')">2024 Picks</button>
-  <button class="filter-btn" data-filter="available" onclick="setFilter('available')">Available Now</button>
+  <button class="filter-btn active-all" data-filter="all"   onclick="setFilter('all')">All Books</button>
+  <button class="filter-btn" data-filter="oprah"            onclick="setFilter('oprah')">Oprah's Club</button>
+  <button class="filter-btn" data-filter="reese"            onclick="setFilter('reese')">Reese's Club</button>
+  <button class="filter-btn" data-filter="2025"             onclick="setFilter('2025')">2025 Picks</button>
+  <button class="filter-btn" data-filter="2024"             onclick="setFilter('2024')">2024 Picks</button>
 </div>
 
 <div id="grid"></div>
@@ -240,85 +184,34 @@ const BOOKS = [
   {id:'r25-09', title:'The Heir Apparent',                  author:'Rebecca Armitage',                  club:'reese', year:2025, gr:3.9, grUrl:'https://www.goodreads.com/book/show/232885690-the-heir-apparent'},
 ];
 
-let HOLDS = {};
 let activeFilter = 'all';
 
-async function loadHolds() {
-  try {
-    const resp = await fetch('./kc-holds.json?_=' + Date.now());
-    if (!resp.ok) throw new Error('Cannot fetch kc-holds.json');
-    const data = await resp.json();
-    HOLDS = data.books || {};
-    const el = document.getElementById('last-updated');
-    if (data.updated && data.updated !== '1970-01-01T00:00:00Z') {
-      const d = new Date(data.updated);
-      el.textContent = 'Hold data last updated: ' + d.toLocaleString();
-    } else {
-      el.textContent = 'Hold data not yet fetched — runs automatically every 12 hours via GitHub Actions.';
-    }
-    renderCards();
-  } catch(e) {
-    document.getElementById('last-updated').textContent = 'Could not load hold data.';
-    console.warn(e);
-  }
+function kclsUrl(b) {
+  return `https://kcls.bibliocommons.com/v2/search?query=${encodeURIComponent(b.title)}&searchType=keyword&f_FORMAT=EBOOK`;
 }
 
-function holdBadge(id) {
-  const h = HOLDS[id];
-  if (!h) return `<span class="hold-badge loading">Checking KCLS…</span>`;
-
-  if (h.status === 'holds') {
-    const copies = h.copies === 1 ? '1 copy' : `${h.copies} copies`;
-    return `<span class="hold-badge holds">📋 ${h.holds} holds for ${copies}</span>`;
-  }
-  if (h.status === 'available') {
-    if (h.holds > 0) {
-      const copies = h.copies === 1 ? '1 copy' : `${h.copies} copies`;
-      return `<span class="hold-badge available">✓ Available now &mdash; ${h.holds} holds, ${copies}</span>`;
-    }
-    return `<span class="hold-badge available">✓ Available now &mdash; no holds!</span>`;
-  }
-  if (h.status === 'hoopla') return `<span class="hold-badge hoopla">∞ Available on Hoopla (unlimited)</span>`;
-  return `<span class="hold-badge unknown">—</span>`;
-}
-
-function kclsUrl(book) {
-  const q = encodeURIComponent(book.title + ' ' + book.author);
-  return `https://kcls.bibliocommons.com/v2/search?query=${encodeURIComponent(book.title)}&searchType=keyword&f_FORMAT=EBOOK`;
-}
-
-function libbyUrl(book) {
-  return `https://libbyapp.com/search/kcls/search/query-${encodeURIComponent(book.title)}/page-1`;
+function libbyUrl(b) {
+  return `https://libbyapp.com/search/kcls/search/query-${encodeURIComponent(b.title)}/page-1`;
 }
 
 function setFilter(f) {
   activeFilter = f;
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.className = 'filter-btn';
-    if (btn.dataset.filter === f) {
-      btn.classList.add('active-' + (f === 'all' ? 'all' : f === 'oprah' ? 'oprah' : f === 'reese' ? 'reese' : 'all'));
-    }
+    if (btn.dataset.filter === f)
+      btn.classList.add('active-' + (f === 'oprah' ? 'oprah' : f === 'reese' ? 'reese' : 'all'));
   });
   renderCards();
 }
 
-function visibleBooks() {
-  return BOOKS.filter(b => {
-    if (activeFilter === 'all')       return true;
-    if (activeFilter === 'oprah')     return b.club === 'oprah';
-    if (activeFilter === 'reese')     return b.club === 'reese';
-    if (activeFilter === '2024')      return b.year === 2024;
-    if (activeFilter === '2025')      return b.year === 2025;
-    if (activeFilter === 'available') {
-      const h = HOLDS[b.id];
-      return h && h.available === true;
-    }
+function renderCards() {
+  const books = BOOKS.filter(b => {
+    if (activeFilter === 'oprah') return b.club === 'oprah';
+    if (activeFilter === 'reese') return b.club === 'reese';
+    if (activeFilter === '2024')  return b.year === 2024;
+    if (activeFilter === '2025')  return b.year === 2025;
     return true;
   });
-}
-
-function renderCards() {
-  const books = visibleBooks();
   const grid = document.getElementById('grid');
   if (!books.length) {
     grid.innerHTML = '<div class="empty-state">No books match this filter.</div>';
@@ -333,11 +226,10 @@ function renderCards() {
         </div>
         <span class="club-pill ${b.club}">${b.club === 'oprah' ? "Oprah's" : "Reese's"} ${b.year}</span>
       </div>
-      <div>${holdBadge(b.id)}</div>
       <div class="card-links">
-        <a class="link-kcls"  href="${kclsUrl(b)}"  target="_blank" rel="noopener">KCLS Catalog</a>
-        <a class="link-libby" href="${libbyUrl(b)}" target="_blank" rel="noopener">Libby / OverDrive</a>
-        <a class="link-gr"    href="${escHtml(b.grUrl)}" target="_blank" rel="noopener">⭐ ${b.gr} Goodreads</a>
+        <a class="link-kcls"  href="${kclsUrl(b)}"         target="_blank" rel="noopener">KCLS Catalog</a>
+        <a class="link-libby" href="${libbyUrl(b)}"        target="_blank" rel="noopener">Libby / OverDrive</a>
+        <a class="link-gr"    href="${escHtml(b.grUrl)}"   target="_blank" rel="noopener">⭐ ${b.gr} Goodreads</a>
       </div>
     </div>
   `).join('');
@@ -348,7 +240,6 @@ function escHtml(s) {
 }
 
 renderCards();
-loadHolds();
 </script>
 </body>
 </html>
