@@ -1,95 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Book Club Tracker — SFPL Libby</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<title>Book Club Library Tracker</title>
 
 <style>
 
 body{
-font-family:Inter,system-ui;
-background:#f3f4f6;
-margin:0;
-color:#111827;
-}
-
-header{
-padding:24px;
-background:white;
-border-bottom:1px solid #e5e7eb;
+font-family:Arial;
+background:#f4f4f4;
+margin:40px;
 }
 
 h1{
-margin:0;
-font-size:24px;
+margin-bottom:30px;
 }
 
-#updated{
-font-size:12px;
-color:#6b7280;
-margin-top:4px;
-}
-
-#grid{
-padding:24px;
+.grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-gap:16px;
+grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+gap:20px;
 }
 
 .card{
 background:white;
-border-radius:12px;
-padding:16px;
-box-shadow:0 1px 3px rgba(0,0,0,.08);
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,.1);
 }
 
 .title{
-font-weight:700;
-font-size:15px;
+font-weight:bold;
+font-size:18px;
+margin-bottom:6px;
 }
 
 .author{
-font-size:12px;
-color:#6b7280;
-margin-bottom:8px;
-}
-
-.badge{
-display:inline-block;
-font-size:11px;
-padding:4px 10px;
-border-radius:6px;
-margin-top:6px;
-}
-
-.available{
-background:#dcfce7;
-color:#166534;
+color:#666;
+margin-bottom:10px;
 }
 
 .holds{
-background:#fee2e2;
-color:#991b1b;
+font-size:14px;
+margin-bottom:10px;
 }
 
-.loading{
-background:#e5e7eb;
-color:#374151;
+.available{
+color:green;
+font-weight:bold;
 }
 
-.links{
-margin-top:10px;
+.unavailable{
+color:#cc0000;
+font-weight:bold;
 }
 
-.links a{
-font-size:12px;
-text-decoration:none;
-margin-right:8px;
-color:#2563eb;
+button{
+padding:8px 12px;
+border:none;
+background:#0077cc;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+background:#005fa3;
+}
+
+.updated{
+margin-bottom:20px;
+color:#666;
+font-size:14px;
 }
 
 </style>
@@ -97,121 +79,64 @@ color:#2563eb;
 
 <body>
 
-<header>
+<h1>Oprah & Reese Book Club Tracker</h1>
 
-<h1>📚 Book Club Tracker</h1>
+<div class="updated" id="updated">Loading library data...</div>
 
-<div id="updated">
-Checking SFPL Libby ebook availability…
-</div>
-
-</header>
-
-<div id="grid"></div>
+<div class="grid" id="books"></div>
 
 <script>
 
-const BOOKS = [
-{id:"o24-01",title:"The Many Lives of Mama Love",author:"Lara Love Hardin"},
-{id:"o24-02",title:"Long Island",author:"Colm Tóibín"},
-{id:"o24-04",title:"Tell Me Everything",author:"Elizabeth Strout"},
-{id:"r25-04",title:"Broken Country",author:"Clare Leslie Hall"}
-]
+async function loadData(){
 
-let HOLDS = {}
+const booksRes = await fetch("./books.json")
+const holdsRes = await fetch("./holds.json")
 
-async function loadHolds(){
+const books = await booksRes.json()
+const holds = await holdsRes.json()
 
-try{
+document.getElementById("updated").innerText =
+"SF Public Library Libby ebook holds updated " + holds.updated
 
-const r = await fetch("./holds.json?"+Date.now())
+const grid = document.getElementById("books")
+grid.innerHTML=""
 
-if(!r.ok) throw "no holds"
+books.forEach(book=>{
 
-const data = await r.json()
+const holdData = holds.books[book.id]
 
-HOLDS = data.books || {}
+let holdText=""
+let holdClass="available"
 
-if(data.updated){
+if(!holdData || holdData.holds === 0){
 
-const d = new Date(data.updated)
+holdText="Available now"
+holdClass="available"
 
-document.getElementById("updated").textContent =
-"SFPL Libby ebook holds updated " + d.toLocaleString()
+}else{
 
-}
-
-render()
-
-}catch(e){
-
-document.getElementById("updated").textContent =
-"Unable to load hold counts"
+holdText=holdData.holds + " holds on " + holdData.copies + " copies"
+holdClass="unavailable"
 
 }
 
-}
+const card=document.createElement("div")
+card.className="card"
 
-function badge(id){
+card.innerHTML=`
+<div class="title">${book.title}</div>
+<div class="author">${book.author}</div>
+<div class="holds ${holdClass}">${holdText}</div>
+<button onclick="window.open('${book.sf_url}','_blank')">View in SF Library</button>
+`
 
-const h = HOLDS[id]
+grid.appendChild(card)
 
-if(!h)
-return `<div class="badge loading">Checking…</div>`
-
-if(h.status==="available")
-return `<div class="badge available">${h.text}</div>`
-
-if(h.status==="holds")
-return `<div class="badge holds">${h.text}</div>`
-
-return `<div class="badge loading">—</div>`
+})
 
 }
 
-function libby(book){
-
-return `https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}`
-
-}
-
-function sfpl(book){
-
-return `https://sfpl.bibliocommons.com/v2/search?query=${encodeURIComponent(book.title+" "+book.author)}&searchType=keyword&f_FORMAT=EBOOK`
-
-}
-
-function render(){
-
-const grid=document.getElementById("grid")
-
-grid.innerHTML=BOOKS.map(b=>`
-
-<div class="card">
-
-<div class="title">${b.title}</div>
-
-<div class="author">${b.author}</div>
-
-${badge(b.id)}
-
-<div class="links">
-
-<a href="${libby(b)}" target="_blank">Open in Libby</a>
-
-<a href="${sfpl(b)}" target="_blank">View in SFPL</a>
-
-</div>
-
-</div>
-
-`).join("")
-
-}
-
-render()
-
-loadHolds()
+loadData()
 
 </script>
 
