@@ -159,6 +159,18 @@ header p {
   border: 1px solid #bbf7d0;
 }
 
+.link-gr {
+  background: #fef9f0;
+  color: #b5562b;
+  border: 1px solid #f5cba7;
+}
+
+.gr-rating {
+  font-size: 11px;
+  color: #b5562b;
+  font-weight: 600;
+}
+
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -191,41 +203,41 @@ header p {
 'use strict';
 
 const BOOKS = [
-  {id:'o24-01', title:'The Many Lives of Mama Love',       author:'Lara Love Hardin',                  club:'oprah', year:2024},
-  {id:'o24-02', title:'Long Island',                        author:'Colm Tóibín',                       club:'oprah', year:2024},
-  {id:'o24-03', title:'Familiaris',                         author:'David Wroblewski',                  club:'oprah', year:2024},
-  {id:'o24-04', title:'Tell Me Everything',                 author:'Elizabeth Strout',                  club:'oprah', year:2024},
-  {id:'o24-05', title:'From Here to the Great Unknown',     author:'Lisa Marie Presley & Riley Keough', club:'oprah', year:2024},
-  {id:'o24-06', title:'Small Things Like These',            author:'Claire Keegan',                     club:'oprah', year:2024},
-  {id:'o25-01', title:'Dream State',                        author:'Eric Puchner',                      club:'oprah', year:2025},
-  {id:'o25-02', title:'The Tell',                           author:'Amy Griffin',                       club:'oprah', year:2025},
-  {id:'o25-03', title:'Matriarch',                          author:'Tina Knowles',                      club:'oprah', year:2025},
-  {id:'o25-04', title:'The Emperor of Gladness',            author:'Ocean Vuong',                       club:'oprah', year:2025},
-  {id:'o25-05', title:'The River Is Waiting',               author:'Wally Lamb',                        club:'oprah', year:2025},
-  {id:'o25-06', title:'Culpability',                        author:'Bruce Holsinger',                   club:'oprah', year:2025},
-  {id:'o25-07', title:"Somebody's Fool",                    author:'Richard Russo',                     club:'oprah', year:2025},
-  {id:'o25-08', title:'A Guardian and a Thief',             author:'Megha Majumdar',                    club:'oprah', year:2025},
-  {id:'o25-09', title:'Some Bright Nowhere',                author:'Ann Packer',                        club:'oprah', year:2025},
-  {id:'r24-01', title:'First Lie Wins',                     author:'Ashley Elston',                     club:'reese', year:2024},
-  {id:'r24-02', title:'City of Night Birds',                author:'Juhea Kim',                         club:'reese', year:2024},
-  {id:'r24-03', title:'Redwood Court',                      author:'DéLana R.A. Dameron',               club:'reese', year:2024},
-  {id:'r24-04', title:'Anita de Monte Laughs Last',         author:'Xochitl Gonzalez',                  club:'reese', year:2024},
-  {id:'r24-05', title:'Did You Hear About Kitty Karr?',     author:'Crystal Smith Paul',                club:'reese', year:2024},
-  {id:'r24-06', title:'The Unwedding',                      author:'Ally Condie',                       club:'reese', year:2024},
-  {id:'r24-07', title:'The Cliffs',                         author:'J. Courtney Sullivan',              club:'reese', year:2024},
-  {id:'r24-08', title:'Slow Dance',                         author:'Rainbow Rowell',                    club:'reese', year:2024},
-  {id:'r24-09', title:'The Comfort of Crows',               author:'Margaret Renkl',                    club:'reese', year:2024},
-  {id:'r24-10', title:'Society of Lies',                    author:'Lauren Ling Brown',                 club:'reese', year:2024},
-  {id:'r24-11', title:'We Will Be Jaguars',                 author:'Nemonte Nenquimo & Mitch Anderson',  club:'reese', year:2024},
-  {id:'r25-01', title:'The Three Lives of Cate Kay',        author:'Kate Fagan',                        club:'reese', year:2025},
-  {id:'r25-02', title:'Isola',                              author:'Allegra Goodman',                   club:'reese', year:2025},
-  {id:'r25-03', title:'The Tell',                           author:'Amy Griffin',                       club:'reese', year:2025},
-  {id:'r25-04', title:'Broken Country',                     author:'Clare Leslie Hall',                 club:'reese', year:2025},
-  {id:'r25-05', title:'Great Big Beautiful Life',           author:'Emily Henry',                       club:'reese', year:2025},
-  {id:'r25-06', title:'The Phoenix Pencil Company',         author:'Allison King',                      club:'reese', year:2025},
-  {id:'r25-07', title:'Spectacular Things',                 author:'Beck Dorey-Stein',                  club:'reese', year:2025},
-  {id:'r25-08', title:'Once Upon a Time in Dollywood',      author:'Ashley Jordan',                     club:'reese', year:2025},
-  {id:'r25-09', title:'The Heir Apparent',                  author:'Rebecca Armitage',                  club:'reese', year:2025},
+  {id:'o24-01', title:'The Many Lives of Mama Love',       author:'Lara Love Hardin',                  club:'oprah', year:2024, gr:4.4, grUrl:'https://www.goodreads.com/book/show/64631561-the-many-lives-of-mama-love'},
+  {id:'o24-02', title:'Long Island',                        author:'Colm Tóibín',                       club:'oprah', year:2024, gr:3.7, grUrl:'https://www.goodreads.com/book/show/199798868-long-island'},
+  {id:'o24-03', title:'Familiaris',                         author:'David Wroblewski',                  club:'oprah', year:2024, gr:4.2, grUrl:'https://www.goodreads.com/book/show/200262412-familiaris'},
+  {id:'o24-04', title:'Tell Me Everything',                 author:'Elizabeth Strout',                  club:'oprah', year:2024, gr:4.2, grUrl:'https://www.goodreads.com/book/show/204811915-tell-me-everything'},
+  {id:'o24-05', title:'From Here to the Great Unknown',     author:'Lisa Marie Presley & Riley Keough', club:'oprah', year:2024, gr:4.3, grUrl:'https://www.goodreads.com/book/show/204905217-from-here-to-the-great-unknown'},
+  {id:'o24-06', title:'Small Things Like These',            author:'Claire Keegan',                     club:'oprah', year:2024, gr:4.1, grUrl:'https://www.goodreads.com/book/show/58662236-small-things-like-these'},
+  {id:'o25-01', title:'Dream State',                        author:'Eric Puchner',                      club:'oprah', year:2025, gr:3.6, grUrl:'https://www.goodreads.com/book/show/215362651-dream-state'},
+  {id:'o25-02', title:'The Tell',                           author:'Amy Griffin',                       club:'oprah', year:2025, gr:4.0, grUrl:'https://www.goodreads.com/book/show/214537759-the-tell'},
+  {id:'o25-03', title:'Matriarch',                          author:'Tina Knowles',                      club:'oprah', year:2025, gr:4.5, grUrl:'https://www.goodreads.com/book/show/217044909-matriarch'},
+  {id:'o25-04', title:'The Emperor of Gladness',            author:'Ocean Vuong',                       club:'oprah', year:2025, gr:3.9, grUrl:'https://www.goodreads.com/book/show/219848315-the-emperor-of-gladness'},
+  {id:'o25-05', title:'The River Is Waiting',               author:'Wally Lamb',                        club:'oprah', year:2025, gr:4.3, grUrl:'https://www.goodreads.com/book/show/219319489-the-river-is-waiting'},
+  {id:'o25-06', title:'Culpability',                        author:'Bruce Holsinger',                   club:'oprah', year:2025, gr:4.0, grUrl:'https://www.goodreads.com/book/show/222259253-culpability'},
+  {id:'o25-07', title:"Somebody's Fool",                    author:'Richard Russo',                     club:'oprah', year:2025, gr:4.3, grUrl:'https://www.goodreads.com/book/show/62952125-somebody-s-fool'},
+  {id:'o25-08', title:'A Guardian and a Thief',             author:'Megha Majumdar',                    club:'oprah', year:2025, gr:3.8, grUrl:'https://www.goodreads.com/book/show/232207672-a-guardian-and-a-thief'},
+  {id:'o25-09', title:'Some Bright Nowhere',                author:'Ann Packer',                        club:'oprah', year:2025, gr:3.7, grUrl:'https://www.goodreads.com/book/show/231388884-some-bright-nowhere'},
+  {id:'r24-01', title:'First Lie Wins',                     author:'Ashley Elston',                     club:'reese', year:2024, gr:4.3, grUrl:'https://www.goodreads.com/book/show/164444179-first-lie-wins'},
+  {id:'r24-02', title:'City of Night Birds',                author:'Juhea Kim',                         club:'reese', year:2024, gr:2.8, grUrl:'https://www.goodreads.com/en/book/show/209801563-city-of-night-birds'},
+  {id:'r24-03', title:'Redwood Court',                      author:'DéLana R.A. Dameron',               club:'reese', year:2024, gr:3.4, grUrl:'https://www.goodreads.com/en/book/show/150247430'},
+  {id:'r24-04', title:'Anita de Monte Laughs Last',         author:'Xochitl Gonzalez',                  club:'reese', year:2024, gr:3.8, grUrl:'https://www.goodreads.com/book/show/127306192-anita-de-monte-laughs-last'},
+  {id:'r24-05', title:'Did You Hear About Kitty Karr?',     author:'Crystal Smith Paul',                club:'reese', year:2024, gr:3.7, grUrl:'https://www.goodreads.com/book/show/61796683-did-you-hear-about-kitty-karr'},
+  {id:'r24-06', title:'The Unwedding',                      author:'Ally Condie',                       club:'reese', year:2024, gr:3.2, grUrl:'https://www.goodreads.com/book/show/199262864-the-unwedding'},
+  {id:'r24-07', title:'The Cliffs',                         author:'J. Courtney Sullivan',              club:'reese', year:2024, gr:3.6, grUrl:'https://www.goodreads.com/book/show/200634908-the-cliffs'},
+  {id:'r24-08', title:'Slow Dance',                         author:'Rainbow Rowell',                    club:'reese', year:2024, gr:3.7, grUrl:'https://www.goodreads.com/book/show/198530925-slow-dance'},
+  {id:'r24-09', title:'The Comfort of Crows',               author:'Margaret Renkl',                    club:'reese', year:2024, gr:4.2, grUrl:'https://www.goodreads.com/book/show/123087784-the-comfort-of-crows'},
+  {id:'r24-10', title:'Society of Lies',                    author:'Lauren Ling Brown',                 club:'reese', year:2024, gr:3.5, grUrl:'https://www.goodreads.com/book/show/202102003-society-of-lies'},
+  {id:'r24-11', title:'We Will Be Jaguars',                 author:'Nemonte Nenquimo & Mitch Anderson',  club:'reese', year:2024, gr:4.5, grUrl:'https://www.goodreads.com/book/show/195660519-we-will-be-jaguars'},
+  {id:'r25-01', title:'The Three Lives of Cate Kay',        author:'Kate Fagan',                        club:'reese', year:2025, gr:3.7, grUrl:'https://www.goodreads.com/book/show/214152244-the-three-lives-of-cate-kay'},
+  {id:'r25-02', title:'Isola',                              author:'Allegra Goodman',                   club:'reese', year:2025, gr:4.0, grUrl:'https://www.goodreads.com/book/show/212806636-isola'},
+  {id:'r25-03', title:'The Tell',                           author:'Amy Griffin',                       club:'reese', year:2025, gr:4.0, grUrl:'https://www.goodreads.com/book/show/214537759-the-tell'},
+  {id:'r25-04', title:'Broken Country',                     author:'Clare Leslie Hall',                 club:'reese', year:2025, gr:4.3, grUrl:'https://www.goodreads.com/book/show/214151202-broken-country'},
+  {id:'r25-05', title:'Great Big Beautiful Life',           author:'Emily Henry',                       club:'reese', year:2025, gr:3.9, grUrl:'https://www.goodreads.com/book/show/218559595-great-big-beautiful-life'},
+  {id:'r25-06', title:'The Phoenix Pencil Company',         author:'Allison King',                      club:'reese', year:2025, gr:3.6, grUrl:'https://www.goodreads.com/book/show/220652184-the-phoenix-pencil-company'},
+  {id:'r25-07', title:'Spectacular Things',                 author:'Beck Dorey-Stein',                  club:'reese', year:2025, gr:4.1, grUrl:'https://www.goodreads.com/book/show/221251808-spectacular-things'},
+  {id:'r25-08', title:'Once Upon a Time in Dollywood',      author:'Ashley Jordan',                     club:'reese', year:2025, gr:4.3, grUrl:'https://www.goodreads.com/book/show/223854466-once-upon-a-time-in-dollywood'},
+  {id:'r25-09', title:'The Heir Apparent',                  author:'Rebecca Armitage',                  club:'reese', year:2025, gr:3.9, grUrl:'https://www.goodreads.com/book/show/232885690-the-heir-apparent'},
 ];
 
 let HOLDS = {};
@@ -325,6 +337,7 @@ function renderCards() {
       <div class="card-links">
         <a class="link-kcls"  href="${kclsUrl(b)}"  target="_blank" rel="noopener">KCLS Catalog</a>
         <a class="link-libby" href="${libbyUrl(b)}" target="_blank" rel="noopener">Libby / OverDrive</a>
+        <a class="link-gr"    href="${escHtml(b.grUrl)}" target="_blank" rel="noopener">⭐ ${b.gr} Goodreads</a>
       </div>
     </div>
   `).join('');
