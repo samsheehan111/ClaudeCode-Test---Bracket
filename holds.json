@@ -34,6 +34,13 @@
     "r25-06": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
     "r25-07": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
     "r25-08": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
-    "r25-09": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1}
+    "r25-09": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "o25-10": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "o26-01": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "r25-10": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "r25-11": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "r26-01": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "r26-02": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1},
+    "r26-03": {"status":"available","text":"Available now","holds":0,"copies":1,"available":1}
   }
 }

@@ -175,6 +175,41 @@
       "status": "unknown",
       "text": "\u2014",
       "available": false
+    },
+    "o25-10": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o26-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-10": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-11": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r26-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r26-02": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r26-03": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
     }
   }
 }
