@@ -14,6 +14,8 @@
   {"id":"o25-07","title":"Somebody's Fool","author":"Richard Russo","club":"oprah","year":2025},
   {"id":"o25-08","title":"A Guardian and a Thief","author":"Megha Majumdar","club":"oprah","year":2025},
   {"id":"o25-09","title":"Some Bright Nowhere","author":"Ann Packer","club":"oprah","year":2025},
+  {"id":"o25-10","title":"All the Way to the River","author":"Elizabeth Gilbert","club":"oprah","year":2025},
+  {"id":"o26-01","title":"Kin","author":"Tayari Jones","club":"oprah","year":2026},
   {"id":"r24-01","title":"First Lie Wins","author":"Ashley Elston","club":"reese","year":2024},
   {"id":"r24-02","title":"City of Night Birds","author":"Juhea Kim","club":"reese","year":2024},
   {"id":"r24-03","title":"Redwood Court","author":"DéLana R.A. Dameron","club":"reese","year":2024},
@@ -33,5 +35,10 @@
   {"id":"r25-06","title":"The Phoenix Pencil Company","author":"Allison King","club":"reese","year":2025},
   {"id":"r25-07","title":"Spectacular Things","author":"Beck Dorey-Stein","club":"reese","year":2025},
   {"id":"r25-08","title":"Once Upon a Time in Dollywood","author":"Ashley Jordan","club":"reese","year":2025},
-  {"id":"r25-09","title":"The Heir Apparent","author":"Rebecca Armitage","club":"reese","year":2025}
+  {"id":"r25-09","title":"The Heir Apparent","author":"Rebecca Armitage","club":"reese","year":2025},
+  {"id":"r25-10","title":"To the Moon and Back","author":"Eliana Ramage","club":"reese","year":2025},
+  {"id":"r25-11","title":"Wild Dark Shore","author":"Charlotte McConaghy","club":"reese","year":2025},
+  {"id":"r26-01","title":"The First Time I Saw Him","author":"Laura Dave","club":"reese","year":2026},
+  {"id":"r26-02","title":"In Her Defense","author":"Philippa Malicka","club":"reese","year":2026},
+  {"id":"r26-03","title":"Lady Tremaine","author":"Rachel Hochhauser","club":"reese","year":2026}
 ]
