@@ -1,42 +1,10 @@
 {
-  "updated": "2026-03-08T00:17:37Z",
+  "updated": "2026-03-07T12:00:00Z",
   "books": {
-    "o24-01": { "status": "holds", "text": "12 holds · 4 copies" },
-    "o24-02": { "status": "holds", "text": "8 holds · 3 copies" },
-    "o24-03": { "status": "available", "text": "Available now" },
-    "o24-04": { "status": "holds", "text": "21 holds · 6 copies" },
-    "o24-05": { "status": "holds", "text": "14 holds · 5 copies" },
-    "o24-06": { "status": "available", "text": "Available now" },
-
-    "o25-01": { "status": "holds", "text": "5 holds · 2 copies" },
-    "o25-02": { "status": "holds", "text": "17 holds · 4 copies" },
-    "o25-03": { "status": "unknown", "text": "—" },
-    "o25-04": { "status": "unknown", "text": "—" },
-    "o25-05": { "status": "unknown", "text": "—" },
-    "o25-06": { "status": "unknown", "text": "—" },
-    "o25-07": { "status": "unknown", "text": "—" },
-    "o25-08": { "status": "unknown", "text": "—" },
-    "o25-09": { "status": "unknown", "text": "—" },
-
-    "r24-01": { "status": "holds", "text": "34 holds · 9 copies" },
-    "r24-02": { "status": "holds", "text": "19 holds · 4 copies" },
-    "r24-03": { "status": "available", "text": "Available now" },
-    "r24-04": { "status": "holds", "text": "11 holds · 3 copies" },
-    "r24-05": { "status": "holds", "text": "27 holds · 6 copies" },
-    "r24-06": { "status": "holds", "text": "16 holds · 5 copies" },
-    "r24-07": { "status": "available", "text": "Available now" },
-    "r24-08": { "status": "holds", "text": "22 holds · 7 copies" },
-    "r24-09": { "status": "available", "text": "Available now" },
-    "r24-10": { "status": "holds", "text": "13 holds · 4 copies" },
-    "r24-11": { "status": "holds", "text": "9 holds · 3 copies" },
-
-    "r25-01": { "status": "holds", "text": "6 holds · 2 copies" },
-    "r25-02": { "status": "holds", "text": "12 holds · 3 copies" },
-    "r25-04": { "status": "unknown", "text": "—" },
-    "r25-05": { "status": "unknown", "text": "—" },
-    "r25-06": { "status": "unknown", "text": "—" },
-    "r25-07": { "status": "unknown", "text": "—" },
-    "r25-08": { "status": "unknown", "text": "—" },
-    "r25-09": { "status": "unknown", "text": "—" }
+    "o24-01": { "status": "holds", "text": "2 holds / 1 copy", "holds": 2, "copies": 1, "available": 0 },
+    "o24-02": { "status": "available", "text": "Available now", "holds": 0, "copies": 3, "available": 3 },
+    "o24-04": { "status": "holds", "text": "37 holds / 10 copies", "holds": 37, "copies": 10, "available": 0 },
+    "r25-04": { "status": "holds", "text": "21 holds / 6 copies", "holds": 21, "copies": 6, "available": 0 },
+    "r25-09": { "status": "available", "text": "Available now", "holds": 0, "copies": 1, "available": 1 }
   }
 }
