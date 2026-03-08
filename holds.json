@@ -1,4 +1,141 @@
 {
-  "updated": null,
-  "books": {}
+  "updated": "2026-03-08T00:01:11Z",
+  "books": {
+    "o24-01": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o24-02": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o24-03": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o24-04": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o24-05": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o24-06": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-01": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-02": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-03": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-04": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-05": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-06": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-07": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-08": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "o25-09": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-01": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-02": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-03": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-04": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-05": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-06": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-07": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-08": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-09": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-10": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r24-11": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-01": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-02": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-04": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-05": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-06": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-07": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-08": {
+      "status": "unknown",
+      "text": "\u2014"
+    },
+    "r25-09": {
+      "status": "unknown",
+      "text": "\u2014"
+    }
+  }
 }
