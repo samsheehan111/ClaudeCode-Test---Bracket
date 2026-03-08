@@ -1,4 +1,180 @@
 {
-  "updated": "1970-01-01T00:00:00Z",
-  "books": {}
+  "updated": "2026-03-08T13:53:16Z",
+  "books": {
+    "o24-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o24-02": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o24-03": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o24-04": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o24-05": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o24-06": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-02": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-03": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-04": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-05": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-06": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-07": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-08": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "o25-09": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-02": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-03": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-04": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-05": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-06": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-07": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-08": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-09": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-10": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r24-11": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-01": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-02": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-03": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-04": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-05": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-06": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-07": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-08": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    },
+    "r25-09": {
+      "status": "unknown",
+      "text": "\u2014",
+      "available": false
+    }
+  }
 }
