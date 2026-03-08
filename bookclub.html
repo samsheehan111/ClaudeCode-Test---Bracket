@@ -209,8 +209,7 @@ async function fetchOpenLibraryData(title, author) {
 async function loadBooks(){
   const res = await fetch("./books.json")
   BOOKS = await res.json()
-  // Clear Amazon covers so placeholders show while Open Library loads
-  BOOKS.forEach(b => { b.cover = null })
+  // Don't show Amazon covers — render placeholders while Open Library loads
   render()
 
   // Enrich with live Open Library data (covers + real ratings)
@@ -253,7 +252,7 @@ if(search && !book.title.toLowerCase().includes(search) && !book.author.toLowerC
 return true
 
 })
-.sort((a,b)=>b.rating-a.rating)
+.sort((a,b)=>(b.rating??0)-(a.rating??0))
 
 .forEach(book=>{
 
@@ -262,7 +261,7 @@ card.className="card"
 
 card.innerHTML=`
 
-${book.cover ? `<img class="cover" src="${book.cover}">` : `<span class="cover-placeholder"></span>`}
+${book.cover ? `<img class="cover" src="${book.cover}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'cover-placeholder'}))">` : `<span class="cover-placeholder"></span>`}
 
 <div class="card-body">
 
@@ -271,7 +270,7 @@ ${book.cover ? `<img class="cover" src="${book.cover}">` : `<span class="cover-p
 <div class="author">${book.author}</div>
 
 <div class="rating">
-⭐ ${book.rating} • ${book.reviews.toLocaleString()} ratings
+${book.rating != null ? `⭐ ${book.rating} • ${(book.reviews??0).toLocaleString()} ratings` : `Coming soon`}
 </div>
 
 <div class="club ${book.club}">
