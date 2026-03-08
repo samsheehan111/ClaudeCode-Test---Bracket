@@ -1,35 +1,31 @@
-name: Update SFPL Hold Counts
+name: Update SFPL Holds
 
 on:
   schedule:
-    # Runs at 8am and 8pm UTC (midnight and noon Pacific)
-    - cron: "0 8,20 * * *"
-  workflow_dispatch:  # allow manual trigger from GitHub Actions tab
+    - cron: '0 */12 * * *' # every 12 hours
+  workflow_dispatch:
 
 jobs:
   update-holds:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          python-version: "3.12"
-          cache: "pip"
+          node-version: '20'
 
       - name: Install dependencies
-        run: pip install requests
+        run: npm install node-fetch@3 cheerio
 
-      - name: Fetch hold counts from SFPL
-        run: python scripts/fetch_holds.py
+      - name: Run scraper
+        run: node update-holds.js
 
-      - name: Commit holds.json if changed
+      - name: Commit and push holds.json
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
           git add holds.json
-          git diff --cached --quiet || git commit -m "chore: update SFPL hold counts [$(date -u '+%Y-%m-%d %H:%M UTC')]"
+          git commit -m "Update holds.json" || echo "No changes"
           git push
