@@ -160,6 +160,7 @@ html,body{min-height:100%;background:#f0f4f8;font-family:'Inter',system-ui,-appl
       <option value="date-asc">Oldest first</option>
       <option value="title">Title A–Z</option>
       <option value="author">Author A–Z</option>
+      <option value="holds-desc">Most holds first</option>
     </select>
     <input type="text" id="search-box" placeholder="Search title or author…" autocomplete="off"/>
   </div>
@@ -513,6 +514,12 @@ function filtered() {
       if (sort === 'date-asc') return a.sortDate.localeCompare(b2.sortDate);
       if (sort === 'title') return a.title.localeCompare(b2.title);
       if (sort === 'author') return a.author.localeCompare(b2.author);
+      if (sort === 'holds-desc') {
+        const ha = HOLDS[a.id], hb = HOLDS[b2.id];
+        const na = (ha && ha.holds != null) ? ha.holds : -1;
+        const nb = (hb && hb.holds != null) ? hb.holds : -1;
+        return nb - na;
+      }
       return 0;
     });
 }
