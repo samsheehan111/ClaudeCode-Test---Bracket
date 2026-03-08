@@ -254,9 +254,19 @@ async function loadHolds() {
 function holdBadge(id) {
   const h = HOLDS[id];
   if (!h) return `<span class="hold-badge loading">Checking KCLS…</span>`;
-  if (h.status === 'holds')     return `<span class="hold-badge holds">📋 ${h.text}</span>`;
-  if (h.status === 'available') return `<span class="hold-badge available">✓ ${h.text}</span>`;
-  if (h.status === 'hoopla')    return `<span class="hold-badge hoopla">∞ ${h.text}</span>`;
+
+  if (h.status === 'holds') {
+    const copies = h.copies === 1 ? '1 copy' : `${h.copies} copies`;
+    return `<span class="hold-badge holds">📋 ${h.holds} holds for ${copies}</span>`;
+  }
+  if (h.status === 'available') {
+    if (h.holds > 0) {
+      const copies = h.copies === 1 ? '1 copy' : `${h.copies} copies`;
+      return `<span class="hold-badge available">✓ Available now &mdash; ${h.holds} holds, ${copies}</span>`;
+    }
+    return `<span class="hold-badge available">✓ Available now &mdash; no holds!</span>`;
+  }
+  if (h.status === 'hoopla') return `<span class="hold-badge hoopla">∞ Available on Hoopla (unlimited)</span>`;
   return `<span class="hold-badge unknown">—</span>`;
 }
 
