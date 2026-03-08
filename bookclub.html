@@ -1,87 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Book Club Tracker — Oprah & Reese × SFPL</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book Club Tracker — SFPL Libby</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* Basic styling (same as before, shortened for brevity) */
-body {font-family:'Inter',sans-serif;background:#f0f4f8;color:#1e293b;margin:0;padding:0;}
-#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;padding:20px;}
-.card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);}
-.card-title{font-weight:700;font-size:15px;}
-.card-author{font-size:12px;color:#64748b;}
-.hold-badge{font-size:10px;font-weight:600;padding:4px 10px;border-radius:6px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
-.hold-badge.holds{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;}
-.hold-badge.available{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;}
-.hold-badge.loading{background:#f8fafc;color:#94a3b8;border:1px solid #e2e8f0;}
+
+body{
+font-family:Inter,system-ui;
+background:#f3f4f6;
+margin:0;
+color:#111827;
+}
+
+header{
+padding:24px;
+background:white;
+border-bottom:1px solid #e5e7eb;
+}
+
+h1{
+margin:0;
+font-size:24px;
+}
+
+#updated{
+font-size:12px;
+color:#6b7280;
+margin-top:4px;
+}
+
+#grid{
+padding:24px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:16px;
+}
+
+.card{
+background:white;
+border-radius:12px;
+padding:16px;
+box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+
+.title{
+font-weight:700;
+font-size:15px;
+}
+
+.author{
+font-size:12px;
+color:#6b7280;
+margin-bottom:8px;
+}
+
+.badge{
+display:inline-block;
+font-size:11px;
+padding:4px 10px;
+border-radius:6px;
+margin-top:6px;
+}
+
+.available{
+background:#dcfce7;
+color:#166534;
+}
+
+.holds{
+background:#fee2e2;
+color:#991b1b;
+}
+
+.loading{
+background:#e5e7eb;
+color:#374151;
+}
+
+.links{
+margin-top:10px;
+}
+
+.links a{
+font-size:12px;
+text-decoration:none;
+margin-right:8px;
+color:#2563eb;
+}
+
 </style>
 </head>
+
 <body>
 
-<h1 style="padding:20px 20px 0;">📚 Book Club × SFPL Tracker</h1>
-<p style="padding:0 20px;">Hold counts refresh twice daily automatically via GitHub Actions.</p>
+<header>
+
+<h1>📚 Book Club Tracker</h1>
+
+<div id="updated">
+Checking SFPL Libby ebook availability…
+</div>
+
+</header>
+
 <div id="grid"></div>
 
 <script>
-'use strict';
 
-// ── SAMPLE BOOKS DATA ──
 const BOOKS = [
-  {id:'o24-01', title:'The Many Lives of Mama Love', author:'Lara Love Hardin'},
-  {id:'o24-02', title:'Long Island', author:'Colm Tóibín'},
-  {id:'o24-04', title:'Tell Me Everything', author:'Elizabeth Strout'},
-  {id:'r25-04', title:'Broken Country', author:'Clare Leslie Hall'}
-];
+{id:"o24-01",title:"The Many Lives of Mama Love",author:"Lara Love Hardin"},
+{id:"o24-02",title:"Long Island",author:"Colm Tóibín"},
+{id:"o24-04",title:"Tell Me Everything",author:"Elizabeth Strout"},
+{id:"r25-04",title:"Broken Country",author:"Clare Leslie Hall"}
+]
 
-// ── HOLDS ──
-let HOLDS = {};
-let holdsUpdated = null;
+let HOLDS = {}
 
-async function loadHolds() {
-  try {
-    const resp = await fetch('./holds.json?_=' + Date.now());
-    if (!resp.ok) throw new Error('Cannot fetch holds.json');
-    const data = await resp.json();
-    HOLDS = data.books || {};
-    holdsUpdated = data.updated || null;
-    renderCards();
-  } catch(e) {
-    console.warn(e);
-  }
+async function loadHolds(){
+
+try{
+
+const r = await fetch("./holds.json?"+Date.now())
+
+if(!r.ok) throw "no holds"
+
+const data = await r.json()
+
+HOLDS = data.books || {}
+
+if(data.updated){
+
+const d = new Date(data.updated)
+
+document.getElementById("updated").textContent =
+"SFPL Libby ebook holds updated " + d.toLocaleString()
+
 }
 
-function holdBadgeHtml(id) {
-  const h = HOLDS[id];
-  if (!h) return `<div class="hold-badge loading">Checking SFPL…</div>`;
-  if (h.status==='holds') return `<div class="hold-badge holds">${h.text}</div>`;
-  if (h.status==='available') return `<div class="hold-badge available">${h.text}</div>`;
-  return `<div class="hold-badge loading">—</div>`;
+render()
+
+}catch(e){
+
+document.getElementById("updated").textContent =
+"Unable to load hold counts"
+
 }
 
-// ── SFPL URLs ──
-function libbyUrl(book) {
-  const q = encodeURIComponent(book.title);
-  return `https://libbyapp.com/search/sfpl/search/query-${q}/page-1`;
 }
 
-// ── RENDER ──
-function renderCards() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = BOOKS.map(b=>{
-    return `<div class="card">
-      <div class="card-title">${b.title}</div>
-      <div class="card-author">${b.author}</div>
-      <div>${holdBadgeHtml(b.id)}</div>
-      <div style="margin-top:6px;"><a href="${libbyUrl(b)}" target="_blank">☁️ Libby</a></div>
-    </div>`;
-  }).join('');
+function badge(id){
+
+const h = HOLDS[id]
+
+if(!h)
+return `<div class="badge loading">Checking…</div>`
+
+if(h.status==="available")
+return `<div class="badge available">${h.text}</div>`
+
+if(h.status==="holds")
+return `<div class="badge holds">${h.text}</div>`
+
+return `<div class="badge loading">—</div>`
+
 }
 
-renderCards();
-loadHolds();
+function libby(book){
+
+return `https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}`
+
+}
+
+function sfpl(book){
+
+return `https://sfpl.bibliocommons.com/v2/search?query=${encodeURIComponent(book.title+" "+book.author)}&searchType=keyword&f_FORMAT=EBOOK`
+
+}
+
+function render(){
+
+const grid=document.getElementById("grid")
+
+grid.innerHTML=BOOKS.map(b=>`
+
+<div class="card">
+
+<div class="title">${b.title}</div>
+
+<div class="author">${b.author}</div>
+
+${badge(b.id)}
+
+<div class="links">
+
+<a href="${libby(b)}" target="_blank">Open in Libby</a>
+
+<a href="${sfpl(b)}" target="_blank">View in SFPL</a>
+
+</div>
+
+</div>
+
+`).join("")
+
+}
+
+render()
+
+loadHolds()
+
 </script>
+
 </body>
 </html>
