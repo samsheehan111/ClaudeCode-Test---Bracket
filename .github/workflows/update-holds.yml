@@ -1,13 +1,13 @@
 name: Update SFPL Holds
 
 on:
-  schedule:
-    - cron: '0 */12 * * *' # every 12 hours
-  workflow_dispatch:
+  workflow_dispatch: # manual only — holds removed from bookclub.html
 
 jobs:
   update-holds:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
 
