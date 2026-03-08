@@ -1,77 +1,120 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>New TV Releases — Jan & Feb 2026</title>
-  <link rel="stylesheet" href="tv-releases-2026.css" />
-</head>
-<body>
-  <header class="site-header">
-    <h1>New TV Releases — Jan &amp; Feb 2026</h1>
-    <p>Sorted by popularity, with Rotten Tomatoes, IMDb, and streaming platforms.</p>
-  </header>
+const API_KEY = "YOUR_TMDB_API_KEY";
 
-  <main class="container">
-    <section class="filters" aria-label="Filter controls">
-      <label>
-        Month
-        <select id="monthFilter">
-          <option value="all">All</option>
-          <option value="January">January</option>
-          <option value="February">February</option>
-        </select>
-      </label>
+const resultsBody = document.getElementById("resultsBody");
+const platformFilter = document.getElementById("platformFilter");
+const monthFilter = document.getElementById("monthFilter");
+const popularityFilter = document.getElementById("popularityFilter");
+const popularityValue = document.getElementById("popularityValue");
+const qualityFilter = document.getElementById("qualityFilter");
 
-      <label>
-        Streaming Platform
-        <select id="platformFilter">
-          <option value="all">All</option>
-        </select>
-      </label>
+const countLabel = document.getElementById("countLabel");
+const rangeLabel = document.getElementById("rangeLabel");
 
-      <label>
-        Minimum Popularity Score
-        <input id="popularityFilter" type="range" min="0" max="100" step="1" value="55" />
-        <span id="popularityValue">55</span>
-      </label>
+let shows = [];
 
-      <label class="checkbox">
-        <input id="qualityFilter" type="checkbox" checked />
-        Hide lower-rated shows (IMDb &lt; 6.5 or RT Audience &lt; 65)
-      </label>
-    </section>
+async function fetchShows() {
 
-    <section class="stats" aria-live="polite">
-      <strong id="countLabel"></strong>
-      <span id="rangeLabel"></span>
-    </section>
+  const response = await fetch(
+    `https://api.themoviedb.org/3/trending/tv/week?api_key=${API_KEY}`
+  );
 
-    <section>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Title</th>
-            <th>Release</th>
-            <th>Platform(s)</th>
-            <th>RT Critic</th>
-            <th>RT Audience</th>
-            <th>IMDb</th>
-            <th>Popularity</th>
-          </tr>
-        </thead>
-        <tbody id="resultsBody"></tbody>
-      </table>
-    </section>
-  </main>
+  const data = await response.json();
 
-  <footer>
-    <p>
-      Demo dataset for Jan/Feb 2026 planning. Replace with API-fed data for production.
-    </p>
-  </footer>
+  shows = data.results.map(show => {
 
-  <script type="module" src="tv-releases-2026.js"></script>
-</body>
-</html>
+    const releaseDate = show.first_air_date || "";
+    const month = releaseDate.startsWith("2026-01")
+      ? "January"
+      : releaseDate.startsWith("2026-02")
+      ? "February"
+      : "Other";
+
+    return {
+      title: show.name,
+      release: releaseDate,
+      month: month,
+      platform: show.origin_country.join(", "),
+      imdb: show.vote_average,
+      rtCritic: "-",
+      rtAudience: "-",
+      popularity: Math.round(show.popularity)
+    };
+  });
+
+  shows = shows
+    .filter(s => s.month === "January" || s.month === "February")
+    .sort((a, b) => b.popularity - a.popularity);
+
+  buildPlatformFilter();
+  render();
+}
+
+function buildPlatformFilter() {
+
+  const platforms = new Set();
+
+  shows.forEach(s => platforms.add(s.platform));
+
+  platforms.forEach(p => {
+
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+
+    platformFilter.appendChild(opt);
+
+  });
+}
+
+function render() {
+
+  let filtered = [...shows];
+
+  const month = monthFilter.value;
+  const platform = platformFilter.value;
+  const minPopularity = Number(popularityFilter.value);
+
+  popularityValue.textContent = minPopularity;
+
+  if (month !== "all")
+    filtered = filtered.filter(s => s.month === month);
+
+  if (platform !== "all")
+    filtered = filtered.filter(s => s.platform === platform);
+
+  filtered = filtered.filter(s => s.popularity >= minPopularity);
+
+  if (qualityFilter.checked)
+    filtered = filtered.filter(s => s.imdb >= 6.5);
+
+  resultsBody.innerHTML = "";
+
+  filtered.forEach((s, i) => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${s.title}</td>
+      <td>${s.release}</td>
+      <td>${s.platform}</td>
+      <td>${s.rtCritic}</td>
+      <td>${s.rtAudience}</td>
+      <td>${s.imdb}</td>
+      <td>${s.popularity}</td>
+    `;
+
+    resultsBody.appendChild(tr);
+
+  });
+
+  countLabel.textContent = `${filtered.length} shows`;
+
+}
+
+monthFilter.addEventListener("change", render);
+platformFilter.addEventListener("change", render);
+popularityFilter.addEventListener("input", render);
+qualityFilter.addEventListener("change", render);
+
+fetchShows();
