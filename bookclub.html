@@ -209,10 +209,8 @@ async function fetchOpenLibraryData(title, author) {
 async function loadBooks(){
   const res = await fetch("./books.json")
   BOOKS = await res.json()
-  // Don't show Amazon covers — render placeholders while Open Library loads
   render()
 
-  // Enrich with live Open Library data (covers + real ratings)
   const results = await Promise.all(BOOKS.map(b => fetchOpenLibraryData(b.title, b.author)))
   BOOKS.forEach((book, i) => {
     if (results[i].cover) book.cover = results[i].cover
