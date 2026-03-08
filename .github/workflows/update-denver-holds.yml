@@ -1,0 +1,35 @@
+name: Update Denver Public Library Holds
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'   # every 12 hours (midnight & noon UTC)
+  workflow_dispatch:           # allow manual trigger from GitHub UI
+
+jobs:
+  update-holds:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Fetch Denver Public Library hold counts
+        run: python scripts/fetch_denver_holds.py
+
+      - name: Commit and push denver-holds.json
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add denver-holds.json
+          git diff --cached --quiet && echo "No changes to commit" || \
+            git commit -m "chore: update denver-holds.json [skip ci]" && git push

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Book Club Tracker — Oprah &amp; Reese × King County Library</title>
+<title>Book Club Tracker — Oprah &amp; Reese × Denver Public Library</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -110,7 +110,6 @@ header p {
 
 .card-title { font-weight: 700; font-size: 14px; line-height: 1.3; }
 .card-author { font-size: 12px; color: #64748b; }
-.card-year   { font-size: 11px; color: #94a3b8; }
 
 .hold-badge {
   font-size: 11px;
@@ -147,7 +146,7 @@ header p {
 
 .card-links a:hover { opacity: 0.8; }
 
-.link-kcls {
+.link-dpl {
   background: #eff6ff;
   color: #1d4ed8;
   border: 1px solid #bfdbfe;
@@ -171,18 +170,18 @@ header p {
 <body>
 
 <header>
-  <h1>📚 Book Club Tracker &times; King County Library</h1>
-  <p>Oprah's Book Club &amp; Reese's Book Club — eBook holds on KCLS</p>
+  <h1>📚 Book Club Tracker &times; Denver Public Library</h1>
+  <p>Oprah's Book Club &amp; Reese's Book Club — eBook holds on DPL</p>
   <div id="last-updated">Loading hold data…</div>
 </header>
 
 <div class="filter-bar">
-  <button class="filter-btn active-all" data-filter="all" onclick="setFilter('all')">All Books</button>
-  <button class="filter-btn" data-filter="oprah" onclick="setFilter('oprah')">Oprah's Club</button>
-  <button class="filter-btn" data-filter="reese" onclick="setFilter('reese')">Reese's Club</button>
-  <button class="filter-btn" data-filter="2025" onclick="setFilter('2025')">2025 Picks</button>
-  <button class="filter-btn" data-filter="2024" onclick="setFilter('2024')">2024 Picks</button>
-  <button class="filter-btn" data-filter="available" onclick="setFilter('available')">Available Now</button>
+  <button class="filter-btn active-all" data-filter="all"       onclick="setFilter('all')">All Books</button>
+  <button class="filter-btn"            data-filter="oprah"     onclick="setFilter('oprah')">Oprah's Club</button>
+  <button class="filter-btn"            data-filter="reese"     onclick="setFilter('reese')">Reese's Club</button>
+  <button class="filter-btn"            data-filter="2025"      onclick="setFilter('2025')">2025 Picks</button>
+  <button class="filter-btn"            data-filter="2024"      onclick="setFilter('2024')">2024 Picks</button>
+  <button class="filter-btn"            data-filter="available" onclick="setFilter('available')">Available Now</button>
 </div>
 
 <div id="grid"></div>
@@ -233,8 +232,8 @@ let activeFilter = 'all';
 
 async function loadHolds() {
   try {
-    const resp = await fetch('./kc-holds.json?_=' + Date.now());
-    if (!resp.ok) throw new Error('Cannot fetch kc-holds.json');
+    const resp = await fetch('./denver-holds.json?_=' + Date.now());
+    if (!resp.ok) throw new Error('Cannot fetch denver-holds.json');
     const data = await resp.json();
     HOLDS = data.books || {};
     const el = document.getElementById('last-updated');
@@ -253,7 +252,7 @@ async function loadHolds() {
 
 function holdBadge(id) {
   const h = HOLDS[id];
-  if (!h) return `<span class="hold-badge loading">Checking KCLS…</span>`;
+  if (!h) return `<span class="hold-badge loading">Checking DPL…</span>`;
 
   if (h.status === 'holds') {
     const copies = h.copies === 1 ? '1 copy' : `${h.copies} copies`;
@@ -270,13 +269,12 @@ function holdBadge(id) {
   return `<span class="hold-badge unknown">—</span>`;
 }
 
-function kclsUrl(book) {
-  const q = encodeURIComponent(book.title + ' ' + book.author);
-  return `https://kcls.bibliocommons.com/v2/search?query=${encodeURIComponent(book.title)}&searchType=keyword&f_FORMAT=EBOOK`;
+function dplUrl(book) {
+  return `https://denver.bibliocommons.com/v2/search?query=${encodeURIComponent(book.title)}&searchType=keyword&f_FORMAT=EBOOK`;
 }
 
 function libbyUrl(book) {
-  return `https://libbyapp.com/search/kcls/search/query-${encodeURIComponent(book.title)}/page-1`;
+  return `https://libbyapp.com/search/denver/search/query-${encodeURIComponent(book.title)}/page-1`;
 }
 
 function setFilter(f) {
@@ -284,7 +282,7 @@ function setFilter(f) {
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.className = 'filter-btn';
     if (btn.dataset.filter === f) {
-      btn.classList.add('active-' + (f === 'all' ? 'all' : f === 'oprah' ? 'oprah' : f === 'reese' ? 'reese' : 'all'));
+      btn.classList.add('active-' + (f === 'oprah' ? 'oprah' : f === 'reese' ? 'reese' : 'all'));
     }
   });
   renderCards();
@@ -323,7 +321,7 @@ function renderCards() {
       </div>
       <div>${holdBadge(b.id)}</div>
       <div class="card-links">
-        <a class="link-kcls"  href="${kclsUrl(b)}"  target="_blank" rel="noopener">KCLS Catalog</a>
+        <a class="link-dpl"   href="${dplUrl(b)}"   target="_blank" rel="noopener">DPL Catalog</a>
         <a class="link-libby" href="${libbyUrl(b)}" target="_blank" rel="noopener">Libby / OverDrive</a>
       </div>
     </div>
