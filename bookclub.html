@@ -1,133 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Book Club Library Tracker</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
 
+*{
+box-sizing:border-box;
+}
+
 body{
-font-family:Arial;
-background:#f4f4f4;
-margin:40px;
+font-family:'Inter',sans-serif;
+background:#f6f8fb;
+margin:0;
+padding:40px;
+color:#1e293b;
 }
 
 h1{
+margin-bottom:6px;
+}
+
+.subtitle{
+color:#64748b;
 margin-bottom:30px;
 }
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
 gap:20px;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
-box-shadow:0 3px 8px rgba(0,0,0,.1);
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,.06);
+border:1px solid #eef2f7;
+display:flex;
+flex-direction:column;
+gap:8px;
+transition:transform .15s;
+}
+
+.card:hover{
+transform:translateY(-4px);
 }
 
 .title{
-font-weight:bold;
-font-size:18px;
-margin-bottom:6px;
+font-weight:700;
+font-size:16px;
+line-height:1.3;
 }
 
 .author{
-color:#666;
-margin-bottom:10px;
-}
-
-.holds{
+color:#64748b;
 font-size:14px;
-margin-bottom:10px;
 }
 
-.available{
-color:green;
-font-weight:bold;
+.rating{
+font-size:13px;
+font-weight:600;
+color:#b45309;
 }
 
-.unavailable{
-color:#cc0000;
-font-weight:bold;
+.club{
+font-size:11px;
+font-weight:700;
+padding:4px 8px;
+border-radius:6px;
+display:inline-block;
+margin-top:4px;
+width:max-content;
+}
+
+.oprah{
+background:#faf5ff;
+color:#7c3aed;
+border:1px solid #ddd6fe;
+}
+
+.reese{
+background:#fff1f2;
+color:#e11d48;
+border:1px solid #fecdd3;
+}
+
+.links{
+margin-top:10px;
+display:flex;
+gap:8px;
+flex-wrap:wrap;
 }
 
 button{
-padding:8px 12px;
+padding:6px 10px;
 border:none;
-background:#0077cc;
-color:white;
 border-radius:6px;
+font-size:12px;
+font-weight:600;
 cursor:pointer;
 }
 
-button:hover{
-background:#005fa3;
+.lib{
+background:#eff6ff;
+color:#1d4ed8;
+}
+
+.libby{
+background:#f0fdf4;
+color:#15803d;
 }
 
 .updated{
-margin-bottom:20px;
-color:#666;
+margin-bottom:30px;
+color:#64748b;
 font-size:14px;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h1>Oprah & Reese Book Club Tracker</h1>
+<h1>📚 Oprah & Reese Book Club Tracker</h1>
+<div class="subtitle">Quick links to SF Public Library ebook availability</div>
 
-<div class="updated" id="updated">Loading library data...</div>
+<div class="updated" id="updated">Loading books...</div>
 
 <div class="grid" id="books"></div>
 
 <script>
 
-async function loadData(){
+async function loadBooks(){
 
 const booksRes = await fetch("./books.json")
-const holdsRes = await fetch("./holds.json")
-
 const books = await booksRes.json()
-const holds = await holdsRes.json()
 
 document.getElementById("updated").innerText =
-"SF Public Library Libby ebook holds updated " + holds.updated
+books.length + " book club picks"
 
 const grid = document.getElementById("books")
 grid.innerHTML=""
 
 books.forEach(book=>{
 
-const holdData = holds.books[book.id]
-
-let holdText=""
-let holdClass="available"
-
-if(!holdData || holdData.holds === 0){
-
-holdText="Available now"
-holdClass="available"
-
-}else{
-
-holdText=holdData.holds + " holds on " + holdData.copies + " copies"
-holdClass="unavailable"
-
-}
-
 const card=document.createElement("div")
 card.className="card"
 
+const clubClass = book.club === "oprah" ? "oprah" : "reese"
+
+const ratingHTML = book.rating
+? `<div class="rating">⭐ ${book.rating} Goodreads</div>`
+: ""
+
 card.innerHTML=`
+
 <div class="title">${book.title}</div>
+
 <div class="author">${book.author}</div>
-<div class="holds ${holdClass}">${holdText}</div>
-<button onclick="window.open('${book.sf_url}','_blank')">View in SF Library</button>
+
+${ratingHTML}
+
+<div class="club ${clubClass}">
+${book.club === "oprah" ? "Oprah's Book Club" : "Reese's Book Club"}
+</div>
+
+<div class="links">
+
+<button class="lib"
+onclick="window.open('${book.sf_url}','_blank')">
+SF Library
+</button>
+
+<button class="libby"
+onclick="window.open('https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}','_blank')">
+Libby
+</button>
+
+</div>
+
 `
 
 grid.appendChild(card)
@@ -136,7 +198,7 @@ grid.appendChild(card)
 
 }
 
-loadData()
+loadBooks()
 
 </script>
 
