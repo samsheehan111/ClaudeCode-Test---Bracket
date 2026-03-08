@@ -157,6 +157,13 @@ background:#f0fdf4;
 color:#15803d;
 }
 
+.cover-placeholder{
+width:100%;
+height:320px;
+background:linear-gradient(135deg,#e2e8f0,#f1f5f9);
+display:block;
+}
+
 </style>
 </head>
 
@@ -182,13 +189,37 @@ color:#15803d;
 let BOOKS=[]
 let filter="all"
 
+async function fetchOpenLibraryData(title, author) {
+  try {
+    const q = encodeURIComponent(`${title} ${author}`)
+    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i,ratings_average,ratings_count`)
+    const data = await res.json()
+    const doc = data.docs && data.docs[0]
+    if (!doc) return {}
+    return {
+      cover: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : null,
+      rating: doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : null,
+      reviews: doc.ratings_count || null
+    }
+  } catch(e) {
+    return {}
+  }
+}
+
 async function loadBooks(){
+  const res = await fetch("./books.json")
+  BOOKS = await res.json()
+  // Don't show Amazon covers — render placeholders while Open Library loads
+  render()
 
-const res = await fetch("./books.json")
-BOOKS = await res.json()
-
-render()
-
+  // Enrich with live Open Library data (covers + real ratings)
+  const results = await Promise.all(BOOKS.map(b => fetchOpenLibraryData(b.title, b.author)))
+  BOOKS.forEach((book, i) => {
+    if (results[i].cover) book.cover = results[i].cover
+    if (results[i].rating != null) book.rating = results[i].rating
+    if (results[i].reviews != null) book.reviews = results[i].reviews
+  })
+  render()
 }
 
 function setFilter(f){
@@ -221,7 +252,7 @@ if(search && !book.title.toLowerCase().includes(search) && !book.author.toLowerC
 return true
 
 })
-.sort((a,b)=>b.rating-a.rating)
+.sort((a,b)=>(b.rating??0)-(a.rating??0))
 
 .forEach(book=>{
 
@@ -230,7 +261,7 @@ card.className="card"
 
 card.innerHTML=`
 
-<img class="cover" src="${book.cover}">
+${book.cover ? `<img class="cover" src="${book.cover}" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'cover-placeholder'}))">` : `<span class="cover-placeholder"></span>`}
 
 <div class="card-body">
 
@@ -239,7 +270,7 @@ card.innerHTML=`
 <div class="author">${book.author}</div>
 
 <div class="rating">
-⭐ ${book.rating} Goodreads • ${book.reviews.toLocaleString()} ratings
+${book.rating != null ? `⭐ ${book.rating} • ${(book.reviews??0).toLocaleString()} ratings` : `Coming soon`}
 </div>
 
 <div class="club ${book.club}">
