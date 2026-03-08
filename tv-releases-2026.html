@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New TV Releases — Jan & Feb 2026</title>
+  <link rel="stylesheet" href="tv-releases-2026.css" />
+</head>
+<body>
+  <header class="site-header">
+    <h1>New TV Releases — Jan &amp; Feb 2026</h1>
+    <p>Sorted by popularity, with Rotten Tomatoes, IMDb, and streaming platforms.</p>
+  </header>
+
+  <main class="container">
+    <section class="filters" aria-label="Filter controls">
+      <label>
+        Month
+        <select id="monthFilter">
+          <option value="all">All</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+        </select>
+      </label>
+
+      <label>
+        Streaming Platform
+        <select id="platformFilter">
+          <option value="all">All</option>
+        </select>
+      </label>
+
+      <label>
+        Minimum Popularity Score
+        <input id="popularityFilter" type="range" min="0" max="100" step="1" value="55" />
+        <span id="popularityValue">55</span>
+      </label>
+
+      <label class="checkbox">
+        <input id="qualityFilter" type="checkbox" checked />
+        Hide lower-rated shows (IMDb &lt; 6.5 or RT Audience &lt; 65)
+      </label>
+    </section>
+
+    <section class="stats" aria-live="polite">
+      <strong id="countLabel"></strong>
+      <span id="rangeLabel"></span>
+    </section>
+
+    <section>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Release</th>
+            <th>Platform(s)</th>
+            <th>RT Critic</th>
+            <th>RT Audience</th>
+            <th>IMDb</th>
+            <th>Popularity</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Demo dataset for Jan/Feb 2026 planning. Replace with API-fed data for production.
+    </p>
+  </footer>
+
+  <script type="module" src="tv-releases-2026.js"></script>
+</body>
+</html>
