@@ -182,13 +182,36 @@ color:#15803d;
 let BOOKS=[]
 let filter="all"
 
+async function fetchOpenLibraryData(title, author) {
+  try {
+    const q = encodeURIComponent(`${title} ${author}`)
+    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=cover_i,ratings_average,ratings_count`)
+    const data = await res.json()
+    const doc = data.docs && data.docs[0]
+    if (!doc) return {}
+    return {
+      cover: doc.cover_i ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-L.jpg` : null,
+      rating: doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : null,
+      reviews: doc.ratings_count || null
+    }
+  } catch(e) {
+    return {}
+  }
+}
+
 async function loadBooks(){
+  const res = await fetch("./books.json")
+  BOOKS = await res.json()
+  render()
 
-const res = await fetch("./books.json")
-BOOKS = await res.json()
-
-render()
-
+  // Enrich with live Open Library data (covers + real ratings)
+  const results = await Promise.all(BOOKS.map(b => fetchOpenLibraryData(b.title, b.author)))
+  BOOKS.forEach((book, i) => {
+    if (results[i].cover) book.cover = results[i].cover
+    if (results[i].rating != null) book.rating = results[i].rating
+    if (results[i].reviews != null) book.reviews = results[i].reviews
+  })
+  render()
 }
 
 function setFilter(f){
@@ -239,7 +262,7 @@ card.innerHTML=`
 <div class="author">${book.author}</div>
 
 <div class="rating">
-⭐ ${book.rating} Goodreads • ${book.reviews.toLocaleString()} ratings
+⭐ ${book.rating} • ${book.reviews.toLocaleString()} ratings
 </div>
 
 <div class="club ${book.club}">
