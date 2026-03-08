@@ -157,6 +157,13 @@ background:#f0fdf4;
 color:#15803d;
 }
 
+.cover-placeholder{
+width:100%;
+height:320px;
+background:linear-gradient(135deg,#e2e8f0,#f1f5f9);
+display:block;
+}
+
 </style>
 </head>
 
@@ -202,6 +209,8 @@ async function fetchOpenLibraryData(title, author) {
 async function loadBooks(){
   const res = await fetch("./books.json")
   BOOKS = await res.json()
+  // Clear Amazon covers so placeholders show while Open Library loads
+  BOOKS.forEach(b => { b.cover = null })
   render()
 
   // Enrich with live Open Library data (covers + real ratings)
@@ -253,7 +262,7 @@ card.className="card"
 
 card.innerHTML=`
 
-<img class="cover" src="${book.cover}">
+${book.cover ? `<img class="cover" src="${book.cover}">` : `<span class="cover-placeholder"></span>`}
 
 <div class="card-body">
 
