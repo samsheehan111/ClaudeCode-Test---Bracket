@@ -1,9 +1,10 @@
 {
   "updated": "2026-03-08T00:17:37Z",
   "books": {
-    "o24-01": {
-      "status": "unknown",
-      "text": "\u2014"
+"o24-01": {
+  "status": "holds",
+  "text": "12 holds · 4 copies"
+}
     },
     "o24-02": {
       "status": "unknown",
