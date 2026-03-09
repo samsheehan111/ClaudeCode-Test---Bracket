@@ -179,6 +179,33 @@ let filter="all"
 async function loadBooks(){
   const res = await fetch("./books.json")
   BOOKS = await res.json()
+async function fetchOpenLibraryData(title, author) {
+  try {
+    const q = encodeURIComponent(`${title} ${author}`)
+    const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=ratings_average,ratings_count`)
+    const data = await res.json()
+    const doc = data.docs && data.docs[0]
+    if (!doc) return {}
+    return {
+      rating: doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : null,
+      reviews: doc.ratings_count || null
+    }
+  } catch(e) {
+    return {}
+  }
+}
+
+async function loadBooks(){
+  const res = await fetch("./books.json")
+  BOOKS = await res.json()
+  render()
+
+  // Enrich with live Open Library data (real ratings)
+  const results = await Promise.all(BOOKS.map(b => fetchOpenLibraryData(b.title, b.author)))
+  BOOKS.forEach((book, i) => {
+    if (results[i].rating != null) book.rating = results[i].rating
+    if (results[i].reviews != null) book.reviews = results[i].reviews
+  })
   render()
 }
 

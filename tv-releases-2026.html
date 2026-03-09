@@ -1,0 +1,120 @@
+const API_KEY = "21322bdf6abf288ae15aa6a97caf66ae";
+
+const resultsBody = document.getElementById("resultsBody");
+const platformFilter = document.getElementById("platformFilter");
+const monthFilter = document.getElementById("monthFilter");
+const popularityFilter = document.getElementById("popularityFilter");
+const popularityValue = document.getElementById("popularityValue");
+const qualityFilter = document.getElementById("qualityFilter");
+
+const countLabel = document.getElementById("countLabel");
+const rangeLabel = document.getElementById("rangeLabel");
+
+let shows = [];
+
+async function fetchShows() {
+
+  const response = await fetch(
+    `https://api.themoviedb.org/3/trending/tv/week?api_key=${API_KEY}`
+  );
+
+  const data = await response.json();
+
+  shows = data.results.map(show => {
+
+    const releaseDate = show.first_air_date || "";
+    const month = releaseDate.startsWith("2026-01")
+      ? "January"
+      : releaseDate.startsWith("2026-02")
+      ? "February"
+      : "Other";
+
+    return {
+      title: show.name,
+      release: releaseDate,
+      month: month,
+      platform: show.origin_country.join(", "),
+      imdb: show.vote_average,
+      rtCritic: "-",
+      rtAudience: "-",
+      popularity: Math.round(show.popularity)
+    };
+  });
+
+  shows = shows
+    .filter(s => s.month === "January" || s.month === "February")
+    .sort((a, b) => b.popularity - a.popularity);
+
+  buildPlatformFilter();
+  render();
+}
+
+function buildPlatformFilter() {
+
+  const platforms = new Set();
+
+  shows.forEach(s => platforms.add(s.platform));
+
+  platforms.forEach(p => {
+
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+
+    platformFilter.appendChild(opt);
+
+  });
+}
+
+function render() {
+
+  let filtered = [...shows];
+
+  const month = monthFilter.value;
+  const platform = platformFilter.value;
+  const minPopularity = Number(popularityFilter.value);
+
+  popularityValue.textContent = minPopularity;
+
+  if (month !== "all")
+    filtered = filtered.filter(s => s.month === month);
+
+  if (platform !== "all")
+    filtered = filtered.filter(s => s.platform === platform);
+
+  filtered = filtered.filter(s => s.popularity >= minPopularity);
+
+  if (qualityFilter.checked)
+    filtered = filtered.filter(s => s.imdb >= 6.5);
+
+  resultsBody.innerHTML = "";
+
+  filtered.forEach((s, i) => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${s.title}</td>
+      <td>${s.release}</td>
+      <td>${s.platform}</td>
+      <td>${s.rtCritic}</td>
+      <td>${s.rtAudience}</td>
+      <td>${s.imdb}</td>
+      <td>${s.popularity}</td>
+    `;
+
+    resultsBody.appendChild(tr);
+
+  });
+
+  countLabel.textContent = `${filtered.length} shows`;
+
+}
+
+monthFilter.addEventListener("change", render);
+platformFilter.addEventListener("change", render);
+popularityFilter.addEventListener("input", render);
+qualityFilter.addEventListener("change", render);
+
+fetchShows();
