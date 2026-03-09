@@ -176,9 +176,6 @@ color:#15803d;
 let BOOKS=[]
 let filter="all"
 
-async function loadBooks(){
-  const res = await fetch("./books.json")
-  BOOKS = await res.json()
 async function fetchOpenLibraryData(title, author) {
   try {
     const q = encodeURIComponent(`${title} ${author}`)
