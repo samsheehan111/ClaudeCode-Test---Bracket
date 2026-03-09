@@ -146,10 +146,6 @@ background:#eff6ff;
 color:#1d4ed8;
 }
 
-.libby{
-background:#f0fdf4;
-color:#15803d;
-}
 
 </style>
 </head>
@@ -157,7 +153,7 @@ color:#15803d;
 <body>
 
 <h1>📚 Oprah & Reese Book Club Tracker</h1>
-<div class="subtitle">Explore book club picks and jump straight to SF Library or Libby</div>
+<div class="subtitle">Explore book club picks and jump straight to SF Library</div>
 
 <div class="controls">
 
@@ -264,11 +260,6 @@ ${book.club==="oprah"?"Oprah's Book Club":"Reese's Book Club"}
 <button class="link lib"
 onclick="window.open('${book.sf_url}','_blank')">
 SF Library
-</button>
-
-<button class="link libby"
-onclick="window.open('https://libbyapp.com/search/sfpl/search/query-${encodeURIComponent(book.title)}','_blank')">
-Libby
 </button>
 
 </div>
