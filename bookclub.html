@@ -176,6 +176,9 @@ color:#15803d;
 let BOOKS=[]
 let filter="all"
 
+async function loadBooks(){
+  const res = await fetch("./books.json")
+  BOOKS = await res.json()
 async function fetchOpenLibraryData(title, author) {
   try {
     const q = encodeURIComponent(`${title} ${author}`)
@@ -252,7 +255,7 @@ card.innerHTML=`
 <div class="author">${book.author}</div>
 
 <div class="rating">
-${book.rating != null ? `⭐ ${book.rating} • ${(book.reviews??0).toLocaleString()} ratings` : `Coming soon`}
+${book.rating != null ? `⭐ ${book.rating} • ${(book.reviews??0).toLocaleString()} Goodreads ratings` : `Coming soon`}
 </div>
 
 <div class="club ${book.club}">
