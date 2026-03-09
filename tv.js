@@ -20,15 +20,23 @@ Disney:"https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg"
 
 async function loadShows(){
 
-const trending = await fetch(
-`https://api.themoviedb.org/3/trending/tv/week?api_key=${API_KEY}`
+let allResults=[];
+
+for(let page=1; page<=10; page++){
+
+const res = await fetch(
+`https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&first_air_date_year=2026&sort_by=popularity.desc&page=${page}`
 );
 
-const data = await trending.json();
+const data = await res.json();
+
+allResults = allResults.concat(data.results);
+
+}
 
 const detailed = await Promise.all(
 
-data.results.map(async show=>{
+allResults.map(async show=>{
 
 const details = await fetch(
 `https://api.themoviedb.org/3/tv/${show.id}?api_key=${API_KEY}`
@@ -66,12 +74,11 @@ title:show.name,
 poster:show.poster_path,
 release:show.first_air_date,
 rating:show.vote_average,
-popularity:show.popularity,
 service:service,
 trailer:trailer,
 
 demand:Math.round(
-(show.popularity*0.6)+(show.vote_average*10*0.4)
+(show.popularity*0.7)+(show.vote_average*10*0.3)
 ),
 
 rt:Math.floor(60+Math.random()*35)
@@ -82,7 +89,7 @@ rt:Math.floor(60+Math.random()*35)
 
 );
 
-shows=detailed.filter(s=>s.release && s.release.startsWith("2026"));
+shows=detailed;
 
 populateServices();
 
@@ -148,10 +155,6 @@ const logo = logos[show.service]
 ? `<img class="logo" src="${logos[show.service]}">`
 : show.service;
 
-const trend = show.popularity>100
-? `<span class="trending">🔥</span>`
-: "";
-
 const trailer = show.trailer
 ? `<a href="${show.trailer}" target="_blank"><button>Watch</button></a>`
 : "";
@@ -164,7 +167,7 @@ row.innerHTML=`
 
 <td><img class="poster" src="${poster}"></td>
 
-<td>${show.title} ${trend}</td>
+<td>${show.title}</td>
 
 <td>${show.release}</td>
 
