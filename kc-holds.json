@@ -1,5 +1,5 @@
 {
-  "updated": "2026-03-08T13:53:16Z",
+  "updated": "2026-03-09T05:13:46Z",
   "books": {
     "o24-01": {
       "status": "unknown",
@@ -62,8 +62,8 @@
       "available": false
     },
     "o25-07": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 502",
       "available": false
     },
     "o25-08": {
@@ -172,41 +172,6 @@
       "available": false
     },
     "r25-09": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "o25-10": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "o26-01": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "r25-10": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "r25-11": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "r26-01": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "r26-02": {
-      "status": "unknown",
-      "text": "\u2014",
-      "available": false
-    },
-    "r26-03": {
       "status": "unknown",
       "text": "\u2014",
       "available": false
