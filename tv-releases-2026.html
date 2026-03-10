@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2026 TV Releases — What to Watch</title>
+  <title>2025–2026 TV Releases — What to Watch</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -28,7 +28,7 @@
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           📺 <span class="text-cyan-400">2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">Jan – Feb 2026 · Top 100 by IMDb Rating</p>
+        <p class="text-xs text-gray-500 mt-0.5">Jan 2025 – Mar 2026 · Top 100 by Rating</p>
       </div>
       <span id="countLabel"
         class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
@@ -58,8 +58,23 @@
           <select id="monthFilter"
             class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition-all">
             <option value="all">All Months</option>
-            <option value="01">January</option>
-            <option value="02">February</option>
+            <option value="2025" disabled style="color:#4b5563;font-weight:700">── 2025 ──</option>
+            <option value="2025-01">Jan 2025</option>
+            <option value="2025-02">Feb 2025</option>
+            <option value="2025-03">Mar 2025</option>
+            <option value="2025-04">Apr 2025</option>
+            <option value="2025-05">May 2025</option>
+            <option value="2025-06">Jun 2025</option>
+            <option value="2025-07">Jul 2025</option>
+            <option value="2025-08">Aug 2025</option>
+            <option value="2025-09">Sep 2025</option>
+            <option value="2025-10">Oct 2025</option>
+            <option value="2025-11">Nov 2025</option>
+            <option value="2025-12">Dec 2025</option>
+            <option value="2026" disabled style="color:#4b5563;font-weight:700">── 2026 ──</option>
+            <option value="2026-01">Jan 2026</option>
+            <option value="2026-02">Feb 2026</option>
+            <option value="2026-03">Mar 2026</option>
           </select>
         </div>
 
@@ -176,18 +191,22 @@
       setStatus('Fetching 2026 shows…');
 
       try {
-        // Phase 1 — Discover US Jan–Feb 2026 shows, sorted by popularity
+        // Phase 1 — Discover US shows Jan 2025–now, sorted by popularity
+        const today = new Date().toISOString().slice(0, 10);
         const base = '/discover/tv?with_origin_country=US&with_original_language=en' +
-                     '&first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc';
+                     `&first_air_date.gte=2025-01-01&first_air_date.lte=${today}&sort_by=popularity.desc`;
         const pages = await Promise.all([
           tmdb(`${base}&page=1`),
           tmdb(`${base}&page=2`),
           tmdb(`${base}&page=3`),
+          tmdb(`${base}&page=4`),
+          tmdb(`${base}&page=5`),
+          tmdb(`${base}&page=6`),
         ]);
 
         const raw = pages
           .flatMap(p => p.results || [])
-          .filter(s => s.first_air_date && /^2026-0[12]/.test(s.first_air_date));
+          .filter(s => s.first_air_date && s.first_air_date >= '2025-01-01' && s.first_air_date <= today);
 
         const seen = new Set();
         allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
@@ -294,8 +313,7 @@
       const names = new Set();
       allShows.forEach(s =>
         (s._providers || []).forEach(p => {
-          const known = PROVIDERS[p.provider_id];
-          names.add(known ? known.name : p.provider_name);
+          if (PROVIDERS[p.provider_id]) names.add(PROVIDERS[p.provider_id].name);
         })
       );
 
@@ -354,11 +372,11 @@
                     : rtNum >= 60   ? '#fb923c'
                                     : '#f87171';
 
-      const badgesHtml = providers.slice(0, 3).map(p => {
-        const s = PROVIDERS[p.provider_id] || DEFAULT_STYLE;
-        const name = s.name || p.provider_name;
+      const knownProviders = providers.filter(p => PROVIDERS[p.provider_id]);
+      const badgesHtml = knownProviders.slice(0, 3).map(p => {
+        const s = PROVIDERS[p.provider_id];
         return `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
-          background:${s.bg};border:1px solid ${s.border};color:${s.text};white-space:nowrap">${name}</span>`;
+          background:${s.bg};border:1px solid ${s.border};color:${s.text};white-space:nowrap">${s.name}</span>`;
       }).join('') || `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;
         background:#1f293766;border:1px solid #374151;color:#9ca3af">Streaming TBD</span>`;
 
@@ -493,7 +511,7 @@
       document.getElementById('ratingValue').textContent = minRat.toFixed(1);
 
       const filtered = allShows
-        .filter(s => month === 'all' || (s.first_air_date || '').slice(5, 7) === month)
+        .filter(s => month === 'all' || (s.first_air_date || '').slice(0, 7) === month)
         .filter(s => {
           if (platform === 'all') return true;
           return (s._providers || []).some(p => {
