@@ -124,7 +124,7 @@
   </main>
 
   <footer class="border-t border-gray-800/50 py-8 text-center text-xs text-gray-700">
-    Ratings sourced from IMDb via OMDb API
+    Ratings sourced from TMDB · IMDb via OMDb API
   </footer>
 
   <script>
@@ -192,6 +192,11 @@
         const seen = new Set();
         allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 
+        // Pre-populate TMDB rating as fallback (available immediately from discover API)
+        allShows.forEach(s => {
+          s._tmdbRating = (s.vote_average && s.vote_count > 5) ? s.vote_average : null;
+        });
+
         hideSkeletons();
         render();
         setStatus(`Loading streaming info & IMDb IDs for ${allShows.length} shows…`);
@@ -256,12 +261,14 @@
           }
         });
 
-        // Sort: IMDb-rated shows first (by rating desc), unrated last (by popularity desc)
+        // Sort: IMDb first, then TMDB rating, then popularity
         allShows = allShows
           .sort((a, b) => {
-            if (a._imdbRating != null && b._imdbRating != null) return b._imdbRating - a._imdbRating;
-            if (a._imdbRating != null) return -1;
-            if (b._imdbRating != null) return 1;
+            const ra = a._imdbRating ?? a._tmdbRating ?? 0;
+            const rb = b._imdbRating ?? b._tmdbRating ?? 0;
+            if (ra && rb) return rb - ra;
+            if (ra) return -1;
+            if (rb) return 1;
             return b.popularity - a.popularity;
           })
           .slice(0, 100);
@@ -335,7 +342,8 @@
       const style = getStyle(providers);
 
       // Provider badges (max 3)
-      const rating10  = show._imdbRating ?? 0;
+      const rating10  = show._imdbRating ?? show._tmdbRating ?? 0;
+      const ratingSource = show._imdbRating != null ? 'IMDb' : 'TMDB';
       const popularity100 = Math.min(100, Math.round(show.popularity));
 
       // RT score from OMDb
@@ -385,13 +393,13 @@
             background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
             padding:3px 10px;font-size:12px;font-weight:700;color:#fff;
             border:1px solid rgba(255,255,255,.15)">#${rank}</div>
-          <!-- Score -->
-          <div style="position:absolute;top:10px;right:12px;
+          <!-- Score (hidden when no rating) -->
+          ${rating10 > 0 ? `<div style="position:absolute;top:10px;right:12px;
             background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
             padding:3px 10px;font-size:12px;font-weight:700;color:#f5c518;
             border:1px solid rgba(245,197,24,.3)">
-            ⭐ ${rating10 > 0 ? rating10.toFixed(1) : 'NR'}
-          </div>
+            ⭐ ${rating10.toFixed(1)}
+          </div>` : ''}
           <!-- Platform + quality badges -->
           <div style="position:absolute;bottom:10px;left:10px;right:10px;
             display:flex;flex-wrap:wrap;gap:4px;align-items:center">
@@ -424,7 +432,7 @@
                 <span style="font-size:10px;color:#6b7280;font-weight:600">/10</span>
                 <span style="margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;
                   border-radius:3px;background:#1a120088;color:#f5c518;
-                  border:1px solid #f5c51844">IMDb</span>
+                  border:1px solid #f5c51844">${ratingSource}</span>
               </div>
               <div style="font-size:12px">${stars(rating10)}</div>
             </div>
@@ -493,13 +501,15 @@
             return (known ? known.name : p.provider_name) === platform;
           });
         })
-        .filter(s => (s._imdbRating ?? 0) >= minRat)
-        .filter(s => !voted || s._imdbRating != null)
+        .filter(s => (s._imdbRating ?? s._tmdbRating ?? 0) >= minRat)
+        .filter(s => !voted || (s._imdbRating ?? s._tmdbRating) != null)
         .filter(s => !search || s.name.toLowerCase().includes(search))
         .sort((a, b) => {
-          if (a._imdbRating != null && b._imdbRating != null) return b._imdbRating - a._imdbRating;
-          if (a._imdbRating != null) return -1;
-          if (b._imdbRating != null) return 1;
+          const ra = a._imdbRating ?? a._tmdbRating ?? 0;
+          const rb = b._imdbRating ?? b._tmdbRating ?? 0;
+          if (ra && rb) return rb - ra;
+          if (ra) return -1;
+          if (rb) return 1;
           return b.popularity - a.popularity;
         });
 
