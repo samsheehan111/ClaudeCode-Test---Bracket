@@ -28,7 +28,7 @@
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           📺 <span class="text-cyan-400">2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Popularity</p>
+        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Viewer Popularity</p>
       </div>
       <span id="countLabel"
         class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
@@ -72,20 +72,20 @@
           </select>
         </div>
 
-        <!-- Min TMDB Rating -->
+        <!-- Min Rating -->
         <div class="min-w-[160px]">
           <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">
-            Min Rating: <span id="ratingValue" class="text-cyan-400 font-bold">0</span>
+            Min Rating: <span id="ratingValue" class="text-yellow-400 font-bold">0</span>
           </label>
           <input type="range" id="ratingFilter" min="0" max="9" value="0" step="0.5" class="w-full">
         </div>
 
-        <!-- Voted Only -->
+        <!-- Rated Only -->
         <label class="flex items-center gap-2.5 cursor-pointer select-none pb-0.5 min-w-fit">
           <input type="checkbox" id="qualityFilter" class="w-4 h-4 rounded cursor-pointer">
           <div>
-            <p class="text-sm text-gray-300 font-medium leading-none">Voted Shows Only</p>
-            <p class="text-xs text-gray-600 mt-0.5">50+ ratings on TMDB</p>
+            <p class="text-sm text-gray-300 font-medium leading-none">Rated Shows Only</p>
+            <p class="text-xs text-gray-600 mt-0.5">50+ community ratings</p>
           </div>
         </label>
 
@@ -301,7 +301,6 @@
         : `<span style="font-size:72px;font-weight:900;color:${style.text}1a;user-select:none;line-height:1">${show.name[0]}</span>`;
 
       const popularity100 = Math.min(100, Math.round(show.popularity));
-      const votes100 = Math.min(100, Math.round((show.vote_count / 500) * 100));
       const rating10 = show.vote_average;
 
       return `
@@ -349,34 +348,33 @@
             <p style="font-size:11px;color:#6b7280;margin:0">${fmtDate(show.first_air_date)}</p>
           </div>
 
-          <div>${stars(rating10)}</div>
-
-          <div style="display:flex;flex-direction:column;gap:9px;flex:1">
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">TMDB Score</span>
-                <span style="color:#f87171;font-weight:700">${rating10 > 0 ? rating10.toFixed(1) + '/10' : '—'}</span>
+          <!-- IMDb-style rating block -->
+          <div style="
+            background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;
+            padding:10px 12px;display:flex;align-items:center;gap:12px">
+            <div style="text-align:center;min-width:48px">
+              <div style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
+                ${rating10 > 0 ? rating10.toFixed(1) : '—'}
               </div>
-              ${scoreBar(rating10 * 10, '#ef4444')}
+              <div style="font-size:9px;color:#6b7280;font-weight:600;letter-spacing:.05em;margin-top:2px">/10</div>
             </div>
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">Votes</span>
-                <span style="color:#fb923c;font-weight:700">${show.vote_count.toLocaleString()}</span>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:600;color:#d1d5db;margin-bottom:4px">
+                ${stars(rating10)}
               </div>
-              ${scoreBar(votes100, '#f97316')}
-            </div>
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">Popularity</span>
-                <span style="color:#22d3ee;font-weight:700">${show.popularity.toFixed(1)}</span>
+              <div style="font-size:10px;color:#6b7280">
+                ${show.vote_count > 0 ? show.vote_count.toLocaleString() + ' ratings' : 'Not yet rated'}
               </div>
-              ${scoreBar(popularity100, '#22d3ee')}
             </div>
+          </div>
 
+          <!-- Popularity bar -->
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+              <span style="color:#9ca3af">🔥 Popularity Rank</span>
+              <span style="color:#22d3ee;font-weight:700">#${rank}</span>
+            </div>
+            ${scoreBar(popularity100, '#22d3ee')}
           </div>
         </div>
       </div>`;
