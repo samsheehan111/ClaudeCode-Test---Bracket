@@ -5,41 +5,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>2026 TV Releases — What to Watch</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Inter', system-ui, sans-serif; }
     input[type="range"] { accent-color: #22d3ee; }
     input[type="checkbox"] { accent-color: #22d3ee; }
     select option { background: #1f2937; }
-    .card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-    .card:hover { transform: translateY(-5px); box-shadow: 0 24px 48px rgba(0,0,0,0.6); }
+    .card { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 28px 56px rgba(0,0,0,0.65); }
     #emptyState { display: none; }
+    @keyframes shimmer { 0%,100% { opacity:.35 } 50% { opacity:.7 } }
+    .skeleton { animation: shimmer 1.6s ease-in-out infinite; }
   </style>
 </head>
 
 <body class="bg-gray-950 text-gray-100 min-h-screen">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="sticky top-0 z-50 bg-gray-950/90 backdrop-blur-md border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           📺 <span class="text-cyan-400">2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">January – February 2026 · Ranked by Popularity Score</p>
+        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Popularity</p>
       </div>
       <span id="countLabel"
         class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
-        15 shows
+        Loading…
       </span>
     </div>
   </header>
 
-  <!-- ── Filters ──────────────────────────────────────────────────────────── -->
+  <!-- ── Filters ────────────────────────────────────────────────────────── -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
     <div class="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-
       <div class="flex flex-wrap gap-4 items-end">
 
         <!-- Search -->
@@ -58,8 +58,8 @@
           <select id="monthFilter"
             class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition-all">
             <option value="all">All Months</option>
-            <option value="January">January</option>
-            <option value="February">February</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
           </select>
         </div>
 
@@ -72,39 +72,42 @@
           </select>
         </div>
 
-        <!-- Popularity Slider -->
-        <div class="min-w-[200px]">
+        <!-- Min TMDB Rating -->
+        <div class="min-w-[160px]">
           <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">
-            Min Score: <span id="popularityValue" class="text-cyan-400 font-bold">0</span>
+            Min Rating: <span id="ratingValue" class="text-cyan-400 font-bold">0</span>
           </label>
-          <input type="range" id="popularityFilter" min="0" max="100" value="0" step="1" class="w-full">
+          <input type="range" id="ratingFilter" min="0" max="9" value="0" step="0.5" class="w-full">
         </div>
 
-        <!-- Quality Toggle -->
+        <!-- Voted Only -->
         <label class="flex items-center gap-2.5 cursor-pointer select-none pb-0.5 min-w-fit">
           <input type="checkbox" id="qualityFilter" class="w-4 h-4 rounded cursor-pointer">
           <div>
-            <p class="text-sm text-gray-300 font-medium leading-none">High Quality Only</p>
-            <p class="text-xs text-gray-600 mt-0.5">IMDb 6.5+ &amp; RT Audience 65%+</p>
+            <p class="text-sm text-gray-300 font-medium leading-none">Voted Shows Only</p>
+            <p class="text-xs text-gray-600 mt-0.5">50+ ratings on TMDB</p>
           </div>
         </label>
 
       </div>
 
-      <!-- Bottom bar -->
+      <!-- Status bar -->
       <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-800">
-        <span id="rangeLabel" class="text-xs text-gray-600">Date range: Jan 1 – Feb 28, 2026</span>
+        <span id="statusLabel" class="text-xs text-gray-600">Fetching live data from TMDB…</span>
         <button id="resetBtn" class="text-xs text-cyan-500 hover:text-cyan-300 transition-colors font-medium">
           ↺ Reset filters
         </button>
       </div>
-
     </div>
   </div>
 
-  <!-- ── Card Grid ─────────────────────────────────────────────────────────── -->
+  <!-- ── Cards ──────────────────────────────────────────────────────────── -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
 
+    <!-- Skeleton loader -->
+    <div id="skeletonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+
+    <!-- Live cards -->
     <div id="cardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
 
     <!-- Empty state -->
@@ -121,201 +124,257 @@
   </main>
 
   <footer class="border-t border-gray-800/50 py-8 text-center text-xs text-gray-700">
-    2026 TV Show Tracker · Ratings data: Jan–Feb 2026 catalog
+    Data sourced from
+    <a href="https://www.themoviedb.org" target="_blank" class="text-cyan-800 hover:text-cyan-600 transition-colors">
+      TMDB
+    </a>
+    · This product uses the TMDB API but is not endorsed or certified by TMDB.
   </footer>
 
   <script>
-    // ── Static show data ─────────────────────────────────────────────────────
-    const shows = [
-      { title: "Shadow Protocol",     releaseDate: "2026-01-04", month: "January",  platforms: ["Netflix"],     rtCritic: 82, rtAudience: 79, imdb: 7.6, tmdbPopularity: 86, votes: 18200 },
-      { title: "Neon District",       releaseDate: "2026-01-08", month: "January",  platforms: ["Max"],         rtCritic: 75, rtAudience: 72, imdb: 7.1, tmdbPopularity: 64, votes: 9300  },
-      { title: "Evergreen Fire",      releaseDate: "2026-01-10", month: "January",  platforms: ["Apple TV+"],   rtCritic: 91, rtAudience: 88, imdb: 8.3, tmdbPopularity: 73, votes: 12400 },
-      { title: "Last Run to Phoenix", releaseDate: "2026-01-12", month: "January",  platforms: ["Prime Video"], rtCritic: 68, rtAudience: 66, imdb: 6.8, tmdbPopularity: 58, votes: 6900  },
-      { title: "Harborline",          releaseDate: "2026-01-16", month: "January",  platforms: ["Hulu"],        rtCritic: 84, rtAudience: 77, imdb: 7.5, tmdbPopularity: 61, votes: 8400  },
-      { title: "Alloy Hearts",        releaseDate: "2026-01-22", month: "January",  platforms: ["Disney+"],     rtCritic: 63, rtAudience: 61, imdb: 6.2, tmdbPopularity: 52, votes: 5100  },
-      { title: "Crimson Ledger",      releaseDate: "2026-01-28", month: "January",  platforms: ["Peacock"],     rtCritic: 88, rtAudience: 85, imdb: 8.0, tmdbPopularity: 70, votes: 10500 },
-      { title: "The Sixth Orbit",     releaseDate: "2026-02-02", month: "February", platforms: ["Netflix"],     rtCritic: 93, rtAudience: 89, imdb: 8.4, tmdbPopularity: 94, votes: 24500 },
-      { title: "Paper Monarch",       releaseDate: "2026-02-05", month: "February", platforms: ["Prime Video"], rtCritic: 74, rtAudience: 70, imdb: 7.0, tmdbPopularity: 62, votes: 7600  },
-      { title: "Rose & Iron",         releaseDate: "2026-02-07", month: "February", platforms: ["Max"],         rtCritic: 86, rtAudience: 80, imdb: 7.8, tmdbPopularity: 69, votes: 9800  },
-      { title: "The Quiet Coast",     releaseDate: "2026-02-11", month: "February", platforms: ["Hulu"],        rtCritic: 79, rtAudience: 76, imdb: 7.3, tmdbPopularity: 57, votes: 6600  },
-      { title: "Beneath Saturn",      releaseDate: "2026-02-14", month: "February", platforms: ["Apple TV+"],   rtCritic: 90, rtAudience: 87, imdb: 8.2, tmdbPopularity: 77, votes: 13300 },
-      { title: "Rookie Saints",       releaseDate: "2026-02-18", month: "February", platforms: ["Disney+"],     rtCritic: 71, rtAudience: 68, imdb: 6.9, tmdbPopularity: 60, votes: 7400  },
-      { title: "Frostwire",           releaseDate: "2026-02-21", month: "February", platforms: ["Paramount+"],  rtCritic: 66, rtAudience: 62, imdb: 6.4, tmdbPopularity: 49, votes: 4300  },
-      { title: "Cinder Lake",         releaseDate: "2026-02-25", month: "February", platforms: ["Peacock"],     rtCritic: 85, rtAudience: 82, imdb: 7.9, tmdbPopularity: 68, votes: 8800  },
-    ];
+    // ── Config ───────────────────────────────────────────────────────────────
+    const API_KEY  = '21322bdf6abf288ae15aa6a97caf66ae';
+    const TMDB     = 'https://api.themoviedb.org/3';
+    const IMG_SM   = 'https://image.tmdb.org/t/p/w342';   // card poster
+    const IMG_LG   = 'https://image.tmdb.org/t/p/w780';   // fallback / bigger
 
-    // ── Platform color palette ────────────────────────────────────────────────
-    const PLATFORM_STYLES = {
-      "Netflix":      { g1: "#1a0000", g2: "#3d0000", text: "#ff6b6b", badgeBg: "#4d000066", badgeBorder: "#7f0000" },
-      "Max":          { g1: "#000933", g2: "#001266", text: "#6b9bff", badgeBg: "#001a7a44", badgeBorder: "#003acc" },
-      "Apple TV+":    { g1: "#0d0d0d", g2: "#1c1c1e", text: "#d1d5db", badgeBg: "#1a1a1a66", badgeBorder: "#3a3a3c" },
-      "Prime Video":  { g1: "#001b33", g2: "#003566", text: "#6bc5ff", badgeBg: "#003a7a44", badgeBorder: "#0077cc" },
-      "Hulu":         { g1: "#002b1a", g2: "#004428", text: "#1ce783", badgeBg: "#004d2e44", badgeBorder: "#008844" },
-      "Disney+":      { g1: "#000b2e", g2: "#001566", text: "#5599ff", badgeBg: "#00226644", badgeBorder: "#003da6" },
-      "Peacock":      { g1: "#2b1100", g2: "#522200", text: "#ff9933", badgeBg: "#4d200044", badgeBorder: "#884400" },
-      "Paramount+":   { g1: "#00001a", g2: "#000033", text: "#8888ff", badgeBg: "#00003344", badgeBorder: "#2222aa" },
+    // ── Known streaming providers (US TMDB IDs → style) ─────────────────────
+    const PROVIDERS = {
+      8:    { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
+      9:    { name: 'Prime Video',   g1: '#001929', g2: '#003060', text: '#6bc5ff', border: '#0060b0', bg: '#003a7a44' },
+      337:  { name: 'Disney+',       g1: '#000826', g2: '#001460', text: '#5599ff', border: '#003da6', bg: '#00226644' },
+      15:   { name: 'Hulu',          g1: '#002818', g2: '#004228', text: '#1ce783', border: '#008844', bg: '#004d2e44' },
+      1899: { name: 'Max',           g1: '#000830', g2: '#001165', text: '#7aabff', border: '#0030bb', bg: '#001a7a44' },
+      2552: { name: 'Apple TV+',     g1: '#0c0c0c', g2: '#1a1a1c', text: '#d1d5db', border: '#3a3a3c', bg: '#1a1a1a66' },
+      386:  { name: 'Peacock',       g1: '#280f00', g2: '#501f00', text: '#ff9933', border: '#884400', bg: '#4d200044' },
+      531:  { name: 'Paramount+',    g1: '#000018', g2: '#000030', text: '#8888ff', border: '#2222aa', bg: '#00003344' },
+      43:   { name: 'Starz',         g1: '#0c0018', g2: '#1a0030', text: '#cc99ff', border: '#6633aa', bg: '#33006644' },
+      35:   { name: 'HBO',           g1: '#180018', g2: '#2c003e', text: '#dd55ff', border: '#7700cc', bg: '#44006644' },
+      37:   { name: 'Showtime',      g1: '#2a0000', g2: '#550000', text: '#ff4444', border: '#990000', bg: '#66000044' },
+      175:  { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' }, // Netflix Kids alias
+      283:  { name: 'Crunchyroll',   g1: '#2b0d00', g2: '#4a1800', text: '#ff6a00', border: '#aa3300', bg: '#4d1a0044' },
+      73:   { name: 'AMC+',          g1: '#001a1a', g2: '#003535', text: '#00cccc', border: '#006666', bg: '#00444444' },
     };
 
-    function getPlatformStyle(name) {
-      return PLATFORM_STYLES[name] || { g1: "#111827", g2: "#1f2937", text: "#9ca3af", badgeBg: "#1f293766", badgeBorder: "#374151" };
+    const DEFAULT_STYLE = { g1: '#111827', g2: '#1f2937', text: '#9ca3af', border: '#374151', bg: '#1f293766' };
+
+    // ── State ────────────────────────────────────────────────────────────────
+    let allShows = [];  // enriched show objects
+
+    // ── TMDB fetch helpers ───────────────────────────────────────────────────
+    async function tmdb(path) {
+      const sep = path.includes('?') ? '&' : '?';
+      const res = await fetch(`${TMDB}${path}${sep}api_key=${API_KEY}`);
+      if (!res.ok) throw new Error(`TMDB ${res.status}: ${path}`);
+      return res.json();
     }
 
-    // ── Scoring algorithm ────────────────────────────────────────────────────
-    function popularityScore(show) {
-      const score =
-        show.tmdbPopularity * 0.35 +
-        show.imdb * 10 * 0.25 +
-        show.rtAudience * 0.2 +
-        show.rtCritic * 0.15 +
-        Math.log10(show.votes + 1) * 10 * 0.05;
-      return Math.max(0, Math.min(100, Number(score.toFixed(1))));
+    // ── Main data fetch ──────────────────────────────────────────────────────
+    async function fetchShows() {
+      showSkeletons(8);
+      setStatus('Fetching 2026 shows from TMDB…');
+
+      try {
+        // 1. Discover TV shows that first aired Jan–Feb 2026, sorted by popularity
+        const pages = await Promise.all([
+          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=1'),
+          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=2'),
+          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=3'),
+        ]);
+
+        const raw = pages
+          .flatMap(p => p.results || [])
+          .filter(s => s.first_air_date && /^2026-0[12]/.test(s.first_air_date));
+
+        // Deduplicate by id
+        const seen = new Set();
+        allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
+
+        // 2. Render cards immediately with available data (no providers yet)
+        hideSkeletons();
+        render();
+        setStatus(`Fetching streaming info for ${allShows.length} shows…`);
+
+        // 3. Fetch watch/providers for all shows in parallel
+        const providerData = await Promise.allSettled(
+          allShows.map(s =>
+            tmdb(`/tv/${s.id}/watch/providers`)
+              .then(d => ({ id: s.id, flatrate: (d.results?.US?.flatrate || []) }))
+              .catch(() => ({ id: s.id, flatrate: [] }))
+          )
+        );
+
+        // Attach provider info to each show
+        providerData.forEach(r => {
+          if (r.status === 'fulfilled') {
+            const show = allShows.find(s => s.id === r.value.id);
+            if (show) show._providers = r.value.flatrate;
+          }
+        });
+
+        buildPlatformFilter();
+        render();
+        setStatus(`${allShows.length} shows · Live from TMDB · Jan–Feb 2026`);
+
+      } catch (err) {
+        hideSkeletons();
+        setStatus(`⚠ Error loading data: ${err.message}`);
+        console.error(err);
+      }
     }
 
-    function passesQuality(show) {
-      return show.imdb >= 6.5 && show.rtAudience >= 65;
+    // ── Platform filter dropdown ──────────────────────────────────────────────
+    function buildPlatformFilter() {
+      const sel = document.getElementById('platformFilter');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="all">All Platforms</option>';
+
+      const names = new Set();
+      allShows.forEach(s =>
+        (s._providers || []).forEach(p => {
+          const known = PROVIDERS[p.provider_id];
+          names.add(known ? known.name : p.provider_name);
+        })
+      );
+
+      [...names].sort().forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = opt.textContent = name;
+        sel.appendChild(opt);
+      });
+
+      sel.value = names.has(prev) ? prev : 'all';
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
-    function scoreBar(value, max, color) {
-      const pct = Math.round((value / max) * 100);
-      return `
-        <div style="height:4px;background:#374151;border-radius:9999px;overflow:hidden;margin-top:3px">
-          <div style="height:100%;width:${pct}%;background:${color};border-radius:9999px;transition:width 0.4s ease"></div>
-        </div>`;
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function getStyle(providers) {
+      for (const p of (providers || [])) {
+        if (PROVIDERS[p.provider_id]) return PROVIDERS[p.provider_id];
+      }
+      return DEFAULT_STYLE;
     }
 
-    function imdbStars(rating) {
-      const filled = Math.round(rating / 2);
+    function scoreBar(pct, color) {
+      const w = Math.min(100, Math.max(0, Math.round(pct)));
+      return `<div style="height:4px;background:#374151;border-radius:9999px;overflow:hidden;margin-top:3px">
+        <div style="height:100%;width:${w}%;background:${color};border-radius:9999px;transition:width .4s ease"></div>
+      </div>`;
+    }
+
+    function stars(rating) {
+      const n = Math.round(rating / 2);
       return Array.from({ length: 5 }, (_, i) =>
-        `<span style="font-size:14px;color:${i < filled ? '#fbbf24' : '#374151'}">★</span>`
+        `<span style="font-size:13px;color:${i < n ? '#fbbf24' : '#374151'}">★</span>`
       ).join('');
     }
 
-    function formatDate(d) {
+    function fmtDate(d) {
+      if (!d) return '—';
       const [, m, day] = d.split('-');
-      return `${['', 'Jan', 'Feb'][+m]} ${+day}, 2026`;
+      return `${['', 'Jan', 'Feb'][+m] || '?'} ${+day}, 2026`;
     }
 
-    // ── Platform filter options ──────────────────────────────────────────────
-    function initPlatformFilter() {
-      const all = [...new Set(shows.flatMap(s => s.platforms))].sort();
-      all.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = opt.textContent = name;
-        platformFilter.appendChild(opt);
-      });
-    }
-
-    // ── Card HTML builder ────────────────────────────────────────────────────
+    // ── Card builder ──────────────────────────────────────────────────────────
     function buildCard(show, rank) {
-      const primary = getPlatformStyle(show.platforms[0]);
+      const providers = show._providers || [];
+      const style = getStyle(providers);
 
-      const badgesHtml = show.platforms.map(name => {
-        const s = getPlatformStyle(name);
-        return `<span style="
-          font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
-          background:${s.badgeBg};border:1px solid ${s.badgeBorder};color:${s.text};
-          white-space:nowrap;letter-spacing:0.02em">${name}</span>`;
-      }).join('');
+      // Provider badges (max 3)
+      const badgesHtml = providers.slice(0, 3).map(p => {
+        const s = PROVIDERS[p.provider_id] || DEFAULT_STYLE;
+        const name = s.name || p.provider_name;
+        return `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
+          background:${s.bg};border:1px solid ${s.border};color:${s.text};white-space:nowrap">${name}</span>`;
+      }).join('') || `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;
+        background:#1f293766;border:1px solid #374151;color:#9ca3af">Streaming TBD</span>`;
 
-      const topPickBadge = show.imdb >= 8.0 ? `
-        <span style="
-          font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
-          background:#15803d55;border:1px solid #166534;color:#4ade80;
-          white-space:nowrap">✓ Top Pick</span>` : '';
+      const topBadge = show.vote_average >= 8.0
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
+            background:#15803d55;border:1px solid #166534;color:#4ade80;white-space:nowrap">✓ Top Pick</span>`
+        : '';
 
-      const initial = show.title[0].toUpperCase();
+      // Poster image or gradient fallback
+      const posterHtml = show.poster_path
+        ? `<img src="${IMG_SM}${show.poster_path}" alt="${show.name.replace(/"/g, '&quot;')}" loading="lazy"
+             style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
+             onerror="this.style.display='none'">`
+        : `<span style="font-size:72px;font-weight:900;color:${style.text}1a;user-select:none;line-height:1">${show.name[0]}</span>`;
+
+      const popularity100 = Math.min(100, Math.round(show.popularity));
+      const votes100 = Math.min(100, Math.round((show.vote_count / 500) * 100));
+      const rating10 = show.vote_average;
 
       return `
       <div class="card" style="
-        background: linear-gradient(160deg, ${primary.g1}, ${primary.g2});
-        border: 1px solid ${primary.badgeBorder}66;
-        border-radius: 18px; overflow: hidden;
-        display: flex; flex-direction: column; cursor: default;">
+        border:1px solid ${style.border}55;border-radius:18px;overflow:hidden;
+        display:flex;flex-direction:column;cursor:default;
+        background:linear-gradient(160deg,${style.g1},${style.g2})">
 
-        <!-- Poster area -->
-        <div style="
-          position: relative; height: 160px;
-          background: linear-gradient(135deg, ${primary.g1}, ${primary.g2}cc);
-          display: flex; align-items: center; justify-content: center; overflow: hidden;">
-
-          <!-- Giant initial letter -->
-          <span style="
-            font-size: 88px; font-weight: 900; line-height: 1;
-            color: ${primary.text}18; user-select: none;
-            font-family: 'Inter', sans-serif;">${initial}</span>
-
-          <!-- Rank badge (top-left) -->
-          <div style="
-            position: absolute; top: 10px; left: 12px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-            border-radius: 8px; padding: 3px 10px;
-            font-size: 12px; font-weight: 700; color: #fff;
-            border: 1px solid rgba(255,255,255,0.15)">
-            #${rank}
+        <!-- Poster -->
+        <div style="position:relative;height:230px;overflow:hidden;
+          background:linear-gradient(135deg,${style.g1},${style.g2}bb);
+          display:flex;align-items:center;justify-content:center">
+          ${posterHtml}
+          <!-- dark overlay for text legibility -->
+          <div style="position:absolute;inset:0;background:linear-gradient(to bottom,
+            rgba(0,0,0,.35) 0%,transparent 45%,rgba(0,0,0,.75) 100%)"></div>
+          <!-- Rank -->
+          <div style="position:absolute;top:10px;left:12px;
+            background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
+            padding:3px 10px;font-size:12px;font-weight:700;color:#fff;
+            border:1px solid rgba(255,255,255,.15)">#${rank}</div>
+          <!-- Score -->
+          <div style="position:absolute;top:10px;right:12px;
+            background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
+            padding:3px 10px;font-size:12px;font-weight:700;color:#fbbf24;
+            border:1px solid rgba(251,191,36,.3)">
+            ⭐ ${rating10 > 0 ? rating10.toFixed(1) : 'NR'}
           </div>
-
-          <!-- IMDb score (top-right) -->
-          <div style="
-            position: absolute; top: 10px; right: 12px;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
-            border-radius: 8px; padding: 3px 10px;
-            font-size: 12px; font-weight: 700; color: #fbbf24;
-            border: 1px solid rgba(251,191,36,0.3)">
-            ⭐ ${show.imdb.toFixed(1)}
-          </div>
-
-          <!-- Platform + quality badges (bottom) -->
-          <div style="
-            position: absolute; bottom: 10px; left: 10px; right: 10px;
-            display: flex; flex-wrap: wrap; gap: 4px; align-items: center">
-            ${badgesHtml}
-            ${topPickBadge}
+          <!-- Platform + quality badges -->
+          <div style="position:absolute;bottom:10px;left:10px;right:10px;
+            display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+            ${badgesHtml}${topBadge}
           </div>
         </div>
 
-        <!-- Card body -->
-        <div style="
-          flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 10px;
-          background: rgba(0,0,0,0.25)">
+        <!-- Body -->
+        <div style="flex:1;padding:14px;display:flex;flex-direction:column;gap:10px;
+          background:rgba(0,0,0,.25)">
 
-          <!-- Title & date -->
           <div>
-            <h3 style="
-              font-size: 15px; font-weight: 700; color: #f9fafb; margin: 0 0 3px;
-              line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2;
-              -webkit-box-orient: vertical; overflow: hidden;">${show.title}</h3>
-            <p style="font-size: 11px; color: #6b7280; margin: 0">${formatDate(show.releaseDate)}</p>
+            <h3 style="font-size:15px;font-weight:700;color:#f9fafb;margin:0 0 3px;line-height:1.3;
+              display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+              ${show.name}
+            </h3>
+            <p style="font-size:11px;color:#6b7280;margin:0">${fmtDate(show.first_air_date)}</p>
           </div>
 
-          <!-- IMDb star row -->
-          <div>${imdbStars(show.imdb)}</div>
+          <div>${stars(rating10)}</div>
 
-          <!-- Score bars -->
-          <div style="display: flex; flex-direction: column; gap: 9px; flex: 1">
+          <div style="display:flex;flex-direction:column;gap:9px;flex:1">
 
             <div>
               <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">RT Critics</span>
-                <span style="color:#f87171;font-weight:700">${show.rtCritic}%</span>
+                <span style="color:#9ca3af">TMDB Score</span>
+                <span style="color:#f87171;font-weight:700">${rating10 > 0 ? rating10.toFixed(1) + '/10' : '—'}</span>
               </div>
-              ${scoreBar(show.rtCritic, 100, '#ef4444')}
+              ${scoreBar(rating10 * 10, '#ef4444')}
             </div>
 
             <div>
               <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">RT Audience</span>
-                <span style="color:#fb923c;font-weight:700">${show.rtAudience}%</span>
+                <span style="color:#9ca3af">Votes</span>
+                <span style="color:#fb923c;font-weight:700">${show.vote_count.toLocaleString()}</span>
               </div>
-              ${scoreBar(show.rtAudience, 100, '#f97316')}
+              ${scoreBar(votes100, '#f97316')}
             </div>
 
             <div>
               <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">Popularity Score</span>
-                <span style="color:#22d3ee;font-weight:700">${show.popularity}</span>
+                <span style="color:#9ca3af">Popularity</span>
+                <span style="color:#22d3ee;font-weight:700">${show.popularity.toFixed(1)}</span>
               </div>
-              ${scoreBar(show.popularity, 100, '#22d3ee')}
+              ${scoreBar(popularity100, '#22d3ee')}
             </div>
 
           </div>
@@ -323,67 +382,80 @@
       </div>`;
     }
 
-    // ── Render cards ─────────────────────────────────────────────────────────
-    function renderCards(filtered) {
-      const grid = document.getElementById('cardGrid');
+    // ── Skeleton loader ───────────────────────────────────────────────────────
+    function showSkeletons(n) {
+      document.getElementById('skeletonGrid').innerHTML = Array.from({ length: n }, () => `
+        <div class="skeleton" style="border-radius:18px;overflow:hidden;border:1px solid #374151">
+          <div style="height:230px;background:#1f2937"></div>
+          <div style="padding:14px;background:#111827;display:flex;flex-direction:column;gap:10px">
+            <div style="height:16px;background:#374151;border-radius:6px;width:80%"></div>
+            <div style="height:12px;background:#374151;border-radius:6px;width:45%"></div>
+            <div style="height:4px;background:#374151;border-radius:9999px"></div>
+            <div style="height:4px;background:#374151;border-radius:9999px"></div>
+            <div style="height:4px;background:#374151;border-radius:9999px"></div>
+          </div>
+        </div>`).join('');
+    }
+    function hideSkeletons() { document.getElementById('skeletonGrid').innerHTML = ''; }
+    function setStatus(msg)   { document.getElementById('statusLabel').textContent = msg; }
+
+    // ── Main render ───────────────────────────────────────────────────────────
+    function render() {
+      const search   = document.getElementById('searchInput').value.toLowerCase().trim();
+      const month    = document.getElementById('monthFilter').value;
+      const platform = document.getElementById('platformFilter').value;
+      const minRat   = +document.getElementById('ratingFilter').value;
+      const voted    = document.getElementById('qualityFilter').checked;
+
+      document.getElementById('ratingValue').textContent = minRat.toFixed(1);
+
+      const filtered = allShows
+        .filter(s => month === 'all' || (s.first_air_date || '').slice(5, 7) === month)
+        .filter(s => {
+          if (platform === 'all') return true;
+          return (s._providers || []).some(p => {
+            const known = PROVIDERS[p.provider_id];
+            return (known ? known.name : p.provider_name) === platform;
+          });
+        })
+        .filter(s => s.vote_average >= minRat)
+        .filter(s => !voted || s.vote_count >= 50)
+        .filter(s => !search || s.name.toLowerCase().includes(search))
+        .sort((a, b) => b.popularity - a.popularity);
+
+      const grid  = document.getElementById('cardGrid');
       const empty = document.getElementById('emptyState');
 
       if (filtered.length === 0) {
         grid.innerHTML = '';
-        empty.style.display = 'flex';
-        empty.style.flexDirection = 'column';
-        empty.style.alignItems = 'center';
-        return;
+        empty.style.cssText = 'display:flex;flex-direction:column;align-items:center';
+      } else {
+        empty.style.display = 'none';
+        grid.innerHTML = filtered.map((s, i) => buildCard(s, i + 1)).join('');
       }
 
-      empty.style.display = 'none';
-      grid.innerHTML = filtered.map((show, i) => buildCard(show, i + 1)).join('');
-    }
-
-    // ── DOM refs ─────────────────────────────────────────────────────────────
-    const monthFilter      = document.getElementById('monthFilter');
-    const platformFilter   = document.getElementById('platformFilter');
-    const popularityFilter = document.getElementById('popularityFilter');
-    const popularityValue  = document.getElementById('popularityValue');
-    const qualityFilter    = document.getElementById('qualityFilter');
-    const countLabel       = document.getElementById('countLabel');
-    const searchInput      = document.getElementById('searchInput');
-
-    // ── Main render ──────────────────────────────────────────────────────────
-    function render() {
-      popularityValue.textContent = popularityFilter.value;
-      const search = searchInput.value.toLowerCase().trim();
-
-      const filtered = shows
-        .map(s => ({ ...s, popularity: popularityScore(s) }))
-        .filter(s => monthFilter.value === 'all'      || s.month === monthFilter.value)
-        .filter(s => platformFilter.value === 'all'   || s.platforms.includes(platformFilter.value))
-        .filter(s => s.popularity >= +popularityFilter.value)
-        .filter(s => !qualityFilter.checked            || passesQuality(s))
-        .filter(s => !search                           || s.title.toLowerCase().includes(search))
-        .sort((a, b) => b.popularity - a.popularity);
-
-      renderCards(filtered);
-      countLabel.textContent = `${filtered.length} show${filtered.length !== 1 ? 's' : ''}`;
+      document.getElementById('countLabel').textContent =
+        `${filtered.length} show${filtered.length !== 1 ? 's' : ''}`;
     }
 
     function resetFilters() {
-      searchInput.value = '';
-      monthFilter.value = 'all';
-      platformFilter.value = 'all';
-      popularityFilter.value = 0;
-      qualityFilter.checked = false;
+      document.getElementById('searchInput').value    = '';
+      document.getElementById('monthFilter').value    = 'all';
+      document.getElementById('platformFilter').value = 'all';
+      document.getElementById('ratingFilter').value   = 0;
+      document.getElementById('qualityFilter').checked = false;
       render();
     }
 
-    // ── Init ─────────────────────────────────────────────────────────────────
-    initPlatformFilter();
-    render();
+    // ── Init ──────────────────────────────────────────────────────────────────
+    fetchShows();
 
-    [monthFilter, platformFilter, popularityFilter, qualityFilter, searchInput].forEach(el => {
-      el.addEventListener('input', render);
-      el.addEventListener('change', render);
-    });
+    ['searchInput', 'monthFilter', 'platformFilter', 'ratingFilter', 'qualityFilter']
+      .forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', render);
+        el.addEventListener('change', render);
+      });
 
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
   </script>
