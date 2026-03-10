@@ -28,7 +28,7 @@
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           📺 <span class="text-cyan-400">2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Viewer Popularity</p>
+        <p class="text-xs text-gray-500 mt-0.5">Jan – Feb 2026 · Top 100 by IMDb Rating</p>
       </div>
       <span id="countLabel"
         class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
@@ -85,7 +85,7 @@
           <input type="checkbox" id="qualityFilter" class="w-4 h-4 rounded cursor-pointer">
           <div>
             <p class="text-sm text-gray-300 font-medium leading-none">Rated Shows Only</p>
-            <p class="text-xs text-gray-600 mt-0.5">50+ community ratings</p>
+            <p class="text-xs text-gray-600 mt-0.5">Has an IMDb rating</p>
           </div>
         </label>
 
@@ -93,7 +93,7 @@
 
       <!-- Status bar -->
       <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-800">
-        <span id="statusLabel" class="text-xs text-gray-600">Fetching live data from TMDB…</span>
+        <span id="statusLabel" class="text-xs text-gray-600">Fetching shows…</span>
         <button id="resetBtn" class="text-xs text-cyan-500 hover:text-cyan-300 transition-colors font-medium">
           ↺ Reset filters
         </button>
@@ -124,11 +124,7 @@
   </main>
 
   <footer class="border-t border-gray-800/50 py-8 text-center text-xs text-gray-700">
-    Data sourced from
-    <a href="https://www.themoviedb.org" target="_blank" class="text-cyan-800 hover:text-cyan-600 transition-colors">
-      TMDB
-    </a>
-    · This product uses the TMDB API but is not endorsed or certified by TMDB.
+    Ratings sourced from IMDb via OMDb API
   </footer>
 
   <script>
@@ -139,7 +135,7 @@
     const OMDB       = 'https://www.omdbapi.com';
     const IMG_SM     = 'https://image.tmdb.org/t/p/w342';   // card poster
 
-    // ── Known streaming providers (US TMDB IDs → style) ─────────────────────
+    // ── Known streaming providers (US IDs → style) ──────────────────────────
     const PROVIDERS = {
       8:    { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
       9:    { name: 'Prime Video',   g1: '#001929', g2: '#003060', text: '#6bc5ff', border: '#0060b0', bg: '#003a7a44' },
@@ -162,18 +158,18 @@
     // ── State ────────────────────────────────────────────────────────────────
     let allShows = [];  // enriched show objects
 
-    // ── TMDB fetch helpers ───────────────────────────────────────────────────
+    // ── API fetch helpers ────────────────────────────────────────────────────
     async function tmdb(path) {
       const sep = path.includes('?') ? '&' : '?';
       const res = await fetch(`${TMDB}${path}${sep}api_key=${API_KEY}`);
-      if (!res.ok) throw new Error(`TMDB ${res.status}: ${path}`);
+      if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
       return res.json();
     }
 
     // ── Main data fetch ──────────────────────────────────────────────────────
     async function fetchShows() {
       showSkeletons(8);
-      setStatus('Fetching 2026 shows from TMDB…');
+      setStatus('Fetching 2026 shows…');
 
       try {
         // Phase 1 — Discover US Jan–Feb 2026 shows, sorted by popularity
@@ -247,13 +243,18 @@
         omdbData.forEach(r => {
           if (r.status === 'fulfilled') {
             const show = allShows.find(s => s.id === r.value.id);
-            if (show) { show._imdbRating = r.value.imdbRating; show._imdbVotes = r.value.imdbVotes; show._rtScore = r.value.rtScore; }
+            if (show) { show._imdbRating = r.value.imdbRating; show._rtScore = r.value.rtScore; }
           }
         });
 
+        // Keep only shows with an IMDb rating, sorted by rating desc, top 100
+        allShows = allShows
+          .filter(s => s._imdbRating != null)
+          .sort((a, b) => b._imdbRating - a._imdbRating)
+          .slice(0, 100);
+
         render();
-        const rated = allShows.filter(s => s._imdbRating != null).length;
-        setStatus(`${allShows.length} shows · ${rated} with IMDb ratings · Sorted by viewer popularity`);
+        setStatus(`Top ${allShows.length} shows ranked by IMDb rating`);
 
       } catch (err) {
         hideSkeletons();
@@ -319,24 +320,16 @@
       const style = getStyle(providers);
 
       // Provider badges (max 3)
-      // Prefer real IMDb rating; fall back to TMDB community rating
-      const hasImdb   = show._imdbRating != null;
-      const rating10  = hasImdb ? show._imdbRating : show.vote_average;
-      const ratingSrc = hasImdb ? 'IMDb' : 'TMDB';
-      const voteCount = hasImdb ? (show._imdbVotes || 0) : (show.vote_count || 0);
+      const rating10  = show._imdbRating ?? 0;
       const popularity100 = Math.min(100, Math.round(show.popularity));
 
-      // RT score: "85%" → 85 from OMDb (rare for TV shows)
-      // Fallback: use TMDB vote_average × 10 as audience percentage
-      const rtRaw    = show._rtScore;
-      const rtNum    = rtRaw ? parseInt(rtRaw) : null;
-      const hasRt    = rtNum != null;
-      // Right-panel score: prefer RT, else TMDB audience pct
-      const rightNum  = hasRt ? rtNum : Math.round(show.vote_average * 10);
-      const rightLabel = hasRt ? '🍅 ROTTEN TOMATOES' : '⭐ TMDB AUDIENCE';
-      const rightColor = rightNum >= 80 ? '#4ade80'
-                       : rightNum >= 60 ? '#fb923c'
-                                        : '#f87171';
+      // RT score from OMDb
+      const rtRaw  = show._rtScore;
+      const rtNum  = rtRaw ? parseInt(rtRaw) : null;
+      const rtColor = rtNum == null ? '#6b7280'
+                    : rtNum >= 80   ? '#4ade80'
+                    : rtNum >= 60   ? '#fb923c'
+                                    : '#f87171';
 
       const badgesHtml = providers.slice(0, 3).map(p => {
         const s = PROVIDERS[p.provider_id] || DEFAULT_STYLE;
@@ -415,27 +408,23 @@
                 </span>
                 <span style="font-size:10px;color:#6b7280;font-weight:600">/10</span>
                 <span style="margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;
-                  border-radius:3px;background:${hasImdb ? '#1a120088' : '#0a1a1a88'};
-                  color:${hasImdb ? '#f5c518' : '#22d3ee'};
-                  border:1px solid ${hasImdb ? '#f5c51844' : '#22d3ee44'}">${ratingSrc}</span>
+                  border-radius:3px;background:#1a120088;color:#f5c518;
+                  border:1px solid #f5c51844">IMDb</span>
               </div>
-              <div style="font-size:12px;margin-bottom:2px">${stars(rating10)}</div>
-              <div style="font-size:10px;color:#6b7280">
-                ${voteCount > 0 ? voteCount.toLocaleString() + ' ratings' : 'Not yet rated'}
-              </div>
+              <div style="font-size:12px">${stars(rating10)}</div>
             </div>
 
             <!-- Divider -->
             <div style="background:#374151"></div>
 
-            <!-- RT / TMDB audience -->
+            <!-- RT -->
             <div style="padding:10px 12px;text-align:center;display:flex;flex-direction:column;
               justify-content:center;gap:2px">
-              <div style="font-size:20px;font-weight:800;color:${rightColor};line-height:1.1">
-                ${rightNum}%
+              <div style="font-size:20px;font-weight:800;color:${rtColor};line-height:1.1">
+                ${rtNum != null ? rtNum + '%' : '—'}
               </div>
               <div style="font-size:9px;color:#6b7280;font-weight:600;letter-spacing:.04em;line-height:1.3">
-                ${rightLabel}
+                🍅 ROTTEN TOMATOES
               </div>
             </div>
 
@@ -489,10 +478,10 @@
             return (known ? known.name : p.provider_name) === platform;
           });
         })
-        .filter(s => (s._imdbRating ?? s.vote_average) >= minRat)
-        .filter(s => !voted || (s._imdbVotes || s.vote_count || 0) >= 50)
+        .filter(s => (s._imdbRating ?? 0) >= minRat)
+        .filter(s => !voted || s._imdbRating != null)
         .filter(s => !search || s.name.toLowerCase().includes(search))
-        .sort((a, b) => b.popularity - a.popularity);
+        .sort((a, b) => (b._imdbRating ?? 0) - (a._imdbRating ?? 0));
 
       const grid  = document.getElementById('cardGrid');
       const empty = document.getElementById('emptyState');
