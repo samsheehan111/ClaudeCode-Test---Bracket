@@ -176,11 +176,13 @@
       setStatus('Fetching 2026 shows from TMDB…');
 
       try {
-        // Phase 1 — Discover Jan–Feb 2026 shows, sorted by popularity
+        // Phase 1 — Discover US Jan–Feb 2026 shows, sorted by popularity
+        const base = '/discover/tv?with_origin_country=US&with_original_language=en' +
+                     '&first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc';
         const pages = await Promise.all([
-          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=1'),
-          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=2'),
-          tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=3'),
+          tmdb(`${base}&page=1`),
+          tmdb(`${base}&page=2`),
+          tmdb(`${base}&page=3`),
         ]);
 
         const raw = pages
@@ -236,6 +238,7 @@
                 id:         s.id,
                 imdbRating: d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null,
                 imdbVotes:  d.imdbVotes  && d.imdbVotes  !== 'N/A' ? parseInt(d.imdbVotes.replace(/,/g, '')) : 0,
+                rtScore:    (d.Ratings || []).find(r => r.Source === 'Rotten Tomatoes')?.Value ?? null,
               }))
               .catch(() => ({ id: s.id, imdbRating: null, imdbVotes: 0 }))
           )
@@ -244,7 +247,7 @@
         omdbData.forEach(r => {
           if (r.status === 'fulfilled') {
             const show = allShows.find(s => s.id === r.value.id);
-            if (show) { show._imdbRating = r.value.imdbRating; show._imdbVotes = r.value.imdbVotes; }
+            if (show) { show._imdbRating = r.value.imdbRating; show._imdbVotes = r.value.imdbVotes; show._rtScore = r.value.rtScore; }
           }
         });
 
@@ -323,6 +326,15 @@
       const voteCount = hasImdb ? (show._imdbVotes || 0) : (show.vote_count || 0);
       const popularity100 = Math.min(100, Math.round(show.popularity));
 
+      // RT score: "85%" → 85, null if not available
+      const rtRaw   = show._rtScore;                          // e.g. "85%" or null
+      const rtNum   = rtRaw ? parseInt(rtRaw) : null;         // e.g. 85
+      const rtColor = rtNum == null ? '#6b7280'
+                    : rtNum >= 80   ? '#4ade80'               // Certified Fresh
+                    : rtNum >= 60   ? '#fb923c'               // Fresh
+                                    : '#f87171';              // Rotten
+      const rtIcon  = rtNum == null ? '🍅' : rtNum >= 60 ? '🍅' : '🤢';
+
       const badgesHtml = providers.slice(0, 3).map(p => {
         const s = PROVIDERS[p.provider_id] || DEFAULT_STYLE;
         const name = s.name || p.provider_name;
@@ -388,30 +400,43 @@
             <p style="font-size:11px;color:#6b7280;margin:0">${fmtDate(show.first_air_date)}</p>
           </div>
 
-          <!-- IMDb rating block -->
-          <div style="
-            background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;
-            padding:10px 12px;display:flex;align-items:center;gap:12px">
-            <div style="text-align:center;min-width:48px">
-              <div style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
-                ${rating10 > 0 ? rating10.toFixed(1) : '—'}
-              </div>
-              <div style="font-size:9px;color:#6b7280;font-weight:600;letter-spacing:.05em;margin-top:2px">/10</div>
-            </div>
-            <div style="flex:1">
-              <div style="font-size:11px;font-weight:600;color:#d1d5db;margin-bottom:4px">
-                ${stars(rating10)}
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center">
-                <span style="font-size:10px;color:#6b7280">
-                  ${voteCount > 0 ? voteCount.toLocaleString() + ' ratings' : 'Not yet rated'}
+          <!-- Ratings block: IMDb left · RT right -->
+          <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;
+            background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;overflow:hidden">
+
+            <!-- IMDb -->
+            <div style="padding:10px 12px">
+              <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:3px">
+                <span style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
+                  ${rating10 > 0 ? rating10.toFixed(1) : '—'}
                 </span>
-                <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;
-                  background:${hasImdb ? '#1a1200' : '#0a1a1a'};
+                <span style="font-size:10px;color:#6b7280;font-weight:600">/10</span>
+                <span style="margin-left:auto;font-size:9px;font-weight:700;padding:1px 5px;
+                  border-radius:3px;background:${hasImdb ? '#1a120088' : '#0a1a1a88'};
                   color:${hasImdb ? '#f5c518' : '#22d3ee'};
                   border:1px solid ${hasImdb ? '#f5c51844' : '#22d3ee44'}">${ratingSrc}</span>
               </div>
+              <div style="font-size:12px;margin-bottom:2px">${stars(rating10)}</div>
+              <div style="font-size:10px;color:#6b7280">
+                ${voteCount > 0 ? voteCount.toLocaleString() + ' ratings' : 'Not yet rated'}
+              </div>
             </div>
+
+            <!-- Divider -->
+            <div style="background:#374151"></div>
+
+            <!-- RT -->
+            <div style="padding:10px 12px;text-align:center;display:flex;flex-direction:column;
+              justify-content:center;gap:2px">
+              <div style="font-size:20px;line-height:1">${rtIcon}</div>
+              <div style="font-size:20px;font-weight:800;color:${rtColor};line-height:1.1">
+                ${rtNum != null ? rtNum + '%' : '—'}
+              </div>
+              <div style="font-size:9px;color:#6b7280;font-weight:600;letter-spacing:.04em">
+                ROTTEN TOMATOES
+              </div>
+            </div>
+
           </div>
 
           <!-- Popularity bar -->
