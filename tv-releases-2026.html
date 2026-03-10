@@ -26,14 +26,20 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
       <div>
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-          📺 <span class="text-cyan-400">2026 TV Releases</span>
+          📺 <span class="text-cyan-400">2025–2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">Jan 2025 – Mar 2026 · Top 100 by Rating</p>
+        <p class="text-xs text-gray-500 mt-0.5">Jan 2025 – today · Major streamers only</p>
       </div>
-      <span id="countLabel"
-        class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
-        Loading…
-      </span>
+      <div class="flex items-center gap-3">
+        <span id="countLabel"
+          class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
+          Loading…
+        </span>
+        <button id="refreshBtn"
+          class="text-xs font-semibold bg-gray-800 text-gray-300 px-3 py-1.5 rounded-full border border-gray-700 hover:border-cyan-600 hover:text-cyan-300 transition-all">
+          ↻ Refresh
+        </button>
+      </div>
     </div>
   </header>
 
@@ -50,6 +56,18 @@
             <input type="text" id="searchInput" placeholder="Search shows…"
               class="w-full bg-gray-800 border border-gray-700 rounded-xl pl-8 pr-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/30 transition-all">
           </div>
+        </div>
+
+        <!-- Sort By -->
+        <div class="min-w-[160px]">
+          <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">Sort By</label>
+          <select id="sortFilter"
+            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-cyan-500 transition-all">
+            <option value="trending">🔥 Trending Now</option>
+            <option value="rating">⭐ Top Rated</option>
+            <option value="newest">🆕 Newest First</option>
+            <option value="popular">📈 Most Popular</option>
+          </select>
         </div>
 
         <!-- Month -->
@@ -100,7 +118,7 @@
           <input type="checkbox" id="qualityFilter" class="w-4 h-4 rounded cursor-pointer">
           <div>
             <p class="text-sm text-gray-300 font-medium leading-none">Rated Shows Only</p>
-            <p class="text-xs text-gray-600 mt-0.5">Has an IMDb rating</p>
+            <p class="text-xs text-gray-600 mt-0.5">Has a rating score</p>
           </div>
         </label>
 
@@ -139,20 +157,21 @@
   </main>
 
   <footer class="border-t border-gray-800/50 py-8 text-center text-xs text-gray-700">
-    Ratings sourced from TMDB · IMDb via OMDb API
+    Ratings sourced from TMDB · IMDb & Rotten Tomatoes via OMDb API · Trending from TMDB weekly chart
   </footer>
 
   <script>
     // ── Config ───────────────────────────────────────────────────────────────
-    const API_KEY    = '21322bdf6abf288ae15aa6a97caf66ae';
-    const OMDB_KEY   = '679ba5a1';
-    const TMDB       = 'https://api.themoviedb.org/3';
-    const OMDB       = 'https://www.omdbapi.com';
-    const IMG_SM     = 'https://image.tmdb.org/t/p/w342';   // card poster
+    const API_KEY  = '21322bdf6abf288ae15aa6a97caf66ae';
+    const OMDB_KEY = '679ba5a1';
+    const TMDB     = 'https://api.themoviedb.org/3';
+    const OMDB     = 'https://www.omdbapi.com';
+    const IMG_SM   = 'https://image.tmdb.org/t/p/w342';
 
     // ── Known streaming providers (US IDs → style) ──────────────────────────
     const PROVIDERS = {
       8:    { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
+      175:  { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
       9:    { name: 'Prime Video',   g1: '#001929', g2: '#003060', text: '#6bc5ff', border: '#0060b0', bg: '#003a7a44' },
       337:  { name: 'Disney+',       g1: '#000826', g2: '#001460', text: '#5599ff', border: '#003da6', bg: '#00226644' },
       15:   { name: 'Hulu',          g1: '#002818', g2: '#004228', text: '#1ce783', border: '#008844', bg: '#004d2e44' },
@@ -163,7 +182,6 @@
       43:   { name: 'Starz',         g1: '#0c0018', g2: '#1a0030', text: '#cc99ff', border: '#6633aa', bg: '#33006644' },
       35:   { name: 'HBO',           g1: '#180018', g2: '#2c003e', text: '#dd55ff', border: '#7700cc', bg: '#44006644' },
       37:   { name: 'Showtime',      g1: '#2a0000', g2: '#550000', text: '#ff4444', border: '#990000', bg: '#66000044' },
-      175:  { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' }, // Netflix Kids alias
       283:  { name: 'Crunchyroll',   g1: '#2b0d00', g2: '#4a1800', text: '#ff6a00', border: '#aa3300', bg: '#4d1a0044' },
       73:   { name: 'AMC+',          g1: '#001a1a', g2: '#003535', text: '#00cccc', border: '#006666', bg: '#00444444' },
     };
@@ -171,38 +189,32 @@
     const DEFAULT_STYLE = { g1: '#111827', g2: '#1f2937', text: '#9ca3af', border: '#374151', bg: '#1f293766' };
 
     // ── Major streaming platforms (only these are shown) ─────────────────────
-    const MAJOR_IDS = new Set([8, 175, 15, 1899, 9, 386, 531, 2552]);
     // 8/175=Netflix, 15=Hulu, 1899=Max, 9=Prime Video, 386=Peacock, 531=Paramount+, 2552=Apple TV+
+    const MAJOR_IDS = new Set([8, 175, 15, 1899, 9, 386, 531, 2552]);
 
     // ── State ────────────────────────────────────────────────────────────────
-    let allShows = [];  // enriched show objects
+    let allShows = [];
 
     // ── API fetch helpers ────────────────────────────────────────────────────
     async function tmdb(path) {
       const sep = path.includes('?') ? '&' : '?';
       const res = await fetch(`${TMDB}${path}${sep}api_key=${API_KEY}`);
-      if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
+      if (!res.ok) throw new Error(`TMDB ${res.status}: ${path}`);
       return res.json();
     }
 
     // ── Main data fetch ──────────────────────────────────────────────────────
     async function fetchShows() {
+      allShows = [];
       showSkeletons(8);
-      setStatus('Fetching 2026 shows…');
+      setStatus('Fetching shows…');
 
       try {
-        // Phase 1 — Discover US shows Jan 2025–now, sorted by popularity
+        // Phase 1 — Discover US shows Jan 2025–today, sorted by popularity
         const today = new Date().toISOString().slice(0, 10);
         const base = '/discover/tv?with_origin_country=US&with_original_language=en' +
                      `&first_air_date.gte=2025-01-01&first_air_date.lte=${today}&sort_by=popularity.desc`;
-        const pages = await Promise.all([
-          tmdb(`${base}&page=1`),
-          tmdb(`${base}&page=2`),
-          tmdb(`${base}&page=3`),
-          tmdb(`${base}&page=4`),
-          tmdb(`${base}&page=5`),
-          tmdb(`${base}&page=6`),
-        ]);
+        const pages = await Promise.all([1,2,3,4,5,6].map(p => tmdb(`${base}&page=${p}`)));
 
         const raw = pages
           .flatMap(p => p.results || [])
@@ -211,17 +223,17 @@
         const seen = new Set();
         allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 
-        // Pre-populate TMDB rating as fallback (available immediately from discover API)
+        // Pre-populate TMDB rating as fallback (available immediately from discover response)
         allShows.forEach(s => {
           s._tmdbRating = (s.vote_average && s.vote_count > 5) ? s.vote_average : null;
         });
 
         hideSkeletons();
         render();
-        setStatus(`Loading streaming info & IMDb IDs for ${allShows.length} shows…`);
+        setStatus(`Loading streaming info, trending & ratings for ${allShows.length} shows…`);
 
-        // Phase 2 — Providers + external IDs in parallel (one Promise.all round)
-        const [providerData, externalData] = await Promise.all([
+        // Phase 2 — Providers + external IDs + trending, all in parallel
+        const [providerData, externalData, trendingData] = await Promise.all([
           Promise.allSettled(allShows.map(s =>
             tmdb(`/tv/${s.id}/watch/providers`)
               .then(d => ({ id: s.id, flatrate: d.results?.US?.flatrate || [] }))
@@ -232,6 +244,11 @@
               .then(d => ({ id: s.id, imdbId: d.imdb_id || null }))
               .catch(() => ({ id: s.id, imdbId: null }))
           )),
+          // Fetch this week's trending TV shows (2 pages = top 40)
+          Promise.allSettled([
+            tmdb('/trending/tv/week?page=1'),
+            tmdb('/trending/tv/week?page=2'),
+          ]),
         ]);
 
         providerData.forEach(r => {
@@ -247,6 +264,19 @@
           }
         });
 
+        // Build trending rank map (lower rank = more trending)
+        const trendingRankMap = new Map();
+        trendingData.forEach(r => {
+          if (r.status === 'fulfilled') {
+            (r.value?.results || []).forEach((t, i) => {
+              if (!trendingRankMap.has(t.id)) trendingRankMap.set(t.id, trendingRankMap.size + 1);
+            });
+          }
+        });
+        allShows.forEach(s => {
+          s._trendingRank = trendingRankMap.get(s.id) ?? null;
+        });
+
         // Keep only shows on major streaming platforms
         allShows = allShows.filter(s =>
           (s._providers || []).some(p => MAJOR_IDS.has(p.provider_id))
@@ -255,9 +285,9 @@
         buildPlatformFilter();
         render();
 
-        // Phase 3 — OMDb for real IMDb ratings (only shows that have an IMDb ID)
+        // Phase 3 — OMDb for IMDb ratings + RT scores (only for shows with an IMDb ID)
         const withImdb = allShows.filter(s => s._imdbId);
-        setStatus(`Fetching IMDb ratings for ${withImdb.length} shows…`);
+        setStatus(`Fetching IMDb & RT ratings for ${withImdb.length} shows…`);
 
         const omdbData = await Promise.allSettled(
           withImdb.map(s =>
@@ -266,21 +296,30 @@
               .then(d => ({
                 id:         s.id,
                 imdbRating: d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null,
-                imdbVotes:  d.imdbVotes  && d.imdbVotes  !== 'N/A' ? parseInt(d.imdbVotes.replace(/,/g, '')) : 0,
-                rtScore:    (d.Ratings || []).find(r => r.Source === 'Rotten Tomatoes')?.Value ?? null,
+                imdbVotes:  d.imdbVotes  && d.imdbVotes  !== 'N/A' ? parseInt(d.imdbVotes.replace(/,/g,'')) : 0,
+                rtScore:    (() => {
+                  const rt = (d.Ratings || []).find(r => r.Source === 'Rotten Tomatoes');
+                  if (!rt || rt.Value === 'N/A') return null;
+                  return parseInt(rt.Value); // store as number, e.g. 87
+                })(),
               }))
-              .catch(() => ({ id: s.id, imdbRating: null, imdbVotes: 0 }))
+              .catch(() => ({ id: s.id, imdbRating: null, imdbVotes: 0, rtScore: null }))
           )
         );
 
+        let rtCount = 0;
         omdbData.forEach(r => {
           if (r.status === 'fulfilled') {
             const show = allShows.find(s => s.id === r.value.id);
-            if (show) { show._imdbRating = r.value.imdbRating; show._rtScore = r.value.rtScore; }
+            if (show) {
+              show._imdbRating = r.value.imdbRating;
+              show._rtScore    = r.value.rtScore;
+              if (r.value.rtScore != null) rtCount++;
+            }
           }
         });
 
-        // Sort: IMDb first, then TMDB rating, then popularity
+        // Final sort: keep internal order by best-available rating + popularity
         allShows = allShows
           .sort((a, b) => {
             const ra = a._imdbRating ?? a._tmdbRating ?? 0;
@@ -294,8 +333,12 @@
 
         buildPlatformFilter();
         render();
-        const rated = allShows.filter(s => s._imdbRating != null).length;
-        setStatus(`${allShows.length} shows on major streamers · ${rated} with IMDb ratings`);
+
+        const trendingCount = allShows.filter(s => s._trendingRank != null).length;
+        const imdbCount     = allShows.filter(s => s._imdbRating != null).length;
+        setStatus(
+          `${allShows.length} shows · ${trendingCount} trending · ${imdbCount} IMDb ratings · ${rtCount} RT scores`
+        );
 
       } catch (err) {
         hideSkeletons();
@@ -306,7 +349,7 @@
 
     // ── Platform filter dropdown ──────────────────────────────────────────────
     function buildPlatformFilter() {
-      const sel = document.getElementById('platformFilter');
+      const sel  = document.getElementById('platformFilter');
       const prev = sel.value;
       sel.innerHTML = '<option value="all">All Platforms</option>';
 
@@ -348,25 +391,24 @@
       ).join('');
     }
 
+    // Fixed: was hardcoded to 2026
     function fmtDate(d) {
       if (!d) return '—';
-      const [, m, day] = d.split('-');
-      return `${['', 'Jan', 'Feb'][+m] || '?'} ${+day}, 2026`;
+      const [year, m, day] = d.split('-');
+      const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return `${months[+m] || '?'} ${+day}, ${year}`;
     }
 
     // ── Card builder ──────────────────────────────────────────────────────────
     function buildCard(show, rank) {
       const providers = show._providers || [];
-      const style = getStyle(providers);
+      const style     = getStyle(providers);
 
-      // Provider badges (max 3)
-      const rating10  = show._imdbRating ?? show._tmdbRating ?? 0;
+      const rating10     = show._imdbRating ?? show._tmdbRating ?? 0;
       const ratingSource = show._imdbRating != null ? 'IMDb' : 'TMDB';
-      const popularity100 = Math.min(100, Math.round(show.popularity));
 
-      // RT score from OMDb
-      const rtRaw  = show._rtScore;
-      const rtNum  = rtRaw ? parseInt(rtRaw) : null;
+      // RT score stored as integer (null if unavailable)
+      const rtNum   = show._rtScore ?? null;
       const rtColor = rtNum == null ? '#6b7280'
                     : rtNum >= 80   ? '#4ade80'
                     : rtNum >= 60   ? '#fb923c'
@@ -385,12 +427,23 @@
             background:#15803d55;border:1px solid #166534;color:#4ade80;white-space:nowrap">✓ Top Pick</span>`
         : '';
 
-      // Poster image or gradient fallback
+      const trendBadge = show._trendingRank != null
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
+            background:#7c2d1255;border:1px solid #c2410c;color:#fb923c;white-space:nowrap">🔥 Trending</span>`
+        : '';
+
       const posterHtml = show.poster_path
-        ? `<img src="${IMG_SM}${show.poster_path}" alt="${show.name.replace(/"/g, '&quot;')}" loading="lazy"
+        ? `<img src="${IMG_SM}${show.poster_path}" alt="${show.name.replace(/"/g,'&quot;')}" loading="lazy"
              style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"
              onerror="this.style.display='none'">`
         : `<span style="font-size:72px;font-weight:900;color:${style.text}1a;user-select:none;line-height:1">${show.name[0]}</span>`;
+
+      // Synopsis: trim to ~120 chars
+      const synopsis = show.overview
+        ? show.overview.length > 120
+          ? show.overview.slice(0, 117) + '…'
+          : show.overview
+        : '';
 
       return `
       <div class="card" style="
@@ -403,7 +456,6 @@
           background:linear-gradient(135deg,${style.g1},${style.g2}bb);
           display:flex;align-items:center;justify-content:center">
           ${posterHtml}
-          <!-- dark overlay for text legibility -->
           <div style="position:absolute;inset:0;background:linear-gradient(to bottom,
             rgba(0,0,0,.35) 0%,transparent 45%,rgba(0,0,0,.75) 100%)"></div>
           <!-- Rank -->
@@ -415,13 +467,11 @@
           ${rating10 > 0 ? `<div style="position:absolute;top:10px;right:12px;
             background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
             padding:3px 10px;font-size:12px;font-weight:700;color:#f5c518;
-            border:1px solid rgba(245,197,24,.3)">
-            ⭐ ${rating10.toFixed(1)}
-          </div>` : ''}
+            border:1px solid rgba(245,197,24,.3)">⭐ ${rating10.toFixed(1)}</div>` : ''}
           <!-- Platform + quality badges -->
           <div style="position:absolute;bottom:10px;left:10px;right:10px;
             display:flex;flex-wrap:wrap;gap:4px;align-items:center">
-            ${badgesHtml}${topBadge}
+            ${badgesHtml}${trendBadge}${topBadge}
           </div>
         </div>
 
@@ -434,14 +484,17 @@
               display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
               ${show.name}
             </h3>
-            <p style="font-size:11px;color:#6b7280;margin:0">${fmtDate(show.first_air_date)}</p>
+            <p style="font-size:11px;color:#6b7280;margin:0 0 6px">${fmtDate(show.first_air_date)}</p>
+            ${synopsis ? `<p style="font-size:11px;color:#9ca3af;margin:0;line-height:1.5;
+              display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">
+              ${synopsis}</p>` : ''}
           </div>
 
-          <!-- Ratings block: IMDb left · RT right -->
+          <!-- Ratings block: score left · RT right -->
           <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;
             background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;overflow:hidden">
 
-            <!-- IMDb -->
+            <!-- IMDb / TMDB score -->
             <div style="padding:10px 12px">
               <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:3px">
                 <span style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
@@ -471,13 +524,15 @@
 
           </div>
 
-          <!-- Popularity bar -->
+          <!-- Popularity / trending indicator -->
           <div>
             <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
-              <span style="color:#9ca3af">🔥 Popularity Rank</span>
-              <span style="color:#22d3ee;font-weight:700">#${rank}</span>
+              <span style="color:#9ca3af">${show._trendingRank != null ? '🔥 Trending' : '📈 Popularity'}</span>
+              <span style="color:#22d3ee;font-weight:700">
+                ${show._trendingRank != null ? `#${show._trendingRank} this week` : `#${rank}`}
+              </span>
             </div>
-            ${scoreBar(popularity100, '#22d3ee')}
+            ${scoreBar(Math.min(100, Math.round(show.popularity)), '#22d3ee')}
           </div>
         </div>
       </div>`;
@@ -491,8 +546,7 @@
           <div style="padding:14px;background:#111827;display:flex;flex-direction:column;gap:10px">
             <div style="height:16px;background:#374151;border-radius:6px;width:80%"></div>
             <div style="height:12px;background:#374151;border-radius:6px;width:45%"></div>
-            <div style="height:4px;background:#374151;border-radius:9999px"></div>
-            <div style="height:4px;background:#374151;border-radius:9999px"></div>
+            <div style="height:40px;background:#374151;border-radius:6px"></div>
             <div style="height:4px;background:#374151;border-radius:9999px"></div>
           </div>
         </div>`).join('');
@@ -503,6 +557,7 @@
     // ── Main render ───────────────────────────────────────────────────────────
     function render() {
       const search   = document.getElementById('searchInput').value.toLowerCase().trim();
+      const sortBy   = document.getElementById('sortFilter').value;
       const month    = document.getElementById('monthFilter').value;
       const platform = document.getElementById('platformFilter').value;
       const minRat   = +document.getElementById('ratingFilter').value;
@@ -514,20 +569,33 @@
         .filter(s => month === 'all' || (s.first_air_date || '').slice(0, 7) === month)
         .filter(s => {
           if (platform === 'all') return true;
-          return (s._providers || []).some(p => {
-            const known = PROVIDERS[p.provider_id];
-            return (known ? known.name : p.provider_name) === platform;
-          });
+          return (s._providers || []).some(p => PROVIDERS[p.provider_id]?.name === platform);
         })
         .filter(s => (s._imdbRating ?? s._tmdbRating ?? 0) >= minRat)
         .filter(s => !voted || (s._imdbRating ?? s._tmdbRating) != null)
         .filter(s => !search || s.name.toLowerCase().includes(search))
         .sort((a, b) => {
-          const ra = a._imdbRating ?? a._tmdbRating ?? 0;
-          const rb = b._imdbRating ?? b._tmdbRating ?? 0;
-          if (ra && rb) return rb - ra;
-          if (ra) return -1;
-          if (rb) return 1;
+          if (sortBy === 'trending') {
+            const ta = a._trendingRank ?? 9999;
+            const tb = b._trendingRank ?? 9999;
+            if (ta !== tb) return ta - tb;
+            // tie-break: trending shows by rating, rest by popularity
+            const ra = a._imdbRating ?? a._tmdbRating ?? 0;
+            const rb = b._imdbRating ?? b._tmdbRating ?? 0;
+            return rb - ra;
+          }
+          if (sortBy === 'rating') {
+            const ra = a._imdbRating ?? a._tmdbRating ?? 0;
+            const rb = b._imdbRating ?? b._tmdbRating ?? 0;
+            if (ra && rb) return rb - ra;
+            if (ra) return -1;
+            if (rb) return 1;
+            return b.popularity - a.popularity;
+          }
+          if (sortBy === 'newest') {
+            return (b.first_air_date || '').localeCompare(a.first_air_date || '');
+          }
+          // popular
           return b.popularity - a.popularity;
         });
 
@@ -547,10 +615,11 @@
     }
 
     function resetFilters() {
-      document.getElementById('searchInput').value    = '';
-      document.getElementById('monthFilter').value    = 'all';
-      document.getElementById('platformFilter').value = 'all';
-      document.getElementById('ratingFilter').value   = 0;
+      document.getElementById('searchInput').value     = '';
+      document.getElementById('sortFilter').value      = 'trending';
+      document.getElementById('monthFilter').value     = 'all';
+      document.getElementById('platformFilter').value  = 'all';
+      document.getElementById('ratingFilter').value    = 0;
       document.getElementById('qualityFilter').checked = false;
       render();
     }
@@ -558,7 +627,7 @@
     // ── Init ──────────────────────────────────────────────────────────────────
     fetchShows();
 
-    ['searchInput', 'monthFilter', 'platformFilter', 'ratingFilter', 'qualityFilter']
+    ['searchInput', 'sortFilter', 'monthFilter', 'platformFilter', 'ratingFilter', 'qualityFilter']
       .forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener('input', render);
@@ -566,6 +635,7 @@
       });
 
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
+    document.getElementById('refreshBtn').addEventListener('click', fetchShows);
   </script>
 
 </body>
