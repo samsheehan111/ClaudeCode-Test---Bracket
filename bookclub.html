@@ -1,277 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Oprah & Reese Book Club Tracker</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+  }
+</script>
 
 <style>
-
-*{
-box-sizing:border-box;
-}
-
-body{
-font-family:'Inter',sans-serif;
-background:#f6f8fb;
-margin:0;
-padding:40px;
-color:#1e293b;
-}
-
-h1{
-margin-bottom:6px;
-}
-
-.subtitle{
-color:#64748b;
-margin-bottom:20px;
-}
-
-.controls{
-display:flex;
-gap:10px;
-margin-bottom:30px;
-flex-wrap:wrap;
-}
-
-button.filter{
-padding:6px 12px;
-border-radius:6px;
-border:1px solid #e2e8f0;
-background:white;
-cursor:pointer;
-font-size:13px;
-}
-
-button.filter.active{
-background:#2563eb;
-color:white;
-}
-
-input{
-padding:7px 10px;
-border-radius:6px;
-border:1px solid #e2e8f0;
-}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
-gap:22px;
-}
-
-.card{
-background:white;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 6px 18px rgba(0,0,0,.08);
-border:1px solid #eef2f7;
-transition:transform .15s;
-}
-
-.card:hover{
-transform:translateY(-6px);
-}
-
-.card-body{
-padding:16px;
-display:flex;
-flex-direction:column;
-gap:6px;
-}
-
-.title{
-font-size:16px;
-font-weight:700;
-}
-
-.author{
-font-size:14px;
-color:#64748b;
-}
-
-.rating{
-font-size:13px;
-font-weight:600;
-color:#b45309;
-}
-
-.club{
-font-size:11px;
-font-weight:700;
-padding:4px 8px;
-border-radius:6px;
-display:inline-block;
-margin-top:6px;
-width:max-content;
-}
-
-.oprah{
-background:#faf5ff;
-color:#7c3aed;
-border:1px solid #ddd6fe;
-}
-
-.reese{
-background:#fff1f2;
-color:#e11d48;
-border:1px solid #fecdd3;
-}
-
-.links{
-margin-top:10px;
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-}
-
-button.link{
-padding:6px 10px;
-border:none;
-border-radius:6px;
-font-size:12px;
-font-weight:600;
-cursor:pointer;
-}
-
-.lib{
-background:#eff6ff;
-color:#1d4ed8;
-}
-
-
+  body { font-family: 'Inter', sans-serif; }
+  .pill-btn.active { background: #2563eb; color: white; }
+  .pill-btn:not(.active) { color: #475569; }
+  .pill-btn:not(.active):hover { background: #f1f5f9; color: #1e293b; }
+  .card-lift { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .card-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
+  #sort-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    background-size: 1rem;
+  }
 </style>
+
 </head>
+<body class="bg-slate-50 min-h-screen">
 
-<body>
+<!-- ── Header ── -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
+  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">📚 Book Club Tracker</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Oprah &amp; Reese picks · live Goodreads ratings · SF Library links</p>
+    </div>
+    <div id="header-stats" class="hidden sm:flex flex-col items-end">
+      <div id="stat-count" class="text-3xl font-bold text-slate-800 leading-none"></div>
+      <div class="text-xs text-slate-500 mt-0.5">books tracked</div>
+    </div>
+  </div>
+</header>
 
-<h1>📚 Oprah & Reese Book Club Tracker</h1>
-<div class="subtitle">Explore book club picks and jump straight to SF Library</div>
+<!-- ── Controls ── -->
+<main class="max-w-7xl mx-auto px-5 sm:px-8 py-7">
 
-<div class="controls">
+  <!-- Search -->
+  <div class="relative mb-5">
+    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    </svg>
+    <input id="search" type="search" placeholder="Search by title or author…"
+      class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+  </div>
 
-<input id="search" placeholder="Search books">
+  <!-- Filter row -->
+  <div class="flex flex-wrap items-center gap-3 mb-4">
 
-<button class="filter active" onclick="setFilter('all')">All</button>
-<button class="filter" onclick="setFilter('oprah')">Oprah</button>
-<button class="filter" onclick="setFilter('reese')">Reese</button>
+    <!-- Club filter -->
+    <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+      <button class="pill-btn active px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="all">All</button>
+      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="oprah">Oprah</button>
+      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="reese">Reese</button>
+    </div>
 
-</div>
+    <!-- Year filter -->
+    <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+      <button class="pill-btn active px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="all">All Years</button>
+      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2026">2026</button>
+      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2025">2025</button>
+      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2024">2024</button>
+    </div>
 
-<div class="grid" id="grid"></div>
+    <!-- Sort -->
+    <div class="ml-auto">
+      <select id="sort-select"
+        class="appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-slate-200 bg-white text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition">
+        <option value="rating-desc">⭐ Highest Rated</option>
+        <option value="rating-asc">Rating: Low to High</option>
+        <option value="year-desc">Newest First</option>
+        <option value="year-asc">Oldest First</option>
+        <option value="title-asc">Title: A – Z</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- Result count -->
+  <div id="result-count" class="text-sm text-slate-500 mb-5 h-5"></div>
+
+  <!-- Book grid -->
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+
+  <!-- Empty state -->
+  <div id="empty-state" class="hidden text-center py-24">
+    <div class="text-6xl mb-4">🔍</div>
+    <div class="text-lg font-semibold text-slate-700">No books found</div>
+    <div class="text-sm text-slate-500 mt-1">Try adjusting your search or filters</div>
+  </div>
+
+</main>
 
 <script>
 
-let BOOKS=[]
-let filter="all"
+let BOOKS = []
+let clubFilter = 'all'
+let yearFilter = 'all'
+
+// ── Utility ──────────────────────────────────────────────────────────────────
+
+function escapeHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+}
+
+function stars(rating) {
+  const full = Math.floor(rating)
+  const half = (rating - full) >= 0.5
+  return '★'.repeat(full) + (half ? '½' : '')
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+
+// ── Open Library enrichment ───────────────────────────────────────────────────
 
 async function fetchOpenLibraryData(title, author) {
   try {
     const q = encodeURIComponent(`${title} ${author}`)
     const res = await fetch(`https://openlibrary.org/search.json?q=${q}&limit=1&fields=ratings_average,ratings_count`)
     const data = await res.json()
-    const doc = data.docs && data.docs[0]
+    const doc = data.docs?.[0]
     if (!doc) return {}
     return {
       rating: doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : null,
-      reviews: doc.ratings_count || null
+      reviews: doc.ratings_count ?? null
     }
-  } catch(e) {
+  } catch {
     return {}
   }
 }
 
-async function loadBooks(){
-  const res = await fetch("./books.json")
+async function enrichBooks() {
+  const BATCH = 5
+  for (let i = 0; i < BOOKS.length; i += BATCH) {
+    const batch = BOOKS.slice(i, i + BATCH)
+    const results = await Promise.all(batch.map(b => fetchOpenLibraryData(b.title, b.author)))
+    batch.forEach((book, j) => {
+      if (results[j].rating != null) book.rating = results[j].rating
+      if (results[j].reviews != null) book.reviews = results[j].reviews
+    })
+    render()
+    if (i + BATCH < BOOKS.length) await sleep(300)
+  }
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+
+async function loadBooks() {
+  showSkeletons()
+  const res = await fetch('./books.json')
   BOOKS = await res.json()
+  document.getElementById('stat-count').textContent = BOOKS.length
+  document.getElementById('header-stats').classList.remove('hidden')
   render()
+  enrichBooks()
+}
 
-  // Enrich with live Open Library data (real ratings)
-  const results = await Promise.all(BOOKS.map(b => fetchOpenLibraryData(b.title, b.author)))
-  BOOKS.forEach((book, i) => {
-    if (results[i].rating != null) book.rating = results[i].rating
-    if (results[i].reviews != null) book.reviews = results[i].reviews
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+
+function showSkeletons() {
+  document.getElementById('grid').innerHTML = Array(8).fill(0).map(() => `
+    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm animate-pulse">
+      <div class="h-1.5 bg-slate-200 w-full"></div>
+      <div class="p-5 space-y-3">
+        <div class="h-4 bg-slate-200 rounded-lg w-4/5"></div>
+        <div class="h-3 bg-slate-200 rounded-lg w-1/2"></div>
+        <div class="h-3 bg-slate-200 rounded-lg w-1/3 mt-2"></div>
+        <div class="h-3 bg-slate-200 rounded-lg w-2/3"></div>
+        <div class="flex gap-2 mt-4">
+          <div class="h-8 bg-slate-100 rounded-lg flex-1"></div>
+          <div class="h-8 bg-slate-100 rounded-lg flex-1"></div>
+        </div>
+      </div>
+    </div>
+  `).join('')
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function getFiltered() {
+  const search = document.getElementById('search').value.toLowerCase().trim()
+  return BOOKS.filter(b => {
+    if (clubFilter !== 'all' && b.club !== clubFilter) return false
+    if (yearFilter !== 'all' && String(b.year) !== yearFilter) return false
+    if (search && !b.title.toLowerCase().includes(search) && !b.author.toLowerCase().includes(search)) return false
+    return true
   })
-  render()
 }
 
-function setFilter(f){
-
-filter=f
-
-document.querySelectorAll(".filter").forEach(b=>b.classList.remove("active"))
-event.target.classList.add("active")
-
-render()
-
+function getSorted(books) {
+  const sort = document.getElementById('sort-select').value
+  return [...books].sort((a, b) => {
+    switch (sort) {
+      case 'rating-desc': return (b.rating ?? -1) - (a.rating ?? -1)
+      case 'rating-asc':  return (a.rating ?? 999) - (b.rating ?? 999)
+      case 'year-desc':   return b.year - a.year || a.title.localeCompare(b.title)
+      case 'year-asc':    return a.year - b.year || a.title.localeCompare(b.title)
+      case 'title-asc':   return a.title.localeCompare(b.title)
+      default:            return 0
+    }
+  })
 }
 
-document.getElementById("search").addEventListener("input",render)
+function cardHtml(book) {
+  const t = escapeHtml(book.title)
+  const a = escapeHtml(book.author)
+  const isOprah = book.club === 'oprah'
 
-function render(){
+  const accent  = isOprah ? 'bg-violet-500'  : 'bg-rose-400'
+  const badge   = isOprah
+    ? 'bg-violet-50 text-violet-700 border border-violet-200'
+    : 'bg-rose-50 text-rose-600 border border-rose-200'
+  const label   = isOprah ? "Oprah's Book Club" : "Reese's Book Club"
 
-const grid=document.getElementById("grid")
-grid.innerHTML=""
+  const ratingHtml = book.rating != null
+    ? `<div class="flex items-baseline gap-1.5">
+         <span class="text-amber-500 text-xs tracking-tighter leading-none">${stars(book.rating)}</span>
+         <span class="font-semibold text-amber-700 text-sm">${book.rating}</span>
+         <span class="text-slate-400 text-xs">${(book.reviews ?? 0).toLocaleString()} ratings</span>
+       </div>`
+    : `<div class="text-xs text-slate-400 italic">Ratings not yet available</div>`
 
-const search=document.getElementById("search").value.toLowerCase()
+  const sfUrl        = escapeHtml(book.sf_url)
+  const goodreadsUrl = `https://www.goodreads.com/search?q=${encodeURIComponent(book.title + ' ' + book.author)}`
 
-BOOKS
-.filter(book=>{
+  return `
+    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-lift flex flex-col">
+      <div class="h-1.5 ${accent} w-full"></div>
+      <div class="p-5 flex flex-col gap-2.5 flex-1">
 
-if(filter!=="all" && book.club!==filter) return false
+        <div>
+          <div class="font-bold text-slate-900 leading-snug text-base mb-1">${t}</div>
+          <div class="text-sm text-slate-500 leading-tight">${a}</div>
+        </div>
 
-if(search && !book.title.toLowerCase().includes(search) && !book.author.toLowerCase().includes(search)) return false
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${badge}">${label}</span>
+          <span class="text-xs text-slate-400 font-medium">${book.year}</span>
+        </div>
 
-return true
+        ${ratingHtml}
 
+        <div class="flex gap-2 mt-auto pt-3">
+          <a href="${sfUrl}" target="_blank" rel="noopener noreferrer"
+            class="flex-1 text-center text-xs font-semibold px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+            📖 SF Library
+          </a>
+          <a href="${goodreadsUrl}" target="_blank" rel="noopener noreferrer"
+            class="flex-1 text-center text-xs font-semibold px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">
+            ⭐ Goodreads
+          </a>
+        </div>
+
+      </div>
+    </div>
+  `
+}
+
+function render() {
+  const grid       = document.getElementById('grid')
+  const emptyState = document.getElementById('empty-state')
+  const countEl    = document.getElementById('result-count')
+
+  const filtered = getFiltered()
+  const sorted   = getSorted(filtered)
+
+  if (sorted.length === 0) {
+    grid.innerHTML = ''
+    emptyState.classList.remove('hidden')
+    countEl.textContent = ''
+    return
+  }
+
+  emptyState.classList.add('hidden')
+  countEl.textContent = filtered.length === BOOKS.length
+    ? `Showing all ${BOOKS.length} books`
+    : `Showing ${filtered.length} of ${BOOKS.length} books`
+
+  grid.innerHTML = sorted.map(cardHtml).join('')
+}
+
+// ── Event wiring ──────────────────────────────────────────────────────────────
+
+document.querySelectorAll('[data-club]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    clubFilter = btn.dataset.club
+    document.querySelectorAll('[data-club]').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    render()
+  })
 })
-.sort((a,b)=>(b.rating??0)-(a.rating??0))
 
-.forEach(book=>{
-
-const card=document.createElement("div")
-card.className="card"
-
-card.innerHTML=`
-
-<div class="card-body">
-
-<div class="title">${book.title}</div>
-
-<div class="author">${book.author}</div>
-
-<div class="rating">
-${book.rating != null ? `⭐ ${book.rating} • ${(book.reviews??0).toLocaleString()} Goodreads ratings` : `Coming soon`}
-</div>
-
-<div class="club ${book.club}">
-${book.club==="oprah"?"Oprah's Book Club":"Reese's Book Club"}
-</div>
-
-<div class="links">
-
-<button class="link lib"
-onclick="window.open('${book.sf_url}','_blank')">
-SF Library
-</button>
-
-</div>
-
-</div>
-`
-
-grid.appendChild(card)
-
+document.querySelectorAll('[data-year]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    yearFilter = btn.dataset.year
+    document.querySelectorAll('[data-year]').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    render()
+  })
 })
 
-}
+document.getElementById('search').addEventListener('input', render)
+document.getElementById('sort-select').addEventListener('change', render)
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
 
 loadBooks()
 
