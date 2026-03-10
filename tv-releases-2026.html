@@ -28,7 +28,7 @@
         <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
           📺 <span class="text-cyan-400">2026 TV Releases</span>
         </h1>
-        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Popularity</p>
+        <p class="text-xs text-gray-500 mt-0.5">Live from TMDB · Jan – Feb 2026 · Ranked by Viewer Popularity</p>
       </div>
       <span id="countLabel"
         class="text-xs sm:text-sm font-semibold bg-cyan-950/60 text-cyan-300 px-3 py-1.5 rounded-full border border-cyan-800/50">
@@ -72,20 +72,20 @@
           </select>
         </div>
 
-        <!-- Min TMDB Rating -->
+        <!-- Min Rating -->
         <div class="min-w-[160px]">
           <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wider">
-            Min Rating: <span id="ratingValue" class="text-cyan-400 font-bold">0</span>
+            Min Rating: <span id="ratingValue" class="text-yellow-400 font-bold">0</span>
           </label>
           <input type="range" id="ratingFilter" min="0" max="9" value="0" step="0.5" class="w-full">
         </div>
 
-        <!-- Voted Only -->
+        <!-- Rated Only -->
         <label class="flex items-center gap-2.5 cursor-pointer select-none pb-0.5 min-w-fit">
           <input type="checkbox" id="qualityFilter" class="w-4 h-4 rounded cursor-pointer">
           <div>
-            <p class="text-sm text-gray-300 font-medium leading-none">Voted Shows Only</p>
-            <p class="text-xs text-gray-600 mt-0.5">50+ ratings on TMDB</p>
+            <p class="text-sm text-gray-300 font-medium leading-none">Rated Shows Only</p>
+            <p class="text-xs text-gray-600 mt-0.5">50+ community ratings</p>
           </div>
         </label>
 
@@ -133,10 +133,11 @@
 
   <script>
     // ── Config ───────────────────────────────────────────────────────────────
-    const API_KEY  = '21322bdf6abf288ae15aa6a97caf66ae';
-    const TMDB     = 'https://api.themoviedb.org/3';
-    const IMG_SM   = 'https://image.tmdb.org/t/p/w342';   // card poster
-    const IMG_LG   = 'https://image.tmdb.org/t/p/w780';   // fallback / bigger
+    const API_KEY    = '21322bdf6abf288ae15aa6a97caf66ae';
+    const OMDB_KEY   = '679ba5a1';
+    const TMDB       = 'https://api.themoviedb.org/3';
+    const OMDB       = 'https://www.omdbapi.com';
+    const IMG_SM     = 'https://image.tmdb.org/t/p/w342';   // card poster
 
     // ── Known streaming providers (US TMDB IDs → style) ─────────────────────
     const PROVIDERS = {
@@ -175,7 +176,7 @@
       setStatus('Fetching 2026 shows from TMDB…');
 
       try {
-        // 1. Discover TV shows that first aired Jan–Feb 2026, sorted by popularity
+        // Phase 1 — Discover Jan–Feb 2026 shows, sorted by popularity
         const pages = await Promise.all([
           tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=1'),
           tmdb('/discover/tv?first_air_date.gte=2026-01-01&first_air_date.lte=2026-02-28&sort_by=popularity.desc&page=2'),
@@ -186,39 +187,74 @@
           .flatMap(p => p.results || [])
           .filter(s => s.first_air_date && /^2026-0[12]/.test(s.first_air_date));
 
-        // Deduplicate by id
         const seen = new Set();
         allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 
-        // 2. Render cards immediately with available data (no providers yet)
         hideSkeletons();
         render();
-        setStatus(`Fetching streaming info for ${allShows.length} shows…`);
+        setStatus(`Loading streaming info & IMDb IDs for ${allShows.length} shows…`);
 
-        // 3. Fetch watch/providers for all shows in parallel
-        const providerData = await Promise.allSettled(
-          allShows.map(s =>
+        // Phase 2 — Providers + external IDs in parallel (one Promise.all round)
+        const [providerData, externalData] = await Promise.all([
+          Promise.allSettled(allShows.map(s =>
             tmdb(`/tv/${s.id}/watch/providers`)
-              .then(d => ({ id: s.id, flatrate: (d.results?.US?.flatrate || []) }))
+              .then(d => ({ id: s.id, flatrate: d.results?.US?.flatrate || [] }))
               .catch(() => ({ id: s.id, flatrate: [] }))
-          )
-        );
+          )),
+          Promise.allSettled(allShows.map(s =>
+            tmdb(`/tv/${s.id}/external_ids`)
+              .then(d => ({ id: s.id, imdbId: d.imdb_id || null }))
+              .catch(() => ({ id: s.id, imdbId: null }))
+          )),
+        ]);
 
-        // Attach provider info to each show
         providerData.forEach(r => {
           if (r.status === 'fulfilled') {
             const show = allShows.find(s => s.id === r.value.id);
             if (show) show._providers = r.value.flatrate;
           }
         });
+        externalData.forEach(r => {
+          if (r.status === 'fulfilled') {
+            const show = allShows.find(s => s.id === r.value.id);
+            if (show) show._imdbId = r.value.imdbId;
+          }
+        });
 
         buildPlatformFilter();
         render();
-        setStatus(`${allShows.length} shows · Live from TMDB · Jan–Feb 2026`);
+
+        // Phase 3 — OMDb for real IMDb ratings (only shows that have an IMDb ID)
+        const withImdb = allShows.filter(s => s._imdbId);
+        setStatus(`Fetching IMDb ratings for ${withImdb.length} shows…`);
+
+        const omdbData = await Promise.allSettled(
+          withImdb.map(s =>
+            fetch(`${OMDB}/?i=${s._imdbId}&apikey=${OMDB_KEY}`)
+              .then(r => r.json())
+              .then(d => ({
+                id:         s.id,
+                imdbRating: d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null,
+                imdbVotes:  d.imdbVotes  && d.imdbVotes  !== 'N/A' ? parseInt(d.imdbVotes.replace(/,/g, '')) : 0,
+              }))
+              .catch(() => ({ id: s.id, imdbRating: null, imdbVotes: 0 }))
+          )
+        );
+
+        omdbData.forEach(r => {
+          if (r.status === 'fulfilled') {
+            const show = allShows.find(s => s.id === r.value.id);
+            if (show) { show._imdbRating = r.value.imdbRating; show._imdbVotes = r.value.imdbVotes; }
+          }
+        });
+
+        render();
+        const rated = allShows.filter(s => s._imdbRating != null).length;
+        setStatus(`${allShows.length} shows · ${rated} with IMDb ratings · Sorted by viewer popularity`);
 
       } catch (err) {
         hideSkeletons();
-        setStatus(`⚠ Error loading data: ${err.message}`);
+        setStatus(`⚠ Error: ${err.message}`);
         console.error(err);
       }
     }
@@ -288,7 +324,7 @@
       }).join('') || `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;
         background:#1f293766;border:1px solid #374151;color:#9ca3af">Streaming TBD</span>`;
 
-      const topBadge = show.vote_average >= 8.0
+      const topBadge = rating10 >= 8.0
         ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
             background:#15803d55;border:1px solid #166534;color:#4ade80;white-space:nowrap">✓ Top Pick</span>`
         : '';
@@ -301,8 +337,11 @@
         : `<span style="font-size:72px;font-weight:900;color:${style.text}1a;user-select:none;line-height:1">${show.name[0]}</span>`;
 
       const popularity100 = Math.min(100, Math.round(show.popularity));
-      const votes100 = Math.min(100, Math.round((show.vote_count / 500) * 100));
-      const rating10 = show.vote_average;
+      // Prefer real IMDb rating; fall back to TMDB community rating
+      const hasImdb   = show._imdbRating != null;
+      const rating10  = hasImdb ? show._imdbRating : show.vote_average;
+      const ratingSrc = hasImdb ? 'IMDb' : 'TMDB';
+      const voteCount = hasImdb ? (show._imdbVotes || 0) : (show.vote_count || 0);
 
       return `
       <div class="card" style="
@@ -326,8 +365,8 @@
           <!-- Score -->
           <div style="position:absolute;top:10px;right:12px;
             background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
-            padding:3px 10px;font-size:12px;font-weight:700;color:#fbbf24;
-            border:1px solid rgba(251,191,36,.3)">
+            padding:3px 10px;font-size:12px;font-weight:700;color:#f5c518;
+            border:1px solid rgba(245,197,24,.3)">
             ⭐ ${rating10 > 0 ? rating10.toFixed(1) : 'NR'}
           </div>
           <!-- Platform + quality badges -->
@@ -349,34 +388,39 @@
             <p style="font-size:11px;color:#6b7280;margin:0">${fmtDate(show.first_air_date)}</p>
           </div>
 
-          <div>${stars(rating10)}</div>
-
-          <div style="display:flex;flex-direction:column;gap:9px;flex:1">
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">TMDB Score</span>
-                <span style="color:#f87171;font-weight:700">${rating10 > 0 ? rating10.toFixed(1) + '/10' : '—'}</span>
+          <!-- IMDb rating block -->
+          <div style="
+            background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;
+            padding:10px 12px;display:flex;align-items:center;gap:12px">
+            <div style="text-align:center;min-width:48px">
+              <div style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
+                ${rating10 > 0 ? rating10.toFixed(1) : '—'}
               </div>
-              ${scoreBar(rating10 * 10, '#ef4444')}
+              <div style="font-size:9px;color:#6b7280;font-weight:600;letter-spacing:.05em;margin-top:2px">/10</div>
             </div>
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">Votes</span>
-                <span style="color:#fb923c;font-weight:700">${show.vote_count.toLocaleString()}</span>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:600;color:#d1d5db;margin-bottom:4px">
+                ${stars(rating10)}
               </div>
-              ${scoreBar(votes100, '#f97316')}
-            </div>
-
-            <div>
-              <div style="display:flex;justify-content:space-between;font-size:11px">
-                <span style="color:#9ca3af">Popularity</span>
-                <span style="color:#22d3ee;font-weight:700">${show.popularity.toFixed(1)}</span>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:10px;color:#6b7280">
+                  ${voteCount > 0 ? voteCount.toLocaleString() + ' ratings' : 'Not yet rated'}
+                </span>
+                <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;
+                  background:${hasImdb ? '#1a1200' : '#0a1a1a'};
+                  color:${hasImdb ? '#f5c518' : '#22d3ee'};
+                  border:1px solid ${hasImdb ? '#f5c51844' : '#22d3ee44'}">${ratingSrc}</span>
               </div>
-              ${scoreBar(popularity100, '#22d3ee')}
             </div>
+          </div>
 
+          <!-- Popularity bar -->
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
+              <span style="color:#9ca3af">🔥 Popularity Rank</span>
+              <span style="color:#22d3ee;font-weight:700">#${rank}</span>
+            </div>
+            ${scoreBar(popularity100, '#22d3ee')}
           </div>
         </div>
       </div>`;
@@ -418,8 +462,8 @@
             return (known ? known.name : p.provider_name) === platform;
           });
         })
-        .filter(s => s.vote_average >= minRat)
-        .filter(s => !voted || s.vote_count >= 50)
+        .filter(s => (s._imdbRating ?? s.vote_average) >= minRat)
+        .filter(s => !voted || (s._imdbVotes || s.vote_count || 0) >= 50)
         .filter(s => !search || s.name.toLowerCase().includes(search))
         .sort((a, b) => b.popularity - a.popularity);
 
