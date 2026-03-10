@@ -16,6 +16,26 @@
     #emptyState { display: none; }
     @keyframes shimmer { 0%,100% { opacity:.35 } 50% { opacity:.7 } }
     .skeleton { animation: shimmer 1.6s ease-in-out infinite; }
+    .qpill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 14px; border-radius: 9999px; font-size: 12px; font-weight: 700;
+      border: 1px solid; cursor: pointer; transition: all 0.18s ease; user-select: none;
+    }
+    .qpill-off  { background: transparent; border-color: #374151; color: #6b7280; }
+    .qpill-off:hover  { border-color: #6b7280; color: #d1d5db; }
+    .qpill-heart-on   { background: #4c0519aa; border-color: #be123c; color: #fb7185; }
+    .qpill-week-on    { background: #052e16aa; border-color: #16a34a; color: #4ade80; }
+    .qpill-soon-on    { background: #1c1917aa; border-color: #a78bfa; color: #c4b5fd; }
+    .heart-btn {
+      position: absolute; top: 10px; right: 12px;
+      background: rgba(0,0,0,.65); backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+      padding: 4px 9px; font-size: 16px; cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+      line-height: 1;
+    }
+    .heart-btn:hover { transform: scale(1.25); }
+    .heart-btn.saved { background: rgba(76,5,25,.8); border-color: #be123c; }
   </style>
 </head>
 
@@ -124,6 +144,16 @@
 
       </div>
 
+      <!-- Quick-filter pills -->
+      <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-800">
+        <span class="text-xs text-gray-600 font-semibold uppercase tracking-wider self-center mr-1">Quick:</span>
+        <button id="pill-watchlist" class="qpill qpill-off" onclick="togglePill('watchlist')">
+          ♥ My List <span id="wl-count" class="hidden bg-pink-900/60 text-pink-300 rounded-full px-1.5 text-[10px]">0</span>
+        </button>
+        <button id="pill-week"      class="qpill qpill-off" onclick="togglePill('week')">🆕 New This Week</button>
+        <button id="pill-soon"      class="qpill qpill-off" onclick="togglePill('soon')">📅 Coming Soon</button>
+      </div>
+
       <!-- Status bar -->
       <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-800">
         <span id="statusLabel" class="text-xs text-gray-600">Fetching shows…</span>
@@ -136,15 +166,9 @@
 
   <!-- ── Cards ──────────────────────────────────────────────────────────── -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
-
-    <!-- Skeleton loader -->
     <div id="skeletonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-
-    <!-- Live cards -->
-    <div id="cardGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-
-    <!-- Empty state -->
-    <div id="emptyState" class="flex-col items-center justify-center py-24 text-center">
+    <div id="cardGrid"     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    <div id="emptyState"   class="flex-col items-center justify-center py-24 text-center">
       <div class="text-6xl mb-4 opacity-40">📭</div>
       <p class="text-gray-400 text-lg font-semibold">No shows match your filters</p>
       <p class="text-gray-600 text-sm mt-1">Try adjusting or resetting your filters</p>
@@ -153,11 +177,10 @@
         Clear Filters
       </button>
     </div>
-
   </main>
 
   <footer class="border-t border-gray-800/50 py-8 text-center text-xs text-gray-700">
-    Ratings sourced from TMDB · IMDb & Rotten Tomatoes via OMDb API · Trending from TMDB weekly chart
+    Ratings sourced from TMDB · IMDb &amp; Rotten Tomatoes via OMDb API · Trending from TMDB weekly chart
   </footer>
 
   <script>
@@ -167,35 +190,72 @@
     const TMDB     = 'https://api.themoviedb.org/3';
     const OMDB     = 'https://www.omdbapi.com';
     const IMG_SM   = 'https://image.tmdb.org/t/p/w342';
+    const TODAY    = new Date().toISOString().slice(0, 10);
+    const WEEK_AGO = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
     // ── Known streaming providers (US IDs → style) ──────────────────────────
     const PROVIDERS = {
-      8:    { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
-      175:  { name: 'Netflix',       g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
-      9:    { name: 'Prime Video',   g1: '#001929', g2: '#003060', text: '#6bc5ff', border: '#0060b0', bg: '#003a7a44' },
-      337:  { name: 'Disney+',       g1: '#000826', g2: '#001460', text: '#5599ff', border: '#003da6', bg: '#00226644' },
-      15:   { name: 'Hulu',          g1: '#002818', g2: '#004228', text: '#1ce783', border: '#008844', bg: '#004d2e44' },
-      1899: { name: 'Max',           g1: '#000830', g2: '#001165', text: '#7aabff', border: '#0030bb', bg: '#001a7a44' },
-      2552: { name: 'Apple TV+',     g1: '#0c0c0c', g2: '#1a1a1c', text: '#d1d5db', border: '#3a3a3c', bg: '#1a1a1a66' },
-      386:  { name: 'Peacock',       g1: '#280f00', g2: '#501f00', text: '#ff9933', border: '#884400', bg: '#4d200044' },
-      531:  { name: 'Paramount+',    g1: '#000018', g2: '#000030', text: '#8888ff', border: '#2222aa', bg: '#00003344' },
-      43:   { name: 'Starz',         g1: '#0c0018', g2: '#1a0030', text: '#cc99ff', border: '#6633aa', bg: '#33006644' },
-      35:   { name: 'HBO',           g1: '#180018', g2: '#2c003e', text: '#dd55ff', border: '#7700cc', bg: '#44006644' },
-      37:   { name: 'Showtime',      g1: '#2a0000', g2: '#550000', text: '#ff4444', border: '#990000', bg: '#66000044' },
-      283:  { name: 'Crunchyroll',   g1: '#2b0d00', g2: '#4a1800', text: '#ff6a00', border: '#aa3300', bg: '#4d1a0044' },
-      73:   { name: 'AMC+',          g1: '#001a1a', g2: '#003535', text: '#00cccc', border: '#006666', bg: '#00444444' },
+      8:    { name: 'Netflix',     g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
+      175:  { name: 'Netflix',     g1: '#1a0000', g2: '#3b0000', text: '#ff6b6b', border: '#7f0000', bg: '#5c000055' },
+      9:    { name: 'Prime Video', g1: '#001929', g2: '#003060', text: '#6bc5ff', border: '#0060b0', bg: '#003a7a44' },
+      337:  { name: 'Disney+',     g1: '#000826', g2: '#001460', text: '#5599ff', border: '#003da6', bg: '#00226644' },
+      15:   { name: 'Hulu',        g1: '#002818', g2: '#004228', text: '#1ce783', border: '#008844', bg: '#004d2e44' },
+      1899: { name: 'Max',         g1: '#000830', g2: '#001165', text: '#7aabff', border: '#0030bb', bg: '#001a7a44' },
+      2552: { name: 'Apple TV+',   g1: '#0c0c0c', g2: '#1a1a1c', text: '#d1d5db', border: '#3a3a3c', bg: '#1a1a1a66' },
+      386:  { name: 'Peacock',     g1: '#280f00', g2: '#501f00', text: '#ff9933', border: '#884400', bg: '#4d200044' },
+      531:  { name: 'Paramount+',  g1: '#000018', g2: '#000030', text: '#8888ff', border: '#2222aa', bg: '#00003344' },
+      43:   { name: 'Starz',       g1: '#0c0018', g2: '#1a0030', text: '#cc99ff', border: '#6633aa', bg: '#33006644' },
+      35:   { name: 'HBO',         g1: '#180018', g2: '#2c003e', text: '#dd55ff', border: '#7700cc', bg: '#44006644' },
+      37:   { name: 'Showtime',    g1: '#2a0000', g2: '#550000', text: '#ff4444', border: '#990000', bg: '#66000044' },
+      283:  { name: 'Crunchyroll', g1: '#2b0d00', g2: '#4a1800', text: '#ff6a00', border: '#aa3300', bg: '#4d1a0044' },
+      73:   { name: 'AMC+',        g1: '#001a1a', g2: '#003535', text: '#00cccc', border: '#006666', bg: '#00444444' },
     };
 
     const DEFAULT_STYLE = { g1: '#111827', g2: '#1f2937', text: '#9ca3af', border: '#374151', bg: '#1f293766' };
 
-    // ── Major streaming platforms (only these are shown) ─────────────────────
     // 8/175=Netflix, 15=Hulu, 1899=Max, 9=Prime Video, 386=Peacock, 531=Paramount+, 2552=Apple TV+
     const MAJOR_IDS = new Set([8, 175, 15, 1899, 9, 386, 531, 2552]);
 
     // ── State ────────────────────────────────────────────────────────────────
     let allShows = [];
 
-    // ── API fetch helpers ────────────────────────────────────────────────────
+    // Watchlist: persisted in localStorage as array of numeric IDs
+    let watchlist = new Set(JSON.parse(localStorage.getItem('tvWatchlist') || '[]'));
+
+    // Quick-filter pills state
+    const pillState = { watchlist: false, week: false, soon: false };
+
+    // ── Watchlist helpers ────────────────────────────────────────────────────
+    function saveWatchlist() {
+      localStorage.setItem('tvWatchlist', JSON.stringify([...watchlist]));
+    }
+
+    // Called from card onclick — must be global
+    function toggleWatchlist(id) {
+      if (watchlist.has(id)) watchlist.delete(id); else watchlist.add(id);
+      saveWatchlist();
+      updateWatchlistBadge();
+      render();
+    }
+
+    function updateWatchlistBadge() {
+      const badge = document.getElementById('wl-count');
+      const n = watchlist.size;
+      badge.textContent = n;
+      badge.classList.toggle('hidden', n === 0);
+    }
+
+    // ── Quick-filter pill toggle ─────────────────────────────────────────────
+    function togglePill(name) {
+      pillState[name] = !pillState[name];
+      const pill = document.getElementById(`pill-${name}`);
+      const onClass = { watchlist: 'qpill-heart-on', week: 'qpill-week-on', soon: 'qpill-soon-on' }[name];
+      pill.classList.toggle('qpill-off', !pillState[name]);
+      pill.classList.toggle(onClass,     pillState[name]);
+      render();
+    }
+
+    // ── API fetch helper ─────────────────────────────────────────────────────
     async function tmdb(path) {
       const sep = path.includes('?') ? '&' : '?';
       const res = await fetch(`${TMDB}${path}${sep}api_key=${API_KEY}`);
@@ -211,19 +271,20 @@
 
       try {
         // Phase 1 — Discover US shows Jan 2025–today, sorted by popularity
-        const today = new Date().toISOString().slice(0, 10);
+        // Include future dates (first_air_date up to 60 days ahead) for Coming Soon
+        const futureDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
         const base = '/discover/tv?with_origin_country=US&with_original_language=en' +
-                     `&first_air_date.gte=2025-01-01&first_air_date.lte=${today}&sort_by=popularity.desc`;
+                     `&first_air_date.gte=2025-01-01&first_air_date.lte=${futureDate}&sort_by=popularity.desc`;
         const pages = await Promise.all([1,2,3,4,5,6].map(p => tmdb(`${base}&page=${p}`)));
 
         const raw = pages
           .flatMap(p => p.results || [])
-          .filter(s => s.first_air_date && s.first_air_date >= '2025-01-01' && s.first_air_date <= today);
+          .filter(s => s.first_air_date && s.first_air_date >= '2025-01-01');
 
         const seen = new Set();
         allShows = raw.filter(s => { if (seen.has(s.id)) return false; seen.add(s.id); return true; });
 
-        // Pre-populate TMDB rating as fallback (available immediately from discover response)
+        // Pre-populate TMDB rating as fallback
         allShows.forEach(s => {
           s._tmdbRating = (s.vote_average && s.vote_count > 5) ? s.vote_average : null;
         });
@@ -244,7 +305,6 @@
               .then(d => ({ id: s.id, imdbId: d.imdb_id || null }))
               .catch(() => ({ id: s.id, imdbId: null }))
           )),
-          // Fetch this week's trending TV shows (2 pages = top 40)
           Promise.allSettled([
             tmdb('/trending/tv/week?page=1'),
             tmdb('/trending/tv/week?page=2'),
@@ -264,28 +324,28 @@
           }
         });
 
-        // Build trending rank map (lower rank = more trending)
+        // Build trending rank map
         const trendingRankMap = new Map();
         trendingData.forEach(r => {
           if (r.status === 'fulfilled') {
-            (r.value?.results || []).forEach((t, i) => {
+            (r.value?.results || []).forEach(t => {
               if (!trendingRankMap.has(t.id)) trendingRankMap.set(t.id, trendingRankMap.size + 1);
             });
           }
         });
-        allShows.forEach(s => {
-          s._trendingRank = trendingRankMap.get(s.id) ?? null;
-        });
+        allShows.forEach(s => { s._trendingRank = trendingRankMap.get(s.id) ?? null; });
 
-        // Keep only shows on major streaming platforms
-        allShows = allShows.filter(s =>
-          (s._providers || []).some(p => MAJOR_IDS.has(p.provider_id))
-        );
+        // Keep only shows on major streaming platforms (Coming Soon shows may not have providers yet)
+        allShows = allShows.filter(s => {
+          const isSoon = s.first_air_date > TODAY;
+          const onMajor = (s._providers || []).some(p => MAJOR_IDS.has(p.provider_id));
+          return onMajor || (isSoon && s._trendingRank != null);
+        });
 
         buildPlatformFilter();
         render();
 
-        // Phase 3 — OMDb for IMDb ratings + RT scores (only for shows with an IMDb ID)
+        // Phase 3 — OMDb for IMDb ratings + RT scores
         const withImdb = allShows.filter(s => s._imdbId);
         setStatus(`Fetching IMDb & RT ratings for ${withImdb.length} shows…`);
 
@@ -296,14 +356,13 @@
               .then(d => ({
                 id:         s.id,
                 imdbRating: d.imdbRating && d.imdbRating !== 'N/A' ? parseFloat(d.imdbRating) : null,
-                imdbVotes:  d.imdbVotes  && d.imdbVotes  !== 'N/A' ? parseInt(d.imdbVotes.replace(/,/g,'')) : 0,
-                rtScore:    (() => {
+                rtScore: (() => {
                   const rt = (d.Ratings || []).find(r => r.Source === 'Rotten Tomatoes');
                   if (!rt || rt.Value === 'N/A') return null;
-                  return parseInt(rt.Value); // store as number, e.g. 87
+                  return parseInt(rt.Value); // "87%" → 87
                 })(),
               }))
-              .catch(() => ({ id: s.id, imdbRating: null, imdbVotes: 0, rtScore: null }))
+              .catch(() => ({ id: s.id, imdbRating: null, rtScore: null }))
           )
         );
 
@@ -319,7 +378,7 @@
           }
         });
 
-        // Final sort: keep internal order by best-available rating + popularity
+        // Final internal sort: best-available rating, then popularity; cap at 100
         allShows = allShows
           .sort((a, b) => {
             const ra = a._imdbRating ?? a._tmdbRating ?? 0;
@@ -332,12 +391,14 @@
           .slice(0, 100);
 
         buildPlatformFilter();
+        updateWatchlistBadge();
         render();
 
         const trendingCount = allShows.filter(s => s._trendingRank != null).length;
-        const imdbCount     = allShows.filter(s => s._imdbRating != null).length;
+        const imdbCount     = allShows.filter(s => s._imdbRating  != null).length;
+        const soonCount     = allShows.filter(s => s.first_air_date > TODAY).length;
         setStatus(
-          `${allShows.length} shows · ${trendingCount} trending · ${imdbCount} IMDb ratings · ${rtCount} RT scores`
+          `${allShows.length} shows · ${trendingCount} trending · ${imdbCount} IMDb · ${rtCount} RT scores · ${soonCount} coming soon`
         );
 
       } catch (err) {
@@ -352,20 +413,17 @@
       const sel  = document.getElementById('platformFilter');
       const prev = sel.value;
       sel.innerHTML = '<option value="all">All Platforms</option>';
-
       const names = new Set();
       allShows.forEach(s =>
         (s._providers || []).forEach(p => {
           if (PROVIDERS[p.provider_id]) names.add(PROVIDERS[p.provider_id].name);
         })
       );
-
       [...names].sort().forEach(name => {
         const opt = document.createElement('option');
         opt.value = opt.textContent = name;
         sel.appendChild(opt);
       });
-
       sel.value = names.has(prev) ? prev : 'all';
     }
 
@@ -391,7 +449,6 @@
       ).join('');
     }
 
-    // Fixed: was hardcoded to 2026
     function fmtDate(d) {
       if (!d) return '—';
       const [year, m, day] = d.split('-');
@@ -401,13 +458,15 @@
 
     // ── Card builder ──────────────────────────────────────────────────────────
     function buildCard(show, rank) {
-      const providers = show._providers || [];
-      const style     = getStyle(providers);
+      const providers    = show._providers || [];
+      const style        = getStyle(providers);
+      const isSaved      = watchlist.has(show.id);
+      const isSoon       = show.first_air_date > TODAY;
+      const isNewThisWeek = show.first_air_date >= WEEK_AGO && show.first_air_date <= TODAY;
 
       const rating10     = show._imdbRating ?? show._tmdbRating ?? 0;
       const ratingSource = show._imdbRating != null ? 'IMDb' : 'TMDB';
 
-      // RT score stored as integer (null if unavailable)
       const rtNum   = show._rtScore ?? null;
       const rtColor = rtNum == null ? '#6b7280'
                     : rtNum >= 80   ? '#4ade80'
@@ -422,15 +481,18 @@
       }).join('') || `<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:9999px;
         background:#1f293766;border:1px solid #374151;color:#9ca3af">Streaming TBD</span>`;
 
-      const topBadge = rating10 >= 8.0
+      const topBadge   = rating10 >= 8.0
         ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
-            background:#15803d55;border:1px solid #166534;color:#4ade80;white-space:nowrap">✓ Top Pick</span>`
-        : '';
-
+            background:#15803d55;border:1px solid #166534;color:#4ade80;white-space:nowrap">✓ Top Pick</span>` : '';
       const trendBadge = show._trendingRank != null
         ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
-            background:#7c2d1255;border:1px solid #c2410c;color:#fb923c;white-space:nowrap">🔥 Trending</span>`
-        : '';
+            background:#7c2d1255;border:1px solid #c2410c;color:#fb923c;white-space:nowrap">🔥 Trending</span>` : '';
+      const newBadge   = isNewThisWeek
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
+            background:#052e1655;border:1px solid #16a34a;color:#4ade80;white-space:nowrap">🆕 New</span>` : '';
+      const soonBadge  = isSoon
+        ? `<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;
+            background:#1c193155;border:1px solid #7c3aed;color:#c4b5fd;white-space:nowrap">📅 Coming Soon</span>` : '';
 
       const posterHtml = show.poster_path
         ? `<img src="${IMG_SM}${show.poster_path}" alt="${show.name.replace(/"/g,'&quot;')}" loading="lazy"
@@ -438,12 +500,13 @@
              onerror="this.style.display='none'">`
         : `<span style="font-size:72px;font-weight:900;color:${style.text}1a;user-select:none;line-height:1">${show.name[0]}</span>`;
 
-      // Synopsis: trim to ~120 chars
       const synopsis = show.overview
-        ? show.overview.length > 120
-          ? show.overview.slice(0, 117) + '…'
-          : show.overview
+        ? (show.overview.length > 120 ? show.overview.slice(0, 117) + '…' : show.overview)
         : '';
+
+      // Trailer URL — YouTube search pre-filled with show name + year + "trailer"
+      const year = (show.first_air_date || '').slice(0, 4);
+      const trailerUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(show.name + ' ' + year + ' official trailer')}`;
 
       return `
       <div class="card" style="
@@ -463,15 +526,17 @@
             background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
             padding:3px 10px;font-size:12px;font-weight:700;color:#fff;
             border:1px solid rgba(255,255,255,.15)">#${rank}</div>
-          <!-- Score (hidden when no rating) -->
-          ${rating10 > 0 ? `<div style="position:absolute;top:10px;right:12px;
-            background:rgba(0,0,0,.7);backdrop-filter:blur(6px);border-radius:8px;
-            padding:3px 10px;font-size:12px;font-weight:700;color:#f5c518;
-            border:1px solid rgba(245,197,24,.3)">⭐ ${rating10.toFixed(1)}</div>` : ''}
-          <!-- Platform + quality badges -->
+          <!-- Heart / watchlist button -->
+          <button class="heart-btn ${isSaved ? 'saved' : ''}"
+            onclick="event.stopPropagation();toggleWatchlist(${show.id})"
+            title="${isSaved ? 'Remove from My List' : 'Add to My List'}"
+            aria-label="${isSaved ? 'Remove from My List' : 'Add to My List'}">
+            ${isSaved ? '♥' : '♡'}
+          </button>
+          <!-- Poster badges -->
           <div style="position:absolute;bottom:10px;left:10px;right:10px;
             display:flex;flex-wrap:wrap;gap:4px;align-items:center">
-            ${badgesHtml}${trendBadge}${topBadge}
+            ${badgesHtml}${soonBadge}${newBadge}${trendBadge}${topBadge}
           </div>
         </div>
 
@@ -490,11 +555,9 @@
               ${synopsis}</p>` : ''}
           </div>
 
-          <!-- Ratings block: score left · RT right -->
+          <!-- Ratings block -->
           <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0;
             background:rgba(0,0,0,.3);border:1px solid #374151;border-radius:10px;overflow:hidden">
-
-            <!-- IMDb / TMDB score -->
             <div style="padding:10px 12px">
               <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:3px">
                 <span style="font-size:22px;font-weight:800;color:#f5c518;line-height:1">
@@ -507,11 +570,7 @@
               </div>
               <div style="font-size:12px">${stars(rating10)}</div>
             </div>
-
-            <!-- Divider -->
             <div style="background:#374151"></div>
-
-            <!-- RT -->
             <div style="padding:10px 12px;text-align:center;display:flex;flex-direction:column;
               justify-content:center;gap:2px">
               <div style="font-size:20px;font-weight:800;color:${rtColor};line-height:1.1">
@@ -521,8 +580,18 @@
                 🍅 ROTTEN TOMATOES
               </div>
             </div>
-
           </div>
+
+          <!-- Trailer button -->
+          <a href="${trailerUrl}" target="_blank" rel="noopener noreferrer"
+            style="display:flex;align-items:center;justify-content:center;gap:6px;
+              padding:8px;border-radius:10px;font-size:12px;font-weight:700;
+              background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);
+              color:#fca5a5;text-decoration:none;transition:background 0.18s ease"
+            onmouseover="this.style.background='rgba(220,38,38,.25)'"
+            onmouseout="this.style.background='rgba(220,38,38,.12)'">
+            ▶ Watch Trailer
+          </a>
 
           <!-- Popularity / trending indicator -->
           <div>
@@ -574,29 +643,25 @@
         .filter(s => (s._imdbRating ?? s._tmdbRating ?? 0) >= minRat)
         .filter(s => !voted || (s._imdbRating ?? s._tmdbRating) != null)
         .filter(s => !search || s.name.toLowerCase().includes(search))
+        // Quick-filter pills
+        .filter(s => !pillState.watchlist || watchlist.has(s.id))
+        .filter(s => !pillState.week || (s.first_air_date >= WEEK_AGO && s.first_air_date <= TODAY))
+        .filter(s => !pillState.soon || s.first_air_date > TODAY)
         .sort((a, b) => {
           if (sortBy === 'trending') {
-            const ta = a._trendingRank ?? 9999;
-            const tb = b._trendingRank ?? 9999;
+            const ta = a._trendingRank ?? 9999, tb = b._trendingRank ?? 9999;
             if (ta !== tb) return ta - tb;
-            // tie-break: trending shows by rating, rest by popularity
-            const ra = a._imdbRating ?? a._tmdbRating ?? 0;
-            const rb = b._imdbRating ?? b._tmdbRating ?? 0;
-            return rb - ra;
+            return (b._imdbRating ?? b._tmdbRating ?? 0) - (a._imdbRating ?? a._tmdbRating ?? 0);
           }
           if (sortBy === 'rating') {
             const ra = a._imdbRating ?? a._tmdbRating ?? 0;
             const rb = b._imdbRating ?? b._tmdbRating ?? 0;
             if (ra && rb) return rb - ra;
-            if (ra) return -1;
-            if (rb) return 1;
+            if (ra) return -1; if (rb) return 1;
             return b.popularity - a.popularity;
           }
-          if (sortBy === 'newest') {
-            return (b.first_air_date || '').localeCompare(a.first_air_date || '');
-          }
-          // popular
-          return b.popularity - a.popularity;
+          if (sortBy === 'newest') return (b.first_air_date || '').localeCompare(a.first_air_date || '');
+          return b.popularity - a.popularity; // popular
         });
 
       const grid  = document.getElementById('cardGrid');
@@ -621,10 +686,15 @@
       document.getElementById('platformFilter').value  = 'all';
       document.getElementById('ratingFilter').value    = 0;
       document.getElementById('qualityFilter').checked = false;
+      // Reset all pills
+      ['watchlist', 'week', 'soon'].forEach(name => {
+        if (pillState[name]) togglePill(name);
+      });
       render();
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
+    updateWatchlistBadge();
     fetchShows();
 
     ['searchInput', 'sortFilter', 'monthFilter', 'platformFilter', 'ratingFilter', 'qualityFilter']
