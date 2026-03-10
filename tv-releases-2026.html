@@ -155,6 +155,10 @@
 
     const DEFAULT_STYLE = { g1: '#111827', g2: '#1f2937', text: '#9ca3af', border: '#374151', bg: '#1f293766' };
 
+    // ── Major streaming platforms (only these are shown) ─────────────────────
+    const MAJOR_IDS = new Set([8, 175, 15, 1899, 9, 386, 531, 2552]);
+    // 8/175=Netflix, 15=Hulu, 1899=Max, 9=Prime Video, 386=Peacock, 531=Paramount+, 2552=Apple TV+
+
     // ── State ────────────────────────────────────────────────────────────────
     let allShows = [];  // enriched show objects
 
@@ -219,6 +223,11 @@
           }
         });
 
+        // Keep only shows on major streaming platforms
+        allShows = allShows.filter(s =>
+          (s._providers || []).some(p => MAJOR_IDS.has(p.provider_id))
+        );
+
         buildPlatformFilter();
         render();
 
@@ -247,14 +256,20 @@
           }
         });
 
-        // Keep only shows with an IMDb rating, sorted by rating desc, top 100
+        // Sort: IMDb-rated shows first (by rating desc), unrated last (by popularity desc)
         allShows = allShows
-          .filter(s => s._imdbRating != null)
-          .sort((a, b) => b._imdbRating - a._imdbRating)
+          .sort((a, b) => {
+            if (a._imdbRating != null && b._imdbRating != null) return b._imdbRating - a._imdbRating;
+            if (a._imdbRating != null) return -1;
+            if (b._imdbRating != null) return 1;
+            return b.popularity - a.popularity;
+          })
           .slice(0, 100);
 
+        buildPlatformFilter();
         render();
-        setStatus(`Top ${allShows.length} shows ranked by IMDb rating`);
+        const rated = allShows.filter(s => s._imdbRating != null).length;
+        setStatus(`${allShows.length} shows on major streamers · ${rated} with IMDb ratings`);
 
       } catch (err) {
         hideSkeletons();
@@ -481,7 +496,12 @@
         .filter(s => (s._imdbRating ?? 0) >= minRat)
         .filter(s => !voted || s._imdbRating != null)
         .filter(s => !search || s.name.toLowerCase().includes(search))
-        .sort((a, b) => (b._imdbRating ?? 0) - (a._imdbRating ?? 0));
+        .sort((a, b) => {
+          if (a._imdbRating != null && b._imdbRating != null) return b._imdbRating - a._imdbRating;
+          if (a._imdbRating != null) return -1;
+          if (b._imdbRating != null) return 1;
+          return b.popularity - a.popularity;
+        });
 
       const grid  = document.getElementById('cardGrid');
       const empty = document.getElementById('emptyState');
