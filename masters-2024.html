@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scottie Scheffler — 2024 Masters Champion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --masters-green: #006747;
+            --masters-dark: #004d35;
+            --masters-gold: #c8a951;
+            --masters-cream: #f5f0e8;
+            --fairway: #4a8c5c;
+            --fairway-light: #5ea86e;
+            --rough: #2d6b3f;
+            --green-surface: #6abf7b;
+            --bunker: #e8d9a0;
+            --water: #4a90c2;
+            --water-light: #6bb0e0;
+            --tee: #3d7a4f;
+            --birdie: #2ecc71;
+            --eagle: #f1c40f;
+            --bogey: #e74c3c;
+            --double: #c0392b;
+            --par-color: #95a5a6;
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --text: #eee;
+            --text-muted: #8899aa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(135deg, var(--masters-dark), var(--masters-green));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.4);
+            border-bottom: 2px solid var(--masters-gold);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--masters-gold);
+            letter-spacing: 1px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+
+        .header-player {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .player-score {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* ===== ROUND SELECTOR ===== */
+        .round-selector {
+            display: flex;
+            gap: 6px;
+        }
+
+        .round-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .round-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .round-btn.active {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            border-color: var(--masters-gold);
+            font-weight: 700;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+        }
+
+        /* ===== SCORECARD SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--panel);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            overflow-y: auto;
+            padding: 16px 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            color: var(--masters-gold);
+            padding: 0 16px 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hole-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .hole-row:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .hole-row.active {
+            background: rgba(200, 169, 81, 0.1);
+            border-left-color: var(--masters-gold);
+        }
+
+        .hole-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .hole-name {
+            flex: 1;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .hole-par {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-right: 8px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .hole-yards {
+            font-size: 11px;
+            color: var(--text-muted);
+            width: 45px;
+            text-align: right;
+            margin-right: 8px;
+        }
+
+        .hole-score {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .score-eagle { background: var(--eagle); color: #333; }
+        .score-birdie { background: var(--birdie); color: white; }
+        .score-par { background: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
+        .score-bogey { background: var(--bogey); color: white; }
+        .score-double { background: var(--double); color: white; }
+
+        .sidebar-section {
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: 8px;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+
+        .stat-label { color: var(--text-muted); }
+        .stat-value { font-weight: 600; }
+
+        .turn-divider {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 4px 16px;
+            position: relative;
+        }
+
+        .turn-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 8px 16px 4px;
+        }
+
+        /* ===== COURSE VIEW ===== */
+        .course-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: #1a2810;
+        }
+
+        .course-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== SHOT DETAIL PANEL ===== */
+        .shot-detail {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200, 169, 81, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: none;
+            z-index: 50;
+            min-width: 400px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        .shot-detail.visible { display: flex; gap: 24px; align-items: center; }
+
+        .shot-detail-hole {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--masters-gold);
+        }
+
+        .shot-detail-info {
+            flex: 1;
+        }
+
+        .shot-detail-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .shot-detail-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ===== CONTROLS OVERLAY ===== */
+        .controls-overlay {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(22, 33, 62, 0.9);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-btn:hover {
+            background: rgba(200, 169, 81, 0.3);
+            border-color: var(--masters-gold);
+        }
+
+        /* ===== PLAY BUTTON ===== */
+        .play-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 300px;
+            display: flex;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .play-btn {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(200, 169, 81, 0.4);
+        }
+
+        /* ===== LEGEND ===== */
+        .legend {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            z-index: 50;
+            font-size: 11px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--masters-gold);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ===== HOLE DETAIL MODAL ===== */
+        .hole-detail-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hole-detail-overlay.visible {
+            display: flex;
+        }
+
+        .hole-detail-card {
+            background: var(--panel);
+            border: 1px solid rgba(200, 169, 81, 0.3);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .hole-detail-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .hole-detail-header {
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .hole-detail-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--masters-gold);
+            line-height: 1;
+        }
+
+        .hole-detail-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: white;
+        }
+
+        .hole-detail-meta {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .hole-detail-svg {
+            width: 100%;
+            height: 300px;
+            margin: 16px 0;
+            background: #1a2810;
+            border-radius: 8px;
+        }
+
+        .round-scores-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .round-score-card {
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .round-score-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .round-score-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .round-score-vs-par {
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* ===== SHOT LINES ===== */
+        .shot-line {
+            stroke-width: 2.5;
+            fill: none;
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.2s, stroke-width 0.2s;
+        }
+
+        .shot-line:hover {
+            stroke-width: 4;
+            opacity: 1;
+        }
+
+        .shot-line.birdie { stroke: var(--birdie); }
+        .shot-line.eagle { stroke: var(--eagle); }
+        .shot-line.par { stroke: rgba(255,255,255,0.4); }
+        .shot-line.bogey { stroke: var(--bogey); }
+
+        .shot-dot {
+            cursor: pointer;
+            transition: r 0.2s;
+        }
+
+        .shot-dot:hover {
+            r: 6;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes shotDraw {
+            from { stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        .shot-line.animating {
+            stroke-dasharray: 1000;
+            animation: shotDraw 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-left">
+        <div>
+            <div class="header-logo">THE MASTERS</div>
+            <div class="header-subtitle">Augusta National Golf Club — April 11-14, 2024</div>
+        </div>
+    </div>
+    <div class="header-player">
+        <div class="player-name">Scottie Scheffler</div>
+        <div class="player-score" id="totalScore">-11 (277)</div>
+    </div>
+    <div class="round-selector" id="roundSelector">
+        <button class="round-btn active" data-round="all">All Rounds</button>
+        <button class="round-btn" data-round="1">R1: 66</button>
+        <button class="round-btn" data-round="2">R2: 72</button>
+        <button class="round-btn" data-round="3">R3: 71</button>
+        <button class="round-btn" data-round="4">R4: 68</button>
+    </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="main">
+    <!-- SIDEBAR SCORECARD -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-title">Scorecard</div>
+        <div class="turn-label">Front Nine</div>
+        <div id="frontNine"></div>
+        <div class="turn-divider"></div>
+        <div class="turn-label">Back Nine</div>
+        <div id="backNine"></div>
+        <div class="sidebar-section" id="statsSection">
+            <div class="sidebar-section-title">Round Statistics</div>
+        </div>
+    </div>
+
+    <!-- COURSE VIEW -->
+    <div class="course-container" id="courseContainer">
+        <svg class="course-svg" id="courseSvg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="2" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+                <filter id="waterGlow">
+                    <feGaussianBlur stdDeviation="1.5" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+                <linearGradient id="fairwayGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4a8c5c"/>
+                    <stop offset="100%" stop-color="#3d7a4f"/>
+                </linearGradient>
+                <radialGradient id="greenGrad">
+                    <stop offset="0%" stop-color="#7dd68a"/>
+                    <stop offset="100%" stop-color="#5cb868"/>
+                </radialGradient>
+                <pattern id="roughPattern" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <rect width="8" height="8" fill="#2d5a35"/>
+                    <circle cx="2" cy="2" r="0.5" fill="#245a2e" opacity="0.3"/>
+                    <circle cx="6" cy="6" r="0.5" fill="#245a2e" opacity="0.3"/>
+                </pattern>
+                <pattern id="treePattern" width="12" height="12" patternUnits="userSpaceOnUse">
+                    <rect width="12" height="12" fill="#1e4828"/>
+                    <circle cx="3" cy="3" r="2" fill="#1a3f22" opacity="0.5"/>
+                    <circle cx="9" cy="9" r="2.5" fill="#1a3f22" opacity="0.5"/>
+                </pattern>
+                <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+                    <polygon points="0 0, 6 2, 0 4" fill="currentColor" opacity="0.6"/>
+                </marker>
+            </defs>
+
+            <!-- Background -->
+            <rect width="1400" height="900" fill="#1a2810"/>
+
+            <!-- Course terrain base -->
+            <g id="courseBase">
+                <!-- Tree/rough areas (background) -->
+                <rect x="0" y="0" width="1400" height="900" fill="url(#treePattern)" opacity="0.6"/>
+            </g>
+
+            <!-- HOLES GROUP — all hole elements -->
+            <g id="holesGroup">
+
+                <!-- ===== HOLE 1 — Tea Olive — Par 4, 445 yds ===== -->
+                <g id="hole-1" class="hole-group" data-hole="1">
+                    <path d="M 110,780 Q 115,720 120,660 Q 125,600 130,540" fill="url(#fairwayGrad)" stroke="#3d7a4f" stroke-width="1" opacity="0.9"/>
+                    <ellipse cx="120" cy="780" rx="12" ry="8" fill="#3d7a4f" stroke="#2d6b3f" stroke-width="0.5"/>
+                    <rect x="115" y="785" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 100,780 Q 108,720 115,660 Q 122,610 130,540 L 140,540 Q 135,610 128,660 Q 122,720 130,780 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="130" cy="535" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="118" cy="548" rx="8" ry="5" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="130" y="520" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">1</text>
+                </g>
+
+                <!-- ===== HOLE 2 — Pink Dogwood — Par 5, 585 yds ===== -->
+                <g id="hole-2" class="hole-group" data-hole="2">
+                    <rect x="125" y="790" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 135,790 Q 170,740 200,680 Q 230,620 250,570 Q 265,530 260,480 L 275,475 Q 280,530 265,575 Q 245,625 215,685 Q 185,745 145,790 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="267" cy="470" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="255" cy="458" rx="7" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="267" y="455" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">2</text>
+                </g>
+
+                <!-- ===== HOLE 3 — Flowering Peach — Par 4, 350 yds ===== -->
+                <g id="hole-3" class="hole-group" data-hole="3">
+                    <rect x="270" y="460" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 275,455 Q 290,430 310,400 Q 330,375 340,350 L 355,355 Q 345,380 325,400 Q 305,430 285,455 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="347" cy="342" rx="14" ry="11" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="360" cy="350" rx="7" ry="5" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="347" y="328" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">3</text>
+                </g>
+
+                <!-- ===== HOLE 4 — Flowering Crab Apple — Par 3, 240 yds ===== -->
+                <g id="hole-4" class="hole-group" data-hole="4">
+                    <rect x="350" y="330" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <ellipse cx="405" cy="275" rx="16" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="393" cy="282" rx="7" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="405" y="262" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">4</text>
+                </g>
+
+                <!-- ===== HOLE 5 — Magnolia — Par 4, 495 yds ===== -->
+                <g id="hole-5" class="hole-group" data-hole="5">
+                    <rect x="410" y="265" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 415,260 Q 430,220 445,175 Q 455,140 460,110 L 475,115 Q 470,145 460,180 Q 445,225 425,260 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="467" cy="100" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="480" cy="108" rx="7" ry="5" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="467" y="87" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">5</text>
+                </g>
+
+                <!-- ===== HOLE 6 — Juniper — Par 3, 180 yds ===== -->
+                <g id="hole-6" class="hole-group" data-hole="6">
+                    <rect x="475" y="95" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <ellipse cx="530" cy="130" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="518" cy="122" rx="7" ry="5" fill="#e8d9a0" opacity="0.8"/>
+                    <ellipse cx="544" cy="138" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="530" y="118" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">6</text>
+                </g>
+
+                <!-- ===== HOLE 7 — Pampas — Par 4, 450 yds ===== -->
+                <g id="hole-7" class="hole-group" data-hole="7">
+                    <rect x="540" y="135" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 545,140 Q 570,180 590,230 Q 610,280 620,320 L 632,315 Q 625,275 605,225 Q 585,175 555,140 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="626" cy="328" rx="14" ry="11" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <text x="626" y="315" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">7</text>
+                </g>
+
+                <!-- ===== HOLE 8 — Yellow Jasmine — Par 5, 570 yds ===== -->
+                <g id="hole-8" class="hole-group" data-hole="8">
+                    <rect x="630" y="340" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 635,345 Q 620,400 600,450 Q 580,500 570,540 Q 560,570 565,600 L 578,598 Q 575,570 585,540 Q 595,500 615,450 Q 635,395 645,345 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="571" cy="610" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="558" cy="602" rx="7" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="571" y="598" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">8</text>
+                </g>
+
+                <!-- ===== HOLE 9 — Carolina Cherry — Par 4, 460 yds ===== -->
+                <g id="hole-9" class="hole-group" data-hole="9">
+                    <rect x="575" y="625" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 580,630 Q 560,670 540,710 Q 520,740 510,760 L 523,765 Q 530,745 550,715 Q 570,675 590,630 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="516" cy="773" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <text x="516" y="760" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">9</text>
+                </g>
+
+                <!-- ===== HOLE 10 — Camellia — Par 4, 495 yds ===== -->
+                <g id="hole-10" class="hole-group" data-hole="10">
+                    <rect x="520" y="790" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 525,795 Q 560,760 600,710 Q 640,660 670,620 Q 700,580 720,550 L 733,558 Q 715,585 685,620 Q 655,660 615,710 Q 575,760 535,795 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="727" cy="545" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <text x="727" y="532" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">10</text>
+                </g>
+
+                <!-- ===== HOLE 11 — White Dogwood — Par 4, 520 yds ===== -->
+                <g id="hole-11" class="hole-group" data-hole="11">
+                    <rect x="735" y="540" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 740,538 Q 760,570 780,610 Q 800,650 815,690 Q 825,720 830,745 L 843,742 Q 838,715 828,685 Q 815,645 795,605 Q 775,565 750,535 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="836" cy="755" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <!-- Pond left of 11 green -->
+                    <ellipse cx="815" cy="770" rx="12" ry="8" fill="var(--water)" opacity="0.7" filter="url(#waterGlow)"/>
+                    <text x="836" y="742" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">11</text>
+                </g>
+
+                <!-- ===== HOLE 12 — Golden Bell — Par 3, 155 yds ===== -->
+                <g id="hole-12" class="hole-group" data-hole="12">
+                    <rect x="840" y="765" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <!-- Rae's Creek -->
+                    <path d="M 860,790 Q 900,800 940,795 Q 970,790 1000,785" stroke="var(--water)" stroke-width="6" fill="none" opacity="0.7" filter="url(#waterGlow)"/>
+                    <ellipse cx="920" cy="780" rx="18" ry="10" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="905" cy="773" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <ellipse cx="938" cy="773" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="920" y="768" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">12</text>
+                </g>
+
+                <!-- ===== HOLE 13 — Azalea — Par 5, 545 yds ===== -->
+                <g id="hole-13" class="hole-group" data-hole="13">
+                    <rect x="850" y="782" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 855,788 Q 880,810 920,825 Q 960,835 1000,830 Q 1040,820 1070,800 Q 1090,785 1100,765 L 1112,772 Q 1100,795 1078,812 Q 1048,832 1005,842 Q 960,848 920,838 Q 878,822 855,800 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <!-- Rae's Creek in front of 13 green -->
+                    <path d="M 1070,780 Q 1090,775 1110,778" stroke="var(--water)" stroke-width="4" fill="none" opacity="0.6"/>
+                    <ellipse cx="1106" cy="760" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="1120" cy="768" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="1106" y="747" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">13</text>
+                </g>
+
+                <!-- ===== HOLE 14 — Chinese Fir — Par 4, 440 yds ===== -->
+                <g id="hole-14" class="hole-group" data-hole="14">
+                    <rect x="1110" y="755" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 1115,750 Q 1120,710 1125,660 Q 1130,610 1132,570 L 1147,572 Q 1145,615 1140,665 Q 1135,715 1125,750 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="1139" cy="558" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <text x="1139" y="545" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">14</text>
+                </g>
+
+                <!-- ===== HOLE 15 — Firethorn — Par 5, 550 yds ===== -->
+                <g id="hole-15" class="hole-group" data-hole="15">
+                    <rect x="1143" y="548" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 1148,543 Q 1155,500 1160,450 Q 1165,400 1168,360 Q 1170,330 1165,300 L 1180,298 Q 1185,330 1183,365 Q 1180,405 1175,455 Q 1170,505 1158,543 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <!-- Pond in front of 15 green -->
+                    <ellipse cx="1172" cy="285" rx="14" ry="8" fill="var(--water)" opacity="0.7" filter="url(#waterGlow)"/>
+                    <ellipse cx="1172" cy="270" rx="16" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <text x="1172" y="257" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">15</text>
+                </g>
+
+                <!-- ===== HOLE 16 — Redbud — Par 3, 170 yds ===== -->
+                <g id="hole-16" class="hole-group" data-hole="16">
+                    <rect x="1175" y="260" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <!-- Pond at 16 -->
+                    <ellipse cx="1110" cy="225" rx="18" ry="12" fill="var(--water)" opacity="0.7" filter="url(#waterGlow)"/>
+                    <ellipse cx="1095" cy="210" rx="16" ry="13" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="1082" cy="218" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="1095" y="198" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">16</text>
+                </g>
+
+                <!-- ===== HOLE 17 — Nandina — Par 4, 440 yds ===== -->
+                <g id="hole-17" class="hole-group" data-hole="17">
+                    <rect x="1090" y="198" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 1095,193 Q 1070,160 1040,130 Q 1010,105 985,90 L 992,78 Q 1020,95 1050,120 Q 1080,150 1105,188 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="984" cy="74" rx="14" ry="11" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="972" cy="82" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <text x="984" y="62" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">17</text>
+                </g>
+
+                <!-- ===== HOLE 18 — Holly — Par 4, 465 yds ===== -->
+                <g id="hole-18" class="hole-group" data-hole="18">
+                    <rect x="980" y="68" width="10" height="4" fill="#5a5a5a" rx="1"/>
+                    <path d="M 985,62 Q 960,45 930,35 Q 900,28 860,30 Q 820,35 790,50 Q 760,68 740,90 L 752,98 Q 768,78 795,62 Q 825,48 860,43 Q 900,40 930,48 Q 958,55 980,68 Z" fill="url(#fairwayGrad)" opacity="0.85"/>
+                    <ellipse cx="745" cy="95" rx="15" ry="12" fill="url(#greenGrad)" stroke="#4a9e5e" stroke-width="1"/>
+                    <ellipse cx="730" cy="102" rx="7" ry="5" fill="#e8d9a0" opacity="0.8"/>
+                    <ellipse cx="758" cy="106" rx="6" ry="4" fill="#e8d9a0" opacity="0.8"/>
+                    <!-- Clubhouse area -->
+                    <rect x="730" y="70" width="30" height="20" fill="#d4c9a0" opacity="0.3" rx="2"/>
+                    <text x="745" y="82" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="10" font-weight="600">18</text>
+                </g>
+
+            </g>
+
+            <!-- SHOT OVERLAY GROUP -->
+            <g id="shotsGroup"></g>
+
+        </svg>
+    </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+    <div class="legend-title">Shot Result</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--eagle)"></div> Eagle</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--birdie)"></div> Birdie</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.4)"></div> Par</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--bogey)"></div> Bogey</div>
+</div>
+
+<!-- PLAY CONTROLS -->
+<div class="play-controls">
+    <button class="play-btn" id="playBtn" onclick="playRound()">&#9654; Play Round</button>
+    <button class="play-btn" id="resetBtn" onclick="resetView()" style="background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);">Reset View</button>
+</div>
+
+<!-- ZOOM CONTROLS -->
+<div class="controls-overlay">
+    <button class="control-btn" onclick="zoomIn()" title="Zoom In">+</button>
+    <button class="control-btn" onclick="zoomOut()" title="Zoom Out">-</button>
+    <button class="control-btn" onclick="resetZoom()" title="Reset Zoom">&#8634;</button>
+</div>
+
+<!-- SHOT DETAIL TOOLTIP -->
+<div class="shot-detail" id="shotDetail">
+    <div class="shot-detail-hole" id="shotDetailHole"></div>
+    <div class="shot-detail-info">
+        <div class="shot-detail-title" id="shotDetailTitle"></div>
+        <div class="shot-detail-desc" id="shotDetailDesc"></div>
+    </div>
+</div>
+
+<!-- HOLE DETAIL OVERLAY -->
+<div class="hole-detail-overlay" id="holeDetailOverlay">
+    <div class="hole-detail-card">
+        <button class="hole-detail-close" onclick="closeHoleDetail()">&times;</button>
+        <div class="hole-detail-header">
+            <div class="hole-detail-number" id="holeDetailNum"></div>
+            <div>
+                <div class="hole-detail-name" id="holeDetailName"></div>
+                <div class="hole-detail-meta" id="holeDetailMeta"></div>
+            </div>
+        </div>
+        <div class="round-scores-grid" id="holeRoundScores"></div>
+        <div id="holeDetailNotes" style="margin-top:16px; font-size:13px; color:var(--text-muted); line-height:1.6;"></div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// DATA: Augusta National Course Info + Scheffler's 2024 Scores
+// ============================================================
+
+const COURSE = [
+    { hole: 1,  name: "Tea Olive",            par: 4, yards: 445 },
+    { hole: 2,  name: "Pink Dogwood",          par: 5, yards: 585 },
+    { hole: 3,  name: "Flowering Peach",       par: 4, yards: 350 },
+    { hole: 4,  name: "Flowering Crab Apple",  par: 3, yards: 240 },
+    { hole: 5,  name: "Magnolia",              par: 4, yards: 495 },
+    { hole: 6,  name: "Juniper",               par: 3, yards: 180 },
+    { hole: 7,  name: "Pampas",                par: 4, yards: 450 },
+    { hole: 8,  name: "Yellow Jasmine",        par: 5, yards: 570 },
+    { hole: 9,  name: "Carolina Cherry",       par: 4, yards: 460 },
+    { hole: 10, name: "Camellia",              par: 4, yards: 495 },
+    { hole: 11, name: "White Dogwood",         par: 4, yards: 520 },
+    { hole: 12, name: "Golden Bell",           par: 3, yards: 155 },
+    { hole: 13, name: "Azalea",                par: 5, yards: 545 },
+    { hole: 14, name: "Chinese Fir",           par: 4, yards: 440 },
+    { hole: 15, name: "Firethorn",             par: 5, yards: 550 },
+    { hole: 16, name: "Redbud",                par: 3, yards: 170 },
+    { hole: 17, name: "Nandina",               par: 4, yards: 440 },
+    { hole: 18, name: "Holly",                 par: 4, yards: 465 },
+];
+
+// Scottie Scheffler's 2024 Masters — hole-by-hole scores
+// R1: 66 (-6), R2: 72 (E), R3: 71 (-1), R4: 68 (-4)
+// Reconstructed from detailed reporting
+const SCORES = {
+    1: { // R1: 66 — bogey-free, 6 birdies
+        scores: [4, 4, 4, 3, 4, 3, 4, 4, 4,  4, 4, 2, 4, 4, 4, 2, 4, 4],
+        //       1  2  3  4  5  6  7  8  9   10 11 12 13 14 15 16 17 18
+        notes: "Bogey-free 66 — lowest Masters round of Scheffler's career. Holed a bunker shot on 12 for birdie. Ball miraculously stayed dry on 13. Finished with a dart at 16."
+    },
+    2: { // R2: 72 (E) — some birdies offset by bogeys
+        scores: [4, 5, 4, 3, 4, 3, 4, 4, 4,  4, 4, 3, 5, 4, 5, 3, 4, 5],
+        notes: "Even-par 72 maintained position near the top. Four bogeys on the back nine offset by birdies."
+    },
+    3: { // R3: 71 (-1) — steady round to take 1-shot lead
+        scores: [4, 4, 4, 3, 4, 3, 4, 5, 4,  4, 4, 3, 4, 4, 4, 3, 4, 4],
+        notes: "Steady 1-under 71 to take a one-shot lead into Sunday. Patient play throughout."
+    },
+    4: { // R4: 68 (-4) — well documented
+        scores: [4, 5, 3, 4, 4, 3, 5, 4, 3,  3, 5, 3, 4, 3, 5, 2, 4, 4],
+        //       P  B  Bi Bo P  P  Bo Bi Bi  Bi Bo P  Bi Bi P  Bi P  P
+        notes: "Championship Sunday masterclass. Recovered from early bogeys with three consecutive birdies around the turn (8-9-10). Six birdies in a 10-hole stretch. Tap-in birdie on 14. Clinched with birdie on 16."
+    }
+};
+
+// Approximate SVG coordinates for tee and green centers per hole
+// Used to draw shot trajectory lines
+const HOLE_COORDS = {
+    1:  { tee: [120, 785], green: [130, 535] },
+    2:  { tee: [135, 795], green: [267, 470] },
+    3:  { tee: [275, 460], green: [347, 342] },
+    4:  { tee: [355, 335], green: [405, 275] },
+    5:  { tee: [415, 265], green: [467, 100] },
+    6:  { tee: [480, 100], green: [530, 130] },
+    7:  { tee: [550, 140], green: [626, 328] },
+    8:  { tee: [640, 348], green: [571, 610] },
+    9:  { tee: [580, 630], green: [516, 773] },
+    10: { tee: [530, 798], green: [727, 545] },
+    11: { tee: [740, 542], green: [836, 755] },
+    12: { tee: [845, 770], green: [920, 780] },
+    13: { tee: [858, 792], green: [1106, 760] },
+    14: { tee: [1115, 758], green: [1139, 558] },
+    15: { tee: [1148, 548], green: [1172, 270] },
+    16: { tee: [1180, 265], green: [1095, 210] },
+    17: { tee: [1095, 200], green: [984, 74] },
+    18: { tee: [985, 72],  green: [745, 95] },
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let currentRound = 'all';
+let currentHole = null;
+let viewBox = { x: 0, y: 0, w: 1400, h: 900 };
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+let animationTimer = null;
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+    buildSidebar();
+    renderShots();
+    setupRoundButtons();
+    setupPanZoom();
+    updateStats();
+}
+
+// ============================================================
+// SIDEBAR / SCORECARD
+// ============================================================
+function buildSidebar() {
+    const frontDiv = document.getElementById('frontNine');
+    const backDiv = document.getElementById('backNine');
+    frontDiv.innerHTML = '';
+    backDiv.innerHTML = '';
+
+    COURSE.forEach((hole, i) => {
+        const scores = getScoresForHole(hole.hole);
+        const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : hole.par;
+        const vsPar = avgScore - hole.par;
+        const scoreClass = getScoreClass(avgScore, hole.par);
+
+        const displayScore = currentRound === 'all'
+            ? (vsPar === 0 ? 'E' : (vsPar > 0 ? '+' + vsPar.toFixed(1) : vsPar.toFixed(1)))
+            : scores[0];
+
+        const row = document.createElement('div');
+        row.className = `hole-row${currentHole === hole.hole ? ' active' : ''}`;
+        row.onclick = () => selectHole(hole.hole);
+        row.ondblclick = () => openHoleDetail(hole.hole);
+
+        row.innerHTML = `
+            <div class="hole-num" style="background:${getHoleNumBg(scoreClass)};color:${getHoleNumColor(scoreClass)}">${hole.hole}</div>
+            <div class="hole-name">${hole.name}</div>
+            <div class="hole-par">Par ${hole.par}</div>
+            <div class="hole-yards">${hole.yards}y</div>
+            <div class="hole-score ${scoreClass}">${displayScore}</div>
+        `;
+
+        if (i < 9) frontDiv.appendChild(row);
+        else backDiv.appendChild(row);
+    });
+}
+
+function getScoresForHole(holeNum) {
+    if (currentRound === 'all') {
+        return [1, 2, 3, 4].map(r => SCORES[r].scores[holeNum - 1]);
+    }
+    return [SCORES[parseInt(currentRound)].scores[holeNum - 1]];
+}
+
+function getScoreClass(score, par) {
+    const diff = score - par;
+    if (diff <= -2) return 'score-eagle';
+    if (diff === -1) return 'score-birdie';
+    if (diff === 0) return 'score-par';
+    if (diff === 1) return 'score-bogey';
+    return 'score-double';
+}
+
+function getHoleNumBg(cls) {
+    const map = {
+        'score-eagle': 'var(--eagle)',
+        'score-birdie': 'var(--birdie)',
+        'score-par': 'transparent',
+        'score-bogey': 'var(--bogey)',
+        'score-double': 'var(--double)'
+    };
+    return map[cls] || 'transparent';
+}
+
+function getHoleNumColor(cls) {
+    if (cls === 'score-par') return 'var(--text-muted)';
+    if (cls === 'score-eagle') return '#333';
+    return 'white';
+}
+
+// ============================================================
+// SHOTS RENDERING
+// ============================================================
+function renderShots(animateIndex = -1) {
+    const group = document.getElementById('shotsGroup');
+    group.innerHTML = '';
+
+    const rounds = currentRound === 'all' ? [1, 2, 3, 4] : [parseInt(currentRound)];
+    let shotIndex = 0;
+
+    rounds.forEach(r => {
+        const roundScores = SCORES[r].scores;
+        const roundOpacity = currentRound === 'all' ? 0.5 : 0.85;
+
+        COURSE.forEach((hole, i) => {
+            if (currentHole && currentHole !== hole.hole) return;
+
+            const score = roundScores[i];
+            const par = hole.par;
+            const diff = score - par;
+            const coords = HOLE_COORDS[hole.hole];
+
+            // Color based on score vs par
+            let color;
+            if (diff <= -2) color = 'var(--eagle)';
+            else if (diff === -1) color = 'var(--birdie)';
+            else if (diff === 0) color = 'rgba(255,255,255,0.35)';
+            else color = 'var(--bogey)';
+
+            // Generate shot waypoints
+            const shots = generateShotPath(coords.tee, coords.green, score, hole.par, r);
+
+            // Draw each shot segment
+            for (let s = 0; s < shots.length - 1; s++) {
+                const from = shots[s];
+                const to = shots[s + 1];
+
+                // Curved path for tee shots, straighter for putts
+                const isTeeShot = s === 0;
+                const dx = to[0] - from[0];
+                const dy = to[1] - from[1];
+                const cx = (from[0] + to[0]) / 2 + (isTeeShot ? dy * 0.15 * (r % 2 === 0 ? 1 : -1) : 0);
+                const cy = (from[1] + to[1]) / 2 + (isTeeShot ? -dx * 0.15 * (r % 2 === 0 ? 1 : -1) : 0);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${from[0]},${from[1]} Q ${cx},${cy} ${to[0]},${to[1]}`);
+                path.setAttribute('stroke', color);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-width', isTeeShot ? '2.5' : '1.5');
+                path.setAttribute('opacity', String(roundOpacity));
+                path.setAttribute('stroke-linecap', 'round');
+                if (isTeeShot) path.setAttribute('marker-end', 'url(#arrowhead)');
+                path.style.color = color;
+
+                if (animateIndex >= 0 && shotIndex <= animateIndex) {
+                    path.classList.add('animating');
+                    path.style.animationDelay = `${shotIndex * 0.15}s`;
+                } else if (animateIndex >= 0 && shotIndex > animateIndex) {
+                    path.setAttribute('opacity', '0');
+                }
+
+                // Hover data
+                const shotType = s === 0 ? 'Tee shot' : s === shots.length - 2 ? 'Putt' : `Shot ${s + 1}`;
+                path.onmouseenter = (e) => showShotDetail(hole, r, score, shotType, e);
+                path.onmouseleave = hideShotDetail;
+
+                group.appendChild(path);
+            }
+
+            // Draw dots at each waypoint
+            shots.forEach((pt, s) => {
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.setAttribute('cx', String(pt[0]));
+                dot.setAttribute('cy', String(pt[1]));
+                dot.setAttribute('r', s === 0 ? '3' : s === shots.length - 1 ? '4' : '2.5');
+                dot.setAttribute('fill', s === shots.length - 1 ? color : 'white');
+                dot.setAttribute('stroke', color);
+                dot.setAttribute('stroke-width', '1');
+                dot.setAttribute('opacity', String(roundOpacity));
+                dot.classList.add('shot-dot');
+
+                if (animateIndex >= 0 && shotIndex > animateIndex) {
+                    dot.setAttribute('opacity', '0');
+                }
+
+                dot.onmouseenter = (e) => showShotDetail(hole, r, score, s === 0 ? 'Tee' : s === shots.length - 1 ? 'Hole' : `Shot ${s + 1}`, e);
+                dot.onmouseleave = hideShotDetail;
+
+                group.appendChild(dot);
+            });
+
+            shotIndex++;
+        });
+    });
+}
+
+function generateShotPath(tee, green, score, par, round) {
+    const points = [tee];
+    const numShots = score;
+
+    // Add intermediate points based on number of shots
+    if (numShots <= 2) {
+        // Eagle on par 3, or hole-in-one situation
+        points.push(green);
+    } else if (numShots === 3 && par >= 4) {
+        // Birdie on par 4 or eagle on par 5
+        const mid = lerpWithJitter(tee, green, 0.55, round);
+        points.push(mid);
+        points.push(green);
+    } else if (numShots === 4 && par === 5) {
+        // Birdie on par 5
+        const mid1 = lerpWithJitter(tee, green, 0.4, round);
+        const mid2 = lerpWithJitter(tee, green, 0.75, round);
+        points.push(mid1);
+        points.push(mid2);
+        points.push(green);
+    } else {
+        // Standard: distribute shots evenly
+        for (let i = 1; i < numShots; i++) {
+            const t = i / numShots;
+            const pt = lerpWithJitter(tee, green, t, round + i);
+            points.push(pt);
+        }
+        points.push(green);
+    }
+
+    return points;
+}
+
+function lerpWithJitter(a, b, t, seed) {
+    const jitter = 8 + (seed * 3.7 % 12);
+    const angle = (seed * 137.5 % 360) * Math.PI / 180;
+    return [
+        a[0] + (b[0] - a[0]) * t + Math.cos(angle) * jitter,
+        a[1] + (b[1] - a[1]) * t + Math.sin(angle) * jitter
+    ];
+}
+
+// ============================================================
+// SHOT DETAIL TOOLTIP
+// ============================================================
+function showShotDetail(hole, round, score, shotType, event) {
+    const detail = document.getElementById('shotDetail');
+    const diff = score - hole.par;
+    let resultStr = diff === 0 ? 'Par' : diff < 0 ? (diff === -1 ? 'Birdie' : 'Eagle') : (diff === 1 ? 'Bogey' : 'Double Bogey');
+    let resultColor = diff === 0 ? 'var(--par-color)' : diff < 0 ? 'var(--birdie)' : 'var(--bogey)';
+
+    document.getElementById('shotDetailHole').textContent = `#${hole.hole}`;
+    document.getElementById('shotDetailHole').style.color = resultColor;
+    document.getElementById('shotDetailTitle').textContent = `${hole.name} — ${shotType}`;
+    document.getElementById('shotDetailDesc').textContent = `Round ${round} | Par ${hole.par}, ${hole.yards} yards | Score: ${score} (${resultStr})`;
+
+    detail.classList.add('visible');
+}
+
+function hideShotDetail() {
+    document.getElementById('shotDetail').classList.remove('visible');
+}
+
+// ============================================================
+// ROUND SELECTOR
+// ============================================================
+function setupRoundButtons() {
+    document.querySelectorAll('.round-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRound = btn.dataset.round;
+            currentHole = null;
+            buildSidebar();
+            renderShots();
+            updateStats();
+            updateTotalScore();
+        };
+    });
+}
+
+function updateTotalScore() {
+    const el = document.getElementById('totalScore');
+    if (currentRound === 'all') {
+        el.textContent = '-11 (277)';
+    } else {
+        const r = parseInt(currentRound);
+        const total = SCORES[r].scores.reduce((a, b) => a + b, 0);
+        const vs = total - 72;
+        const vsStr = vs === 0 ? 'E' : (vs > 0 ? '+' + vs : vs);
+        el.textContent = `${vsStr} (${total})`;
+    }
+}
+
+// ============================================================
+// HOLE SELECTION
+// ============================================================
+function selectHole(holeNum) {
+    if (currentHole === holeNum) {
+        currentHole = null;
+        resetZoom();
+    } else {
+        currentHole = holeNum;
+        zoomToHole(holeNum);
+    }
+    buildSidebar();
+    renderShots();
+}
+
+function zoomToHole(holeNum) {
+    const coords = HOLE_COORDS[holeNum];
+    const cx = (coords.tee[0] + coords.green[0]) / 2;
+    const cy = (coords.tee[1] + coords.green[1]) / 2;
+    const span = Math.max(
+        Math.abs(coords.tee[0] - coords.green[0]),
+        Math.abs(coords.tee[1] - coords.green[1])
+    ) + 100;
+
+    const size = Math.max(span, 200);
+    viewBox = { x: cx - size / 2, y: cy - size / 2, w: size, h: size };
+    applyViewBox();
+}
+
+// ============================================================
+// PAN & ZOOM
+// ============================================================
+function setupPanZoom() {
+    const container = document.getElementById('courseContainer');
+    const svg = document.getElementById('courseSvg');
+
+    svg.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragStart = { x: e.clientX, y: e.clientY };
+        svg.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const dx = (e.clientX - dragStart.x) * viewBox.w / container.clientWidth;
+        const dy = (e.clientY - dragStart.y) * viewBox.h / container.clientHeight;
+        viewBox.x -= dx;
+        viewBox.y -= dy;
+        dragStart = { x: e.clientX, y: e.clientY };
+        applyViewBox();
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        svg.style.cursor = 'grab';
+    });
+
+    svg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 1.1 : 0.9;
+        const rect = container.getBoundingClientRect();
+        const mx = (e.clientX - rect.left) / rect.width;
+        const my = (e.clientY - rect.top) / rect.height;
+
+        const newW = viewBox.w * factor;
+        const newH = viewBox.h * factor;
+        viewBox.x += (viewBox.w - newW) * mx;
+        viewBox.y += (viewBox.h - newH) * my;
+        viewBox.w = newW;
+        viewBox.h = newH;
+        applyViewBox();
+    });
+
+    svg.style.cursor = 'grab';
+}
+
+function applyViewBox() {
+    const svg = document.getElementById('courseSvg');
+    svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+}
+
+function zoomIn() {
+    viewBox.x += viewBox.w * 0.15;
+    viewBox.y += viewBox.h * 0.15;
+    viewBox.w *= 0.7;
+    viewBox.h *= 0.7;
+    applyViewBox();
+}
+
+function zoomOut() {
+    viewBox.x -= viewBox.w * 0.2;
+    viewBox.y -= viewBox.h * 0.2;
+    viewBox.w *= 1.4;
+    viewBox.h *= 1.4;
+    applyViewBox();
+}
+
+function resetZoom() {
+    viewBox = { x: 0, y: 0, w: 1400, h: 900 };
+    applyViewBox();
+}
+
+function resetView() {
+    currentHole = null;
+    resetZoom();
+    buildSidebar();
+    renderShots();
+}
+
+// ============================================================
+// PLAY ANIMATION
+// ============================================================
+function playRound() {
+    if (animationTimer) {
+        clearInterval(animationTimer);
+        animationTimer = null;
+        document.getElementById('playBtn').innerHTML = '&#9654; Play Round';
+        renderShots();
+        return;
+    }
+
+    const rounds = currentRound === 'all' ? [1, 2, 3, 4] : [parseInt(currentRound)];
+    const totalHoles = currentHole ? 1 : rounds.length * 18;
+    let step = 0;
+
+    document.getElementById('playBtn').innerHTML = '&#9724; Stop';
+
+    animationTimer = setInterval(() => {
+        if (step >= totalHoles) {
+            clearInterval(animationTimer);
+            animationTimer = null;
+            document.getElementById('playBtn').innerHTML = '&#9654; Play Round';
+            renderShots();
+            return;
+        }
+        renderShots(step);
+        step++;
+    }, 600);
+}
+
+// ============================================================
+// STATS
+// ============================================================
+function updateStats() {
+    const section = document.getElementById('statsSection');
+    const rounds = currentRound === 'all' ? [1, 2, 3, 4] : [parseInt(currentRound)];
+
+    let birdies = 0, pars = 0, bogeys = 0, eagles = 0;
+    let totalScore = 0;
+
+    rounds.forEach(r => {
+        SCORES[r].scores.forEach((score, i) => {
+            const diff = score - COURSE[i].par;
+            totalScore += score;
+            if (diff <= -2) eagles++;
+            else if (diff === -1) birdies++;
+            else if (diff === 0) pars++;
+            else bogeys++;
+        });
+    });
+
+    const totalHoles = rounds.length * 18;
+    const totalPar = rounds.length * 72;
+
+    section.innerHTML = `
+        <div class="sidebar-section-title">Statistics</div>
+        <div class="stat-row"><span class="stat-label">Eagles</span><span class="stat-value" style="color:var(--eagle)">${eagles}</span></div>
+        <div class="stat-row"><span class="stat-label">Birdies</span><span class="stat-value" style="color:var(--birdie)">${birdies}</span></div>
+        <div class="stat-row"><span class="stat-label">Pars</span><span class="stat-value">${pars}</span></div>
+        <div class="stat-row"><span class="stat-label">Bogeys</span><span class="stat-value" style="color:var(--bogey)">${bogeys}</span></div>
+        <div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">${totalScore} (${totalScore - totalPar >= 0 ? '+' : ''}${totalScore - totalPar})</span></div>
+        ${currentRound !== 'all' ? `<div style="margin-top:12px;font-size:11px;color:var(--text-muted);line-height:1.5;">${SCORES[parseInt(currentRound)].notes}</div>` : ''}
+    `;
+}
+
+// ============================================================
+// HOLE DETAIL MODAL
+// ============================================================
+function openHoleDetail(holeNum) {
+    const hole = COURSE[holeNum - 1];
+    document.getElementById('holeDetailNum').textContent = holeNum;
+    document.getElementById('holeDetailName').textContent = hole.name;
+    document.getElementById('holeDetailMeta').textContent = `Par ${hole.par} — ${hole.yards} yards`;
+
+    const grid = document.getElementById('holeRoundScores');
+    grid.innerHTML = '';
+
+    [1, 2, 3, 4].forEach(r => {
+        const score = SCORES[r].scores[holeNum - 1];
+        const diff = score - hole.par;
+        const cls = getScoreClass(score, hole.par);
+        const label = diff === 0 ? 'Par' : diff === -1 ? 'Birdie' : diff === -2 ? 'Eagle' : diff === 1 ? 'Bogey' : diff > 1 ? 'Double' : 'Eagle';
+        const color = diff < 0 ? 'var(--birdie)' : diff > 0 ? 'var(--bogey)' : 'var(--text-muted)';
+
+        grid.innerHTML += `
+            <div class="round-score-card">
+                <div class="round-score-label">Round ${r}</div>
+                <div class="round-score-value" style="color:${color}">${score}</div>
+                <div class="round-score-vs-par" style="color:${color}">${label}</div>
+            </div>
+        `;
+    });
+
+    // Add notes
+    const notesDiv = document.getElementById('holeDetailNotes');
+    const holeNotes = getHoleNotes(holeNum);
+    notesDiv.innerHTML = holeNotes ? `<p>${holeNotes}</p>` : '';
+
+    document.getElementById('holeDetailOverlay').classList.add('visible');
+}
+
+function closeHoleDetail() {
+    document.getElementById('holeDetailOverlay').classList.remove('visible');
+}
+
+function getHoleNotes(holeNum) {
+    const notes = {
+        1: "Tea Olive opens with an uphill drive to a narrow fairway. Scheffler played it conservatively all week.",
+        2: "Pink Dogwood — a reachable par 5 that doglegs left. Scheffler's length made this a birdie opportunity each day.",
+        3: "Flowering Peach is the shortest par 4 on the course. R4 birdie here was a key momentum builder.",
+        4: "At 240 yards, this par 3 is a brute. Scheffler's R4 bogey here came when he flew the green and missed a 14-footer for par.",
+        7: "Pampas — the only hole at Augusta with no bunkers, but trees guard both sides. R4 bogey: tee shot into trees, approach caught front bunker.",
+        8: "Yellow Jasmine — a par 5 that plays uphill then steeply downhill. R4 birdie here started the decisive run.",
+        9: "Carolina Cherry — R4: from 89 yards, Scheffler used the slope behind the pin, the ball stopping an inch from the hole. Tap-in birdie.",
+        10: "Camellia — the toughest hole at Augusta historically. R4: Scheffler drained a 9-foot right-to-left breaker after backing off once. Three birdies in a row.",
+        11: "White Dogwood — the start of Amen Corner. R4: missed a 10-foot par save, but his lead still grew as competitors collapsed.",
+        12: "Golden Bell — 155 yards of pure pressure over Rae's Creek. R1: holed a bunker shot for birdie. R4: played safe to front-left like Tiger in 2019.",
+        13: "Azalea — R1: ball miraculously stayed dry on the bank when it looked destined for Rae's Creek, leading to a birdie. R4: two-putt birdie.",
+        14: "Chinese Fir — R4: approach to within four feet for a tap-in birdie. No bunkers on this hole but the green has massive undulations.",
+        15: "Firethorn — where Sarazen hit 'the shot heard round the world.' Par 5 reachable in two, with the pond guarding the green.",
+        16: "Redbud — R1: finished with a 'ridiculous dart' for birdie. R4: drained a 9-footer to extend his lead to four shots. The iconic par 3 over water.",
+        17: "Nandina — Eisenhower's favorite hole. Plays sharply uphill to a narrow green.",
+        18: "Holly — the steep uphill finish. Scheffler parred it all four days to close out his second green jacket."
+    };
+    return notes[holeNum] || '';
+}
+
+// Close modal on background click
+document.getElementById('holeDetailOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeHoleDetail();
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeHoleDetail();
+        if (currentHole) {
+            currentHole = null;
+            resetZoom();
+            buildSidebar();
+            renderShots();
+        }
+    }
+    if (e.key === ' ') {
+        e.preventDefault();
+        playRound();
+    }
+    if (e.key >= '1' && e.key <= '4') {
+        const btn = document.querySelector(`.round-btn[data-round="${e.key}"]`);
+        if (btn) btn.click();
+    }
+    if (e.key === '0' || e.key === 'a') {
+        const btn = document.querySelector('.round-btn[data-round="all"]');
+        if (btn) btn.click();
+    }
+});
+
+// ============================================================
+// START
+// ============================================================
+init();
+</script>
+
+</body>
+</html>
