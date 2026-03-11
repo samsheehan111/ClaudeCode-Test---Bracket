@@ -144,8 +144,14 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
 // ── Cover + rating fetching ───────────────────────────────────────────────────
 
-async function fetchOpenLibraryData(title, author) {
+async function fetchOpenLibraryData(title, author, isbn) {
   try {
+    // If ISBN is available, try the direct ISBN cover URL first
+    let coverUrl = null
+    if (isbn) {
+      coverUrl = `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`
+    }
+
     // Use title + author as separate params (more precise than free-text q=)
     // Fetch up to 5 results so we can pick the first one that has a cover
     const params = new URLSearchParams({
@@ -155,21 +161,24 @@ async function fetchOpenLibraryData(title, author) {
     const res  = await fetch(`https://openlibrary.org/search.json?${params}`)
     const data = await res.json()
     const docs = data.docs ?? []
-    if (!docs.length) return {}
+    if (!docs.length) return { coverUrl }
 
     // For ratings: prefer the doc with the most reviews (most accurate)
     const ratingDoc = docs.reduce((best, d) =>
       (d.ratings_count ?? 0) > (best.ratings_count ?? 0) ? d : best, docs[0])
 
-    // For cover: take the first doc that has a cover_i
-    const coverDoc = docs.find(d => d.cover_i)
+    // For cover: use ISBN-derived URL if available, otherwise take the first doc with a cover_i
+    if (!coverUrl) {
+      const coverDoc = docs.find(d => d.cover_i)
+      coverUrl = coverDoc?.cover_i
+        ? `https://covers.openlibrary.org/b/id/${coverDoc.cover_i}-L.jpg`
+        : null
+    }
 
     return {
       rating:   ratingDoc.ratings_average ? Math.round(ratingDoc.ratings_average * 10) / 10 : null,
       reviews:  ratingDoc.ratings_count ?? null,
-      coverUrl: coverDoc?.cover_i
-        ? `https://covers.openlibrary.org/b/id/${coverDoc.cover_i}-L.jpg`
-        : null
+      coverUrl: coverUrl
     }
   } catch { return {} }
 }
@@ -195,7 +204,7 @@ async function enrichBooks() {
   const BATCH = 5
   for (let i = 0; i < BOOKS.length; i += BATCH) {
     const batch   = BOOKS.slice(i, i + BATCH)
-    const olData  = await Promise.all(batch.map(b => fetchOpenLibraryData(b.title, b.author)))
+    const olData  = await Promise.all(batch.map(b => fetchOpenLibraryData(b.title, b.author, b.isbn)))
 
     // Fetch Google Books cover only when Open Library didn't return one
     const gbCovers = await Promise.all(
