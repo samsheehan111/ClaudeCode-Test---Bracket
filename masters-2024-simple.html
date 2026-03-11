@@ -10,8 +10,8 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: Arial, sans-serif;
-            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f1419;
             color: #fff;
             height: 100vh;
             overflow: hidden;
@@ -23,109 +23,445 @@
             height: 100%;
         }
 
-        .info {
+        /* Professional Header */
+        .header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(135deg, #004d35, #006747);
-            padding: 12px;
-            text-align: center;
-            z-index: 10;
-            border-bottom: 2px solid #c8a951;
+            background: linear-gradient(135deg, #004d35 0%, #00663d 50%, #004d35 100%);
+            padding: 16px 24px;
+            z-index: 20;
+            border-bottom: 3px solid #c8a951;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.5s ease-out;
         }
 
-        .info h1 {
-            font-size: 18px;
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            color: #c8a951;
             margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .header-left p {
+            font-size: 12px;
+            color: #aaa;
+            margin: 4px 0 0 0;
+        }
+
+        .header-middle {
+            text-align: center;
+            flex: 1;
+        }
+
+        .header-middle h2 {
+            font-size: 14px;
+            color: #c8a951;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .tournament-info {
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 4px;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .score-badge {
+            display: inline-block;
+            background: rgba(200, 169, 81, 0.1);
+            border: 2px solid #c8a951;
+            padding: 8px 16px;
+            border-radius: 6px;
+            margin: 4px 0;
+        }
+
+        .score-badge .score-value {
+            font-size: 20px;
+            font-weight: bold;
             color: #c8a951;
         }
 
-        .info p {
-            font-size: 12px;
-            margin: 4px 0 0 0;
+        .score-badge .score-label {
+            font-size: 10px;
             color: #aaa;
+            display: block;
         }
 
-        .buttons {
+        /* Main Content Container */
+        .main-container {
             position: fixed;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 8px;
-            z-index: 20;
-        }
-
-        button {
-            padding: 8px 16px;
-            background: #c8a951;
-            color: #004d35;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        button:active {
-            opacity: 0.8;
-        }
-
-        .scoreboard {
-            position: fixed;
-            top: 60px;
+            top: 80px;
             left: 0;
-            width: 100%;
-            background: rgba(20, 20, 40, 0.95);
-            padding: 12px;
-            max-height: 140px;
+            right: 0;
+            bottom: 80px;
+            display: flex;
+            gap: 0;
+        }
+
+        /* Left Panel - Scoreboard */
+        .left-panel {
+            width: 300px;
+            background: rgba(15, 20, 25, 0.92);
+            border-right: 2px solid #333;
             overflow-y: auto;
-            font-size: 11px;
-            line-height: 1.8;
-            border-bottom: 1px solid #333;
-            z-index: 15;
+            padding: 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            animation: slideRight 0.5s ease-out;
+        }
+
+        @keyframes slideRight {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .scoreboard-section {
+            padding: 16px;
+            border-bottom: 2px solid #333;
+        }
+
+        .scoreboard-section h3 {
+            font-size: 13px;
+            color: #c8a951;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .nine-holes {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .score-row {
             display: flex;
             justify-content: space-between;
-            padding: 4px 8px;
-            border-bottom: 1px solid #333;
+            align-items: center;
+            padding: 8px 10px;
+            background: rgba(200, 169, 81, 0.05);
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .score-row:hover {
+            background: rgba(200, 169, 81, 0.15);
+            border-left-color: #c8a951;
+            transform: translateX(4px);
         }
 
         .hole-num {
             font-weight: bold;
             color: #c8a951;
-            width: 30px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .hole-name {
+            flex: 1;
+            margin: 0 8px;
+            color: #bbb;
+            font-size: 11px;
         }
 
         .hole-score {
             color: #2ecc71;
             font-weight: bold;
-            width: 30px;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        .hole-score.eagle {
+            color: #ffb700;
+        }
+
+        .hole-score.birdie {
+            color: #2ecc71;
+        }
+
+        .hole-score.par {
+            color: #888;
+        }
+
+        .nine-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #333;
+        }
+
+        .summary-item {
+            background: rgba(200, 169, 81, 0.1);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .summary-item .label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .summary-item .value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #c8a951;
+            margin-top: 4px;
+        }
+
+        /* Stats Widget */
+        .stats-widget {
+            padding: 16px;
+            background: rgba(200, 169, 81, 0.05);
+            border-top: 2px solid #333;
+        }
+
+        .stats-widget h4 {
+            font-size: 12px;
+            color: #c8a951;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .stat-item .stat-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+        }
+
+        .stat-item .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #c8a951;
+            margin-top: 4px;
+        }
+
+        /* Right Panel - Controls */
+        .right-panel {
+            width: 140px;
+            background: rgba(15, 20, 25, 0.92);
+            border-left: 2px solid #333;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
+            animation: slideLeft 0.5s ease-out;
+        }
+
+        @keyframes slideLeft {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .control-group h4 {
+            font-size: 11px;
+            color: #c8a951;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        button {
+            padding: 10px 12px;
+            background: linear-gradient(135deg, #c8a951, #d4b86f);
+            color: #004d35;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(200, 169, 81, 0.3);
+        }
+
+        button:active {
+            opacity: 0.8;
+            transform: translateY(0);
+        }
+
+        /* Bottom Controls */
+        .bottom-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 20, 25, 0.98), rgba(15, 20, 25, 0.8));
+            padding: 12px;
+            text-align: center;
+            z-index: 15;
+            border-top: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .bottom-controls button {
+            padding: 10px 20px;
+        }
+
+        /* Scrollbar Styling */
+        .left-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .left-panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .left-panel::-webkit-scrollbar-thumb {
+            background: #c8a951;
+            border-radius: 3px;
+        }
+
+        .left-panel::-webkit-scrollbar-thumb:hover {
+            background: #d4b86f;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .left-panel { width: 200px; }
+            .header-left h1 { font-size: 18px; }
+            .header-middle h2 { font-size: 12px; }
         }
     </style>
 </head>
 <body>
 
-<div class="info">
-    <h1>🏌️ SCOTTIE SCHEFFLER - 2024 MASTERS</h1>
-    <p>Final Score: -11 (277) • 4-Shot Victory</p>
+<!-- Professional Header -->
+<div class="header">
+    <div class="header-content">
+        <div class="header-left">
+            <h1>🏌️ SCOTTIE SCHEFFLER</h1>
+            <p>2024 MASTERS CHAMPION</p>
+        </div>
+        <div class="header-middle">
+            <h2>Augusta National Golf Club</h2>
+            <div class="tournament-info">April 8-14, 2024 • Final Round</div>
+        </div>
+        <div class="header-right">
+            <div class="score-badge">
+                <span class="score-value">-11</span>
+                <span class="score-label">Final Score</span>
+            </div>
+            <div class="score-badge" style="margin-top: 8px;">
+                <span class="score-value">277</span>
+                <span class="score-label">4-Shot Victory</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="scoreboard" id="scoreboard"></div>
+<!-- Main Layout -->
+<div class="main-container">
+    <!-- Left Scoreboard Panel -->
+    <div class="left-panel">
+        <div class="scoreboard-section">
+            <h3>Front 9</h3>
+            <div class="nine-holes" id="frontNine"></div>
+            <div class="nine-summary" id="frontSummary"></div>
+        </div>
 
+        <div class="scoreboard-section">
+            <h3>Back 9</h3>
+            <div class="nine-holes" id="backNine"></div>
+            <div class="nine-summary" id="backSummary"></div>
+        </div>
+
+        <!-- Stats Widget -->
+        <div class="stats-widget">
+            <h4>Round Stats</h4>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Eagles</div>
+                    <div class="stat-value" id="eagleCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Birdies</div>
+                    <div class="stat-value" id="birdieCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Pars</div>
+                    <div class="stat-value" id="parCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Bogey+</div>
+                    <div class="stat-value" id="bogeyCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Canvas -->
 <canvas id="canvas"></canvas>
 
-<div class="buttons">
-    <button onclick="resetCamera()">Reset</button>
-    <button onclick="toggleAuto()">Auto Rotate</button>
-    <button onclick="showScores()">Scores</button>
+<!-- Right Controls Panel -->
+<div class="right-panel">
+    <div class="control-group">
+        <h4>Course</h4>
+        <button onclick="resetCamera()" title="Reset camera to default position">Reset View</button>
+        <button onclick="toggleAuto()" title="Toggle automatic rotation">Auto Rotate</button>
+    </div>
+</div>
+
+<!-- Bottom Controls -->
+<div class="bottom-controls">
+    <button onclick="zoomIn()" title="Zoom closer to the course">Zoom In</button>
+    <button onclick="zoomOut()" title="Zoom further from course">Zoom Out</button>
+    <button onclick="topView()" title="View from above">Top View</button>
 </div>
 
 <script>
-// Simple data
+// Masters Data
 const HOLES = [
     {hole: 1, name: "Tea Olive", par: 4, score: 4},
     {hole: 2, name: "Pink Dogwood", par: 5, score: 4},
@@ -149,6 +485,50 @@ const HOLES = [
 
 let scene, camera, renderer, controls;
 let autoRotate = true;
+let holeNumberTexture;
+
+// Create texture atlas for hole numbers
+function createHoleNumberAtlas() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, 512, 512);
+
+    // Create 6x3 grid for 18 holes
+    const cols = 6;
+    const rows = 3;
+    const cellSize = 512 / cols;
+
+    ctx.fillStyle = '#c8a951';
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    for (let i = 0; i < 18; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = col * cellSize + cellSize / 2;
+        const y = row * cellSize + cellSize / 2;
+        ctx.fillText((i + 1).toString(), x, y);
+    }
+
+    holeNumberTexture = new THREE.CanvasTexture(canvas);
+    holeNumberTexture.magFilter = THREE.LinearFilter;
+    holeNumberTexture.minFilter = THREE.LinearFilter;
+    return holeNumberTexture;
+}
+
+// Get UV coordinates for a hole number in the atlas
+function getHoleUVs(holeIndex) {
+    const cols = 6;
+    const col = holeIndex % cols;
+    const row = Math.floor(holeIndex / cols);
+    const u = col / cols;
+    const v = row / 3;
+    return {u, v, uSize: 1/cols, vSize: 1/3};
+}
 
 // Initialize Three.js
 function init() {
@@ -188,13 +568,16 @@ function init() {
     light2.castShadow = true;
     scene.add(light2);
 
-    // Simple terrain
-    const terrainGeo = new THREE.PlaneGeometry(600, 600, 32, 32);
+    // OPTIMIZED: Reduced terrain geometry from 32x32 to 16x16
+    const terrainGeo = new THREE.PlaneGeometry(600, 600, 16, 16);
     const terrainMat = new THREE.MeshStandardMaterial({color: 0x2d5a35});
     const terrain = new THREE.Mesh(terrainGeo, terrainMat);
     terrain.rotation.x = -Math.PI / 2;
     terrain.receiveShadow = true;
     scene.add(terrain);
+
+    // Create hole number texture atlas
+    createHoleNumberAtlas();
 
     // Add holes
     addHoles();
@@ -241,20 +624,20 @@ function addHoles() {
         flag.castShadow = true;
         group.add(flag);
 
-        // Hole number label (simple text)
-        const canvas = document.createElement('canvas');
-        canvas.width = 64;
-        canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#c8a951';
-        ctx.font = 'bold 40px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText((i + 1).toString(), 32, 32);
-
-        const texture = new THREE.CanvasTexture(canvas);
-        const spriteMat = new THREE.MeshBasicMaterial({map: texture, transparent: true});
+        // OPTIMIZED: Use texture atlas instead of creating individual canvases
         const spriteGeo = new THREE.PlaneGeometry(10, 10);
+        const spriteMat = new THREE.MeshBasicMaterial({map: holeNumberTexture, transparent: true});
+
+        // Set UV coordinates to point to the correct hole number in the atlas
+        const uvs = getHoleUVs(i);
+        const posAttr = spriteGeo.attributes.uv;
+        for (let j = 0; j < posAttr.count; j++) {
+            const x = posAttr.getX(j);
+            const y = posAttr.getY(j);
+            posAttr.setXY(j, uvs.u + x * uvs.uSize, uvs.v + y * uvs.vSize);
+        }
+        posAttr.needsUpdate = true;
+
         const sprite = new THREE.Mesh(spriteGeo, spriteMat);
         sprite.position.y = 0.5;
         sprite.position.z = 9;
@@ -289,25 +672,112 @@ function toggleAuto() {
     controls.autoRotate = autoRotate;
 }
 
+function zoomIn() {
+    const distance = camera.position.length();
+    camera.position.multiplyScalar(0.8);
+}
+
+function zoomOut() {
+    const distance = camera.position.length();
+    camera.position.multiplyScalar(1.2);
+}
+
+function topView() {
+    camera.position.set(0, 300, 50);
+    controls.target.set(0, 0, 0);
+}
+
+function getScoreType(score, par) {
+    const diff = score - par;
+    if (diff <= -2) return 'eagle';
+    if (diff === -1) return 'birdie';
+    if (diff === 0) return 'par';
+    return 'bogey';
+}
+
 function showScores() {
-    let html = '<strong>Final Round (68, -4)</strong><br>';
-    let total = 0;
+    // Front 9
+    let frontHtml = '';
+    let frontTotal = 0;
+    let frontPar = 0;
 
     for (let i = 0; i < 9; i++) {
         const h = HOLES[i];
-        total += h.score;
-        const vs = h.score - h.par > 0 ? '+' : '';
-        html += `<div class="score-row"><span class="hole-num">#${h.hole}</span><span>${h.name}</span><span class="hole-score">${h.score}(${vs}${h.score - h.par})</span></div>`;
-    }
-    html += '<strong style="display:block; margin-top: 8px;">Back 9</strong>';
-    for (let i = 9; i < 18; i++) {
-        const h = HOLES[i];
-        total += h.score;
-        const vs = h.score - h.par > 0 ? '+' : '';
-        html += `<div class="score-row"><span class="hole-num">#${h.hole}</span><span>${h.name}</span><span class="hole-score">${h.score}(${vs}${h.score - h.par})</span></div>`;
+        frontTotal += h.score;
+        frontPar += h.par;
+        const diff = h.score - h.par;
+        const scoreType = getScoreType(h.score, h.par);
+        const vs = diff > 0 ? '+' : '';
+        frontHtml += `<div class="score-row">
+            <span class="hole-num">#${h.hole}</span>
+            <span class="hole-name">${h.name}</span>
+            <span class="hole-score ${scoreType}">${h.score}</span>
+        </div>`;
     }
 
-    document.getElementById('scoreboard').innerHTML = html;
+    document.getElementById('frontNine').innerHTML = frontHtml;
+
+    const frontDiff = frontTotal - frontPar;
+    const frontVs = frontDiff > 0 ? '+' : '';
+    document.getElementById('frontSummary').innerHTML = `
+        <div class="summary-item">
+            <div class="label">Total</div>
+            <div class="value">${frontTotal}</div>
+        </div>
+        <div class="summary-item">
+            <div class="label">vs Par</div>
+            <div class="value" style="color: ${frontDiff < 0 ? '#2ecc71' : frontDiff > 0 ? '#ff6b6b' : '#888'}">${frontVs}${frontDiff}</div>
+        </div>
+    `;
+
+    // Back 9
+    let backHtml = '';
+    let backTotal = 0;
+    let backPar = 0;
+
+    for (let i = 9; i < 18; i++) {
+        const h = HOLES[i];
+        backTotal += h.score;
+        backPar += h.par;
+        const diff = h.score - h.par;
+        const scoreType = getScoreType(h.score, h.par);
+        const vs = diff > 0 ? '+' : '';
+        backHtml += `<div class="score-row">
+            <span class="hole-num">#${h.hole}</span>
+            <span class="hole-name">${h.name}</span>
+            <span class="hole-score ${scoreType}">${h.score}</span>
+        </div>`;
+    }
+
+    document.getElementById('backNine').innerHTML = backHtml;
+
+    const backDiff = backTotal - backPar;
+    const backVs = backDiff > 0 ? '+' : '';
+    document.getElementById('backSummary').innerHTML = `
+        <div class="summary-item">
+            <div class="label">Total</div>
+            <div class="value">${backTotal}</div>
+        </div>
+        <div class="summary-item">
+            <div class="label">vs Par</div>
+            <div class="value" style="color: ${backDiff < 0 ? '#2ecc71' : backDiff > 0 ? '#ff6b6b' : '#888'}">${backVs}${backDiff}</div>
+        </div>
+    `;
+
+    // Calculate stats
+    let eagles = 0, birdies = 0, pars = 0, bogeys = 0;
+    HOLES.forEach(h => {
+        const diff = h.score - h.par;
+        if (diff <= -2) eagles++;
+        else if (diff === -1) birdies++;
+        else if (diff === 0) pars++;
+        else bogeys++;
+    });
+
+    document.getElementById('eagleCount').textContent = eagles;
+    document.getElementById('birdieCount').textContent = birdies;
+    document.getElementById('parCount').textContent = pars;
+    document.getElementById('bogeyCount').textContent = bogeys;
 }
 
 // Start
