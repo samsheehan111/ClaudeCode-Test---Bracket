@@ -7,453 +7,205 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600;700&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html,body { height:100%; font-family:'Inter','Segoe UI',sans-serif; background:#0d1f16; color:#fff; overflow:hidden; }
+        body { display:flex; flex-direction:column; }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        html, body {
-            height: 100%;
-            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
-            background: #0d1f16;
-            color: #fff;
-            overflow: hidden;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* ─── HEADER ─────────────────────────────────────────── */
+        /* ── HEADER ─────────────────────────────────────── */
         .header {
-            flex-shrink: 0;
-            background: linear-gradient(180deg, #003d2b 0%, #004d35 100%);
-            border-bottom: 2px solid #c8a951;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            z-index: 20;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+            flex-shrink:0; background:linear-gradient(180deg,#003d2b,#004d35);
+            border-bottom:2px solid #c8a951; padding:10px 20px;
+            display:flex; align-items:center; justify-content:space-between;
+            z-index:20; box-shadow:0 2px 12px rgba(0,0,0,.6);
         }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
+        .header-left { display:flex; align-items:center; gap:14px; }
         .masters-badge {
-            width: 44px;
-            height: 44px;
-            background: radial-gradient(circle, #d4b86f, #c8a951);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            box-shadow: 0 2px 8px rgba(200,169,81,0.4);
+            width:44px; height:44px; background:radial-gradient(circle,#d4b86f,#c8a951);
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            font-size:20px; box-shadow:0 2px 8px rgba(200,169,81,.4);
         }
+        .player-info h1 { font-family:'Playfair Display',Georgia,serif; font-size:20px; color:#c8a951; }
+        .player-info p { font-size:11px; color:rgba(200,169,81,.55); letter-spacing:2px; text-transform:uppercase; margin-top:1px; }
+        .header-center { text-align:center; }
+        .total-score { font-family:'Playfair Display',Georgia,serif; font-size:38px; font-weight:700; color:#2ecc71; line-height:1; }
+        .total-label { font-size:10px; color:rgba(255,255,255,.45); text-transform:uppercase; letter-spacing:2px; margin-top:3px; }
+        .header-right { text-align:right; }
+        .tournament-name { font-size:14px; font-weight:600; color:#c8a951; }
+        .tournament-date { font-size:11px; color:rgba(255,255,255,.4); margin-top:3px; }
+        .victory-margin { font-size:11px; color:#2ecc71; margin-top:4px; font-weight:500; }
 
-        .player-info h1 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 20px;
-            color: #c8a951;
-            letter-spacing: 0.5px;
-        }
+        /* ── MAIN ───────────────────────────────────────── */
+        .main { flex:1; display:flex; overflow:hidden; }
 
-        .player-info p {
-            font-size: 11px;
-            color: rgba(200,169,81,0.55);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 1px;
-        }
-
-        .header-center {
-            text-align: center;
-        }
-
-        .total-score {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 38px;
-            font-weight: 700;
-            color: #2ecc71;
-            line-height: 1;
-        }
-
-        .total-label {
-            font-size: 10px;
-            color: rgba(255,255,255,0.45);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 3px;
-        }
-
-        .header-right {
-            text-align: right;
-        }
-
-        .tournament-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #c8a951;
-        }
-
-        .tournament-date {
-            font-size: 11px;
-            color: rgba(255,255,255,0.4);
-            margin-top: 3px;
-        }
-
-        .victory-margin {
-            font-size: 11px;
-            color: #2ecc71;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        /* ─── MAIN LAYOUT ────────────────────────────────────── */
-        .main {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* ─── SCORECARD PANEL ────────────────────────────────── */
+        /* ── SCORECARD ──────────────────────────────────── */
         .scorecard-panel {
-            width: 290px;
-            flex-shrink: 0;
-            background: #0a1a12;
-            border-right: 1px solid rgba(200,169,81,0.2);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
+            width:290px; flex-shrink:0; background:#0a1a12;
+            border-right:1px solid rgba(200,169,81,.2);
+            display:flex; flex-direction:column; overflow-y:auto;
         }
-
-        .scorecard-panel::-webkit-scrollbar { width: 4px; }
-        .scorecard-panel::-webkit-scrollbar-thumb { background: rgba(200,169,81,0.4); border-radius: 2px; }
-
+        .scorecard-panel::-webkit-scrollbar { width:4px; }
+        .scorecard-panel::-webkit-scrollbar-thumb { background:rgba(200,169,81,.4); border-radius:2px; }
         .sc-title {
-            padding: 10px 14px;
-            background: #004d35;
-            border-bottom: 1px solid rgba(200,169,81,0.25);
-            font-size: 10px;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: rgba(200,169,81,0.7);
-            font-weight: 600;
+            padding:10px 14px; background:#004d35;
+            border-bottom:1px solid rgba(200,169,81,.25);
+            font-size:10px; letter-spacing:2.5px; text-transform:uppercase;
+            color:rgba(200,169,81,.7); font-weight:600;
         }
-
         .nine-label {
-            padding: 7px 14px 5px;
-            font-size: 9px;
-            color: rgba(200,169,81,0.45);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+            padding:7px 14px 5px; font-size:9px; color:rgba(200,169,81,.45);
+            text-transform:uppercase; letter-spacing:2px;
+            border-bottom:1px solid rgba(255,255,255,.04);
         }
-
-        /* Column headers */
         .sc-col-heads {
-            display: grid;
-            grid-template-columns: 28px 1fr 24px 34px 34px;
-            padding: 4px 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display:grid; grid-template-columns:28px 1fr 24px 34px 34px;
+            padding:4px 14px; border-bottom:1px solid rgba(255,255,255,.06);
         }
-
-        .sc-col-heads span {
-            font-size: 9px;
-            color: rgba(255,255,255,0.25);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-align: center;
-        }
-
-        .sc-col-heads span:nth-child(2) { text-align: left; }
-
-        /* Hole row */
+        .sc-col-heads span { font-size:9px; color:rgba(255,255,255,.25); text-transform:uppercase; letter-spacing:1px; text-align:center; }
+        .sc-col-heads span:nth-child(2) { text-align:left; }
         .hole-row {
-            display: grid;
-            grid-template-columns: 28px 1fr 24px 34px 34px;
-            align-items: center;
-            padding: 6px 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.035);
-            transition: background 0.15s;
+            display:grid; grid-template-columns:28px 1fr 24px 34px 34px;
+            align-items:center; padding:6px 14px;
+            border-bottom:1px solid rgba(255,255,255,.035); transition:background .15s; cursor:pointer;
         }
-
-        .hole-row:hover { background: rgba(200,169,81,0.06); }
-
-        .h-num {
-            font-size: 11px;
-            font-weight: 700;
-            color: rgba(200,169,81,0.5);
-            text-align: center;
-        }
-
-        .h-name {
-            font-size: 10px;
-            color: rgba(255,255,255,0.4);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .h-par {
-            font-size: 10px;
-            color: rgba(255,255,255,0.3);
-            text-align: center;
-        }
-
-        .h-yds {
-            font-size: 9px;
-            color: rgba(255,255,255,0.2);
-            text-align: center;
-        }
-
-        .h-score-cell {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Score badges — traditional golf notation */
+        .hole-row:hover { background:rgba(200,169,81,.06); }
+        .hole-row.active { background:rgba(200,169,81,.12); border-left:3px solid #c8a951; }
+        .h-num { font-size:11px; font-weight:700; color:rgba(200,169,81,.5); text-align:center; }
+        .h-name { font-size:10px; color:rgba(255,255,255,.4); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .h-par { font-size:10px; color:rgba(255,255,255,.3); text-align:center; }
+        .h-yds { font-size:9px; color:rgba(255,255,255,.2); text-align:center; }
+        .h-score-cell { display:flex; justify-content:center; align-items:center; }
         .score-chip {
-            width: 26px;
-            height: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-            border-radius: 50%;
+            width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+            font-size:12px; font-weight:700; border-radius:50%;
         }
-
-        /* Eagle: double circle = gold filled */
-        .score-chip.eagle {
-            background: #c8a951;
-            color: #003d2b;
-            outline: 2px solid #c8a951;
-            outline-offset: 3px;
-            box-shadow: 0 0 10px rgba(200,169,81,0.5);
-        }
-
-        /* Birdie: single circle outline */
-        .score-chip.birdie {
-            background: transparent;
-            border: 2px solid #2ecc71;
-            color: #2ecc71;
-        }
-
-        /* Par: no decoration */
-        .score-chip.par {
-            background: transparent;
-            color: rgba(255,255,255,0.45);
-        }
-
-        /* Bogey: square */
-        .score-chip.bogey {
-            background: transparent;
-            border: 2px solid #e74c3c;
-            border-radius: 3px;
-            color: #e74c3c;
-        }
-
-        /* Double bogey+: filled square */
-        .score-chip.double-bogey {
-            background: #e74c3c;
-            border-radius: 3px;
-            color: #fff;
-        }
-
-        /* Nine total row */
+        .score-chip.eagle { background:#c8a951; color:#003d2b; outline:2px solid #c8a951; outline-offset:3px; box-shadow:0 0 10px rgba(200,169,81,.5); }
+        .score-chip.birdie { border:2px solid #2ecc71; color:#2ecc71; }
+        .score-chip.par { color:rgba(255,255,255,.45); }
+        .score-chip.bogey { border:2px solid #e74c3c; border-radius:3px; color:#e74c3c; }
+        .score-chip.double-bogey { background:#e74c3c; border-radius:3px; color:#fff; }
         .nine-total {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            padding: 8px 14px;
-            background: rgba(200,169,81,0.04);
-            border-bottom: 1px solid rgba(200,169,81,0.15);
+            display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+            padding:8px 14px; background:rgba(200,169,81,.04);
+            border-bottom:1px solid rgba(200,169,81,.15);
         }
-
-        .nt-item {
-            text-align: center;
-            padding: 5px 4px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
-        }
-
-        .nt-item .nt-label {
-            font-size: 8px;
-            color: rgba(255,255,255,0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .nt-item .nt-val {
-            font-size: 16px;
-            font-weight: 700;
-            color: #c8a951;
-            margin-top: 2px;
-        }
-
-        /* Stats row at bottom */
+        .nt-item { text-align:center; padding:5px 4px; background:rgba(0,0,0,.2); border-radius:3px; }
+        .nt-item .nt-label { font-size:8px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; }
+        .nt-item .nt-val { font-size:16px; font-weight:700; color:#c8a951; margin-top:2px; }
         .stats-bar {
-            margin-top: auto;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            border-top: 1px solid rgba(200,169,81,0.2);
+            margin-top:auto; display:grid; grid-template-columns:repeat(4,1fr);
+            border-top:1px solid rgba(200,169,81,.2);
         }
+        .stat-block { padding:10px 4px; text-align:center; border-right:1px solid rgba(200,169,81,.1); }
+        .stat-block:last-child { border-right:none; }
+        .stat-block .sb-label { font-size:8px; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:1px; }
+        .stat-block .sb-val { font-size:22px; font-weight:700; color:#c8a951; margin-top:2px; }
 
-        .stat-block {
-            padding: 10px 4px;
-            text-align: center;
-            border-right: 1px solid rgba(200,169,81,0.1);
-        }
-
-        .stat-block:last-child { border-right: none; }
-
-        .stat-block .sb-label {
-            font-size: 8px;
-            color: rgba(255,255,255,0.3);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .stat-block .sb-val {
-            font-size: 22px;
-            font-weight: 700;
-            color: #c8a951;
-            margin-top: 2px;
-        }
-
-        /* ─── CANVAS AREA ────────────────────────────────────── */
-        .canvas-area {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
+        /* ── CANVAS AREA ────────────────────────────────── */
+        .canvas-area { flex:1; position:relative; overflow:hidden; }
+        #canvas { display:block; width:100%; height:100%; }
         .view-tag {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            font-size: 10px;
-            color: rgba(200,169,81,0.45);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            pointer-events: none;
+            position:absolute; top:12px; left:12px;
+            font-size:10px; color:rgba(200,169,81,.45);
+            letter-spacing:2px; text-transform:uppercase; pointer-events:none;
         }
-
         .controls-overlay {
-            position: absolute;
-            bottom: 14px;
-            right: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            position:absolute; top:14px; right:14px;
+            display:flex; flex-direction:column; gap:6px;
         }
-
         .ctrl-btn {
-            padding: 7px 14px;
-            background: rgba(0, 60, 40, 0.88);
-            border: 1px solid rgba(200,169,81,0.5);
-            color: #c8a951;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            transition: all 0.2s;
-            font-family: inherit;
+            padding:7px 14px; background:rgba(0,60,40,.88);
+            border:1px solid rgba(200,169,81,.5); color:#c8a951;
+            border-radius:3px; cursor:pointer; font-size:10px; font-weight:600;
+            letter-spacing:1.5px; text-transform:uppercase; transition:all .2s; font-family:inherit;
         }
-
-        .ctrl-btn:hover {
-            background: #c8a951;
-            color: #003d2b;
-        }
-
-        /* Legend */
+        .ctrl-btn:hover { background:#c8a951; color:#003d2b; }
         .legend {
-            position: absolute;
-            bottom: 14px;
-            left: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            pointer-events: none;
+            position:absolute; bottom:80px; left:14px;
+            display:flex; flex-direction:column; gap:5px; pointer-events:none;
         }
+        .legend-item { display:flex; align-items:center; gap:7px; font-size:9px; color:rgba(255,255,255,.45); letter-spacing:1px; }
+        .legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 9px;
-            color: rgba(255,255,255,0.45);
-            letter-spacing: 1px;
+        /* ── SHOT TRACKER BAR ───────────────────────────── */
+        .shot-tracker {
+            position:absolute; bottom:0; left:0; right:0;
+            background:linear-gradient(180deg,rgba(0,40,28,.92),rgba(0,30,20,.97));
+            border-top:1px solid rgba(200,169,81,.3);
+            padding:10px 20px; display:flex; align-items:center; gap:16px;
+            z-index:15; backdrop-filter:blur(6px);
         }
-
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            flex-shrink: 0;
+        .st-hole-nav { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+        .st-hole-nav .nav-btn {
+            width:28px; height:28px; background:rgba(200,169,81,.15);
+            border:1px solid rgba(200,169,81,.4); border-radius:50%;
+            color:#c8a951; font-size:14px; cursor:pointer; display:flex;
+            align-items:center; justify-content:center; transition:all .2s; font-family:inherit;
         }
+        .st-hole-nav .nav-btn:hover { background:#c8a951; color:#003d2b; }
+        .st-hole-label {
+            font-size:13px; font-weight:600; color:#c8a951;
+            min-width:200px; text-align:center;
+        }
+        .st-hole-label .hole-name-sub { font-size:10px; color:rgba(255,255,255,.4); font-weight:400; margin-left:6px; }
+        .st-shot-info {
+            flex:1; text-align:center; font-size:12px; color:rgba(255,255,255,.6);
+        }
+        .st-shot-info .shot-type { color:#c8a951; font-weight:600; }
+        .st-shot-info .shot-club { color:rgba(255,255,255,.45); margin-left:8px; }
+        .st-shot-info .shot-dist { color:#2ecc71; margin-left:8px; font-weight:500; }
+        .st-controls { display:flex; align-items:center; gap:6px; flex-shrink:0; }
+        .st-controls .st-btn {
+            padding:6px 14px; background:rgba(200,169,81,.12);
+            border:1px solid rgba(200,169,81,.4); border-radius:3px;
+            color:#c8a951; font-size:10px; font-weight:600; cursor:pointer;
+            text-transform:uppercase; letter-spacing:1px; transition:all .2s; font-family:inherit;
+        }
+        .st-controls .st-btn:hover { background:#c8a951; color:#003d2b; }
+        .st-controls .st-btn.play-btn { background:rgba(46,204,113,.2); border-color:rgba(46,204,113,.5); color:#2ecc71; }
+        .st-controls .st-btn.play-btn:hover { background:#2ecc71; color:#003d2b; }
+        .st-dots { display:flex; gap:5px; align-items:center; flex-shrink:0; }
+        .st-dots .dot {
+            width:8px; height:8px; border-radius:50%;
+            background:rgba(200,169,81,.2); border:1px solid rgba(200,169,81,.3);
+            transition:all .2s;
+        }
+        .st-dots .dot.active { background:#c8a951; border-color:#c8a951; box-shadow:0 0 6px rgba(200,169,81,.5); }
+        .st-dots .dot.done { background:rgba(46,204,113,.5); border-color:#2ecc71; }
     </style>
 </head>
 <body>
 
-<!-- ─── HEADER ───────────────────────────────────────────────── -->
 <div class="header">
     <div class="header-left">
-        <div class="masters-badge">⛳</div>
+        <div class="masters-badge">&#9971;</div>
         <div class="player-info">
             <h1>SCOTTIE SCHEFFLER</h1>
-            <p>2024 Masters Champion · World No. 1</p>
+            <p>2024 Masters Champion</p>
         </div>
     </div>
     <div class="header-center">
         <div class="total-score">-11</div>
-        <div class="total-label">Final Score &nbsp;·&nbsp; 277 Total</div>
+        <div class="total-label">Final Score &middot; 277 Total</div>
     </div>
     <div class="header-right">
         <div class="tournament-name">The Masters Tournament</div>
-        <div class="tournament-date">Augusta National · April 14, 2024</div>
+        <div class="tournament-date">Augusta National &middot; April 14, 2024</div>
         <div class="victory-margin">Won by 4 shots</div>
     </div>
 </div>
 
-<!-- ─── MAIN ─────────────────────────────────────────────────── -->
 <div class="main">
-
-    <!-- Scorecard -->
     <div class="scorecard-panel">
         <div class="sc-title">Final Round Scorecard</div>
-
-        <!-- Front 9 -->
         <div class="nine-label">Front Nine</div>
-        <div class="sc-col-heads">
-            <span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span>Score</span>
-        </div>
+        <div class="sc-col-heads"><span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span></span></div>
         <div id="frontNine"></div>
         <div class="nine-total" id="frontTotal"></div>
-
-        <!-- Back 9 -->
         <div class="nine-label">Back Nine</div>
-        <div class="sc-col-heads">
-            <span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span>Score</span>
-        </div>
+        <div class="sc-col-heads"><span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span></span></div>
         <div id="backNine"></div>
         <div class="nine-total" id="backTotal"></div>
-
-        <!-- Stats -->
         <div class="stats-bar">
             <div class="stat-block"><div class="sb-label">Eagles</div><div class="sb-val" id="eagleCount">0</div></div>
             <div class="stat-block"><div class="sb-label">Birdies</div><div class="sb-val" id="birdieCount">0</div></div>
@@ -462,10 +214,9 @@
         </div>
     </div>
 
-    <!-- 3D Course -->
     <div class="canvas-area">
         <canvas id="canvas"></canvas>
-        <div class="view-tag">Augusta National · 3D Course</div>
+        <div class="view-tag">Augusta National &middot; Shot Tracker</div>
         <div class="controls-overlay">
             <button class="ctrl-btn" onclick="resetCamera()">Reset View</button>
             <button class="ctrl-btn" onclick="toggleAuto()">Auto Rotate</button>
@@ -474,20 +225,36 @@
             <button class="ctrl-btn" onclick="zoomOut()">Zoom Out</button>
         </div>
         <div class="legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#4a8c3f"></div>Fairway</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#5cbf4e"></div>Green</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#d4c49e"></div>Bunker</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#1a6b9e"></div>Water</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#4ca843"></div>Fairway</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#62d654"></div>Green</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#dbd0a8"></div>Bunker</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1976b5"></div>Water</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d63384"></div>Azaleas</div>
+        </div>
+
+        <!-- Shot Tracker -->
+        <div class="shot-tracker">
+            <div class="st-hole-nav">
+                <button class="nav-btn" onclick="prevHole()">&#9664;</button>
+                <div class="st-hole-label" id="stHoleLabel">Hole 1 — Tea Olive</div>
+                <button class="nav-btn" onclick="nextHole()">&#9654;</button>
+            </div>
+            <div class="st-shot-info" id="stShotInfo">Click Play to start</div>
+            <div class="st-dots" id="stDots"></div>
+            <div class="st-controls">
+                <button class="st-btn" onclick="prevShot()">&#9664; Prev</button>
+                <button class="st-btn play-btn" id="playBtn" onclick="playShot()">&#9654; Play</button>
+                <button class="st-btn" onclick="nextShot()">Next &#9654;</button>
+            </div>
         </div>
     </div>
-
 </div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  HOLE DATA — Scottie Scheffler Final Round 2024
-// ══════════════════════════════════════════════════
-const HOLES = [
+// ══════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════
+var HOLES = [
     {hole:1,  name:"Tea Olive",       par:4, score:4, yds:445},
     {hole:2,  name:"Pink Dogwood",    par:5, score:4, yds:575},
     {hole:3,  name:"Flowering Peach", par:4, score:4, yds:350},
@@ -508,97 +275,80 @@ const HOLES = [
     {hole:18, name:"Holly",           par:4, score:4, yds:465},
 ];
 
-// ══════════════════════════════════════════════════
-//  AUGUSTA NATIONAL — approximate course layout
-//  Coordinates: X=east, Z=south (centered at origin)
-// ══════════════════════════════════════════════════
-const HOLE_LAYOUT = [
-    // 1: Tea Olive — slight dogleg right, SE from clubhouse
+var HOLE_LAYOUT = [
     {tx:-30,tz:-175, gx:75,gz:-85,  cps:[{x:10,z:-150},{x:50,z:-115}], width:22, greenR:16},
-    // 2: Pink Dogwood — long par 5, S then SE
     {tx:75, tz:-85,  gx:165,gz:30,  cps:[{x:90,z:-35},{x:135,z:-5}],   width:24, greenR:18},
-    // 3: Flowering Peach — short par 4, NE
     {tx:165,tz:30,   gx:205,gz:-55, cps:[{x:180,z:5},{x:198,z:-25}],   width:18, greenR:14},
-    // 4: Crab Apple — par 3, west (downhill)
     {tx:205,tz:-55,  gx:155,gz:-88, cps:[{x:182,z:-70}],               width:15, greenR:12},
-    // 5: Magnolia — long par 4, S
     {tx:155,tz:-88,  gx:142,gz:-195,cps:[{x:153,z:-135},{x:147,z:-165}],width:22,greenR:16},
-    // 6: Juniper — par 3, W
     {tx:142,tz:-195, gx:72, gz:-200,cps:[{x:105,z:-198}],              width:15, greenR:12},
-    // 7: Pampas — par 4, SW
     {tx:72, tz:-200, gx:55, gz:-268,cps:[{x:68,z:-228},{x:59,z:-252}], width:20, greenR:15},
-    // 8: Yellow Jasmine — par 5, NW (long uphill)
     {tx:55, tz:-268, gx:-80,gz:-238,cps:[{x:15,z:-275},{x:-35,z:-265},{x:-62,z:-252}],width:24,greenR:17},
-    // 9: Carolina Cherry — par 4, N back toward clubhouse
     {tx:-80,tz:-238, gx:-35,gz:-168,cps:[{x:-68,z:-215},{x:-50,z:-188}],width:21,greenR:15},
-
-    // 10: Camellia — par 4, S (downhill — back nine)
     {tx:-30,tz:-162, gx:-92,gz:-68, cps:[{x:-52,z:-132},{x:-78,z:-100}],width:22,greenR:16},
-    // 11: White Dogwood — par 4, W toward Amen Corner
     {tx:-92,tz:-68,  gx:-205,gz:-80,cps:[{x:-140,z:-65},{x:-178,z:-72}],width:20,greenR:15},
-    // 12: Golden Bell — short par 3, iconic (over Rae's Creek)
     {tx:-205,tz:-80, gx:-232,gz:-50,cps:[{x:-220,z:-65}],              width:13, greenR:11},
-    // 13: Azalea — par 5, dogleg left along Rae's Creek
     {tx:-232,tz:-50, gx:-218,gz:60, cps:[{x:-255,z:-8},{x:-242,z:28},{x:-222,z:48}],width:25,greenR:18},
-    // 14: Chinese Fir — par 4, E
     {tx:-218,tz:60,  gx:-95, gz:82, cps:[{x:-165,z:70},{x:-130,z:76}], width:20, greenR:15},
-    // 15: Firethorn — par 5, SE (over pond)
     {tx:-95, tz:82,  gx:-30, gz:172,cps:[{x:-75,z:112},{x:-52,z:148}], width:22, greenR:16},
-    // 16: Redbud — par 3, NE over pond
     {tx:-30, tz:172, gx:40,  gz:145,cps:[{x:5,z:162}],                 width:14, greenR:13},
-    // 17: Nandina — par 4, N
     {tx:40,  tz:145, gx:35,  gz:58, cps:[{x:40,z:110},{x:38,z:78}],   width:20, greenR:14},
-    // 18: Holly — par 4, NW back to clubhouse (uphill)
     {tx:35,  tz:58,  gx:-30, gz:-158,cps:[{x:20,z:22},{x:5,z:-48},{x:-14,z:-102}],width:22,greenR:16},
 ];
 
-// Rae's Creek (flows through Amen Corner — holes 11/12/13)
-const RAE_CREEK_PTS = [
+var RAE_CREEK = [
     {x:-145,z:-48},{x:-165,z:-42},{x:-190,z:-35},{x:-215,z:-28},
     {x:-242,z:-18},{x:-258,z:-2},{x:-252,z:18},{x:-238,z:32},
     {x:-220,z:40},{x:-200,z:38},{x:-180,z:28},{x:-165,z:10},
     {x:-155,z:-10},{x:-148,z:-30},{x:-143,z:-44},
 ];
 
-// Pond near holes 15/16
-const POND_PTS = [
+var POND = [
     {x:-50,z:122},{x:-18,z:115},{x:8,z:122},{x:12,z:145},
     {x:-4,z:160},{x:-28,z:163},{x:-52,z:150},
 ];
 
-// Key bunkers (approx Augusta positions)
-const BUNKERS = [
-    {x:52,  z:-115, rx:9,  rz:6},   // 1 greenside
-    {x:148, z:18,   rx:10, rz:6},   // 2 greenside
-    {x:152, z:-88,  rx:8,  rz:5},   // 4/5 area
-    {x:50,  z:-265, rx:9,  rz:6},   // 7 greenside
-    {x:-68, z:-258, rx:8,  rz:5},   // 8 fairway
-    {x:-200,z:-88,  rx:10, rz:6},   // 11 greenside
-    {x:-218,z:55,   rx:11, rz:7},   // 13 greenside
-    {x:-42, z:165,  rx:8,  rz:5},   // 15 greenside
-    {x:15,  z:50,   rx:9,  rz:6},   // 17 greenside
-    {x:-8,  z:-128, rx:8,  rz:5},   // 18 fairway right
-    {x:12,  z:-152, rx:7,  rz:5},   // 18 greenside
+var BUNKERS = [
+    {x:52,z:-115,rx:9,rz:6},{x:148,z:18,rx:10,rz:6},{x:152,z:-88,rx:8,rz:5},
+    {x:50,z:-265,rx:9,rz:6},{x:-68,z:-258,rx:8,rz:5},{x:-200,z:-88,rx:10,rz:6},
+    {x:-218,z:55,rx:11,rz:7},{x:-42,z:165,rx:8,rz:5},{x:15,z:50,rx:9,rz:6},
+    {x:-8,z:-128,rx:8,rz:5},{x:12,z:-152,rx:7,rz:5},
 ];
 
-// ══════════════════════════════════════════════════
-//  THREE.JS SCENE
-// ══════════════════════════════════════════════════
-let scene, camera, renderer, controls, autoRotate = true;
+// ══════════════════════════════════════════════════════
+//  SEEDED RNG
+// ══════════════════════════════════════════════════════
+function mulberry32(seed) {
+    return function() {
+        seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+        var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+// ══════════════════════════════════════════════════════
+//  THREE.JS
+// ══════════════════════════════════════════════════════
+var scene, camera, renderer, controls, autoRotate = true;
+var ballMesh, trajectoryLine, landingMarker;
+var shotData = [];
+var currentHole = 0, currentShot = 0;
+var animating = false, animProgress = 0;
+var holeCurves = [];
 
 function init() {
-    const canvasEl = document.getElementById('canvas');
-    const container = canvasEl.parentElement;
-    const W = container.clientWidth;
-    const H = container.clientHeight;
+    var canvasEl = document.getElementById('canvas');
+    var container = canvasEl.parentElement;
+    var W = container.clientWidth;
+    var H = container.clientHeight - 62; // account for shot tracker bar
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a3a28);
-    scene.fog = new THREE.FogExp2(0x1a3a28, 0.0012);
+    scene.background = new THREE.Color(0x152e20);
+    scene.fog = new THREE.FogExp2(0x152e20, 0.0010);
 
     camera = new THREE.PerspectiveCamera(52, W / H, 0.5, 2000);
     camera.position.set(0, 320, 310);
-    camera.lookAt(0, 0, 0);
 
     renderer = new THREE.WebGLRenderer({canvas: canvasEl, antialias: true});
     renderer.setSize(W, H);
@@ -606,22 +356,20 @@ function init() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-    // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.4;
+    controls.autoRotateSpeed = 0.3;
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.minDistance = 80;
+    controls.minDistance = 40;
     controls.maxDistance = 700;
     controls.maxPolarAngle = Math.PI / 2.05;
     controls.target.set(0, 0, 0);
 
     // Lighting
-    const ambLight = new THREE.AmbientLight(0x9fc8aa, 0.8);
-    scene.add(ambLight);
+    scene.add(new THREE.AmbientLight(0x9fc8aa, 0.8));
 
-    const sun = new THREE.DirectionalLight(0xfff5d0, 1.4);
+    var sun = new THREE.DirectionalLight(0xfff5d0, 1.4);
     sun.position.set(200, 450, 150);
     sun.castShadow = true;
     sun.shadow.mapSize.width = 2048;
@@ -634,315 +382,826 @@ function init() {
     sun.shadow.camera.bottom = -400;
     scene.add(sun);
 
-    const fillLight = new THREE.DirectionalLight(0x4a8aff, 0.25);
-    fillLight.position.set(-200, 200, -100);
-    scene.add(fillLight);
+    scene.add(new THREE.DirectionalLight(0x4a8aff, 0.25).translateX(-200).translateY(200).translateZ(-100));
 
-    // Build the course
-    buildCourse();
+    // Build course
+    buildTerrain();
+    buildWater();
+    HOLE_LAYOUT.forEach(function(layout, i) {
+        holeCurves.push(buildHoleCurve(layout));
+        buildFairway(layout);
+        buildGreen(layout, i);
+        buildTeeBox(layout);
+    });
+    buildBunkers();
     buildTrees();
+    buildAzaleas();
+    buildGrassTufts();
+    buildClubhouse();
+
+    // Ball + trajectory objects
+    ballMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(1.5, 12, 12),
+        new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.3, metalness: 0.1})
+    );
+    ballMesh.castShadow = true;
+    ballMesh.visible = false;
+    scene.add(ballMesh);
+
+    landingMarker = new THREE.Mesh(
+        new THREE.RingGeometry(2, 3.5, 20),
+        new THREE.MeshBasicMaterial({color: 0xc8a951, side: THREE.DoubleSide, transparent: true, opacity: 0.7})
+    );
+    landingMarker.rotation.x = -Math.PI / 2;
+    landingMarker.visible = false;
+    scene.add(landingMarker);
+
+    trajectoryLine = new THREE.Line(
+        new THREE.BufferGeometry(),
+        new THREE.LineBasicMaterial({color: 0xffd700, linewidth: 2, transparent: true, opacity: 0.8})
+    );
+    trajectoryLine.visible = false;
+    scene.add(trajectoryLine);
+
+    // Generate shot data
+    generateShotData();
+    updateShotTracker();
 
     window.addEventListener('resize', onResize);
     buildScorecard();
     animate();
 }
 
-// ── COURSE GEOMETRY ──────────────────────────────
-function buildCourse() {
-    // Rough (ground base)
-    const roughGeo = new THREE.PlaneGeometry(820, 820, 1, 1);
-    const roughMat = new THREE.MeshLambertMaterial({color: 0x2a5c1e});
-    const rough = new THREE.Mesh(roughGeo, roughMat);
+// ══════════════════════════════════════════════════════
+//  TERRAIN — procedural grass texture
+// ══════════════════════════════════════════════════════
+function createGrassTexture(baseR, baseG, baseB, density) {
+    var size = 512;
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    var ctx = c.getContext('2d');
+
+    ctx.fillStyle = 'rgb(' + baseR + ',' + baseG + ',' + baseB + ')';
+    ctx.fillRect(0, 0, size, size);
+
+    var rng = mulberry32(baseG);
+    for (var i = 0; i < density; i++) {
+        var x = rng() * size;
+        var y = rng() * size;
+        var r = Math.max(0, Math.min(255, baseR + (rng() - 0.5) * 35)) | 0;
+        var g = Math.max(0, Math.min(255, baseG + (rng() - 0.5) * 50)) | 0;
+        var b = Math.max(0, Math.min(255, baseB + (rng() - 0.5) * 20)) | 0;
+        ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+        // Grass blade strokes
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(rng() * Math.PI);
+        ctx.fillRect(-1, -1, 2 + rng() * 4, 1);
+        ctx.restore();
+    }
+
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+}
+
+function buildTerrain() {
+    // Main rough
+    var roughTex = createGrassTexture(34, 78, 26, 40000);
+    roughTex.repeat.set(12, 12);
+    var roughGeo = new THREE.PlaneGeometry(820, 820, 32, 32);
+
+    // Gentle terrain undulation
+    var rng = mulberry32(99);
+    var posAttr = roughGeo.attributes.position;
+    for (var i = 0; i < posAttr.count; i++) {
+        var x = posAttr.getX(i);
+        var y = posAttr.getY(i);
+        var h = Math.sin(x * 0.01) * 3 + Math.cos(y * 0.015) * 2 + (rng() - 0.5) * 2;
+        posAttr.setZ(i, h);
+    }
+    posAttr.needsUpdate = true;
+    roughGeo.computeVertexNormals();
+
+    var roughMat = new THREE.MeshStandardMaterial({
+        map: roughTex, color: 0x2a5c1e, roughness: 0.9, metalness: 0
+    });
+    var rough = new THREE.Mesh(roughGeo, roughMat);
     rough.rotation.x = -Math.PI / 2;
     rough.receiveShadow = true;
     scene.add(rough);
-
-    // Water
-    buildWaterShape(RAE_CREEK_PTS, 0x1565a0);
-    buildWaterShape(POND_PTS, 0x1a6b9e);
-
-    // Fairways + greens + tees
-    HOLE_LAYOUT.forEach((layout, i) => {
-        buildFairway(layout);
-        buildGreen(layout, i);
-        buildTeeBox(layout);
-    });
-
-    // Bunkers
-    buildBunkers();
-
-    // Clubhouse marker
-    buildClubhouse();
 }
 
-// Creates a flat fairway strip following a spline path
+// ══════════════════════════════════════════════════════
+//  FAIRWAYS — curved flat strips with lighter texture
+// ══════════════════════════════════════════════════════
+function buildHoleCurve(layout) {
+    var pts = [new THREE.Vector2(layout.tx, layout.tz)];
+    for (var j = 0; j < layout.cps.length; j++) pts.push(new THREE.Vector2(layout.cps[j].x, layout.cps[j].z));
+    pts.push(new THREE.Vector2(layout.gx, layout.gz));
+    return new THREE.SplineCurve(pts);
+}
+
 function buildFairway(layout) {
-    const pts2d = [];
-    pts2d.push(new THREE.Vector2(layout.tx, layout.tz));
-    for (const cp of layout.cps) {
-        pts2d.push(new THREE.Vector2(cp.x, cp.z));
-    }
-    pts2d.push(new THREE.Vector2(layout.gx, layout.gz));
+    var pts = [new THREE.Vector2(layout.tx, layout.tz)];
+    for (var j = 0; j < layout.cps.length; j++) pts.push(new THREE.Vector2(layout.cps[j].x, layout.cps[j].z));
+    pts.push(new THREE.Vector2(layout.gx, layout.gz));
+    var curve = new THREE.SplineCurve(pts);
+    var N = 32;
+    var sampled = curve.getPoints(N);
+    var hw = layout.width / 2;
 
-    const curve = new THREE.SplineCurve(pts2d);
-    const N = 32;
-    const sampled = curve.getPoints(N);
-    const hw = layout.width / 2;
-
-    const leftPts = [];
-    const rightPts = [];
-
-    for (let i = 0; i <= N; i++) {
-        const p = sampled[i];
-        let dx, dy;
-        if (i < N) {
-            dx = sampled[i+1].x - p.x;
-            dy = sampled[i+1].y - p.y;
-        } else {
-            dx = p.x - sampled[i-1].x;
-            dy = p.y - sampled[i-1].y;
-        }
-        const len = Math.sqrt(dx*dx + dy*dy) || 1;
-        const nx = -dy / len;
-        const ny = dx / len;
-        leftPts.push( new THREE.Vector2(p.x + nx * hw, p.y + ny * hw) );
-        rightPts.push(new THREE.Vector2(p.x - nx * hw, p.y - ny * hw) );
+    var leftPts = [], rightPts = [];
+    for (var i = 0; i <= N; i++) {
+        var p = sampled[i];
+        var dx, dy;
+        if (i < N) { dx = sampled[i+1].x - p.x; dy = sampled[i+1].y - p.y; }
+        else { dx = p.x - sampled[i-1].x; dy = p.y - sampled[i-1].y; }
+        var len = Math.sqrt(dx*dx + dy*dy) || 1;
+        var nx = -dy/len, ny = dx/len;
+        leftPts.push(new THREE.Vector2(p.x + nx*hw, p.y + ny*hw));
+        rightPts.push(new THREE.Vector2(p.x - nx*hw, p.y - ny*hw));
     }
 
-    const shape = new THREE.Shape();
+    var shape = new THREE.Shape();
     shape.moveTo(leftPts[0].x, leftPts[0].y);
-    for (let i = 1; i <= N; i++) shape.lineTo(leftPts[i].x, leftPts[i].y);
-    for (let i = N; i >= 0; i--) shape.lineTo(rightPts[i].x, rightPts[i].y);
+    for (var i = 1; i <= N; i++) shape.lineTo(leftPts[i].x, leftPts[i].y);
+    for (var i = N; i >= 0; i--) shape.lineTo(rightPts[i].x, rightPts[i].y);
     shape.closePath();
 
-    const geo = new THREE.ShapeGeometry(shape);
-    const mat = new THREE.MeshLambertMaterial({color: 0x4a8c3f});
-    const mesh = new THREE.Mesh(geo, mat);
+    var geo = new THREE.ShapeGeometry(shape);
+    var fairwayTex = createGrassTexture(60, 140, 52, 30000);
+    fairwayTex.repeat.set(4, 4);
+    var mat = new THREE.MeshStandardMaterial({
+        map: fairwayTex, color: 0x4ca843, roughness: 0.7, metalness: 0
+    });
+    var mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = 0.1;
+    mesh.position.y = 0.15;
     mesh.receiveShadow = true;
     scene.add(mesh);
 }
 
-function buildGreen(layout, holeIndex) {
-    // Green circle
-    const geo = new THREE.CircleGeometry(layout.greenR, 20);
-    const mat = new THREE.MeshLambertMaterial({color: 0x5cbf4e});
-    const mesh = new THREE.Mesh(geo, mat);
+function buildGreen(layout, idx) {
+    var greenTex = createGrassTexture(75, 180, 60, 25000);
+    greenTex.repeat.set(2, 2);
+    var geo = new THREE.CircleGeometry(layout.greenR, 24);
+    var mat = new THREE.MeshStandardMaterial({
+        map: greenTex, color: 0x62d654, roughness: 0.5, metalness: 0
+    });
+    var mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
-    mesh.position.set(layout.gx, 0.2, layout.gz);
+    mesh.position.set(layout.gx, 0.25, layout.gz);
     mesh.receiveShadow = true;
     scene.add(mesh);
 
+    // Fringe ring
+    var fringeGeo = new THREE.RingGeometry(layout.greenR, layout.greenR + 4, 24);
+    var fringeMat = new THREE.MeshStandardMaterial({color: 0x50a545, roughness: 0.8});
+    var fringe = new THREE.Mesh(fringeGeo, fringeMat);
+    fringe.rotation.x = -Math.PI / 2;
+    fringe.position.set(layout.gx, 0.12, layout.gz);
+    fringe.receiveShadow = true;
+    scene.add(fringe);
+
     // Flag pole
-    const poleGeo = new THREE.CylinderGeometry(0.35, 0.35, 14, 6);
-    const poleMat = new THREE.MeshLambertMaterial({color: 0x777777});
-    const pole = new THREE.Mesh(poleGeo, poleMat);
+    var pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.35, 0.35, 14, 6),
+        new THREE.MeshLambertMaterial({color: 0x888888})
+    );
     pole.position.set(layout.gx, 7, layout.gz);
     pole.castShadow = true;
     scene.add(pole);
 
     // Flag
-    const flagGeo = new THREE.PlaneGeometry(6, 4);
-    const flagColor = holeIndex < 9 ? 0xffffff : 0xee2222;
-    const flagMat = new THREE.MeshLambertMaterial({color: flagColor, side: THREE.DoubleSide});
-    const flag = new THREE.Mesh(flagGeo, flagMat);
+    var flag = new THREE.Mesh(
+        new THREE.PlaneGeometry(6, 4),
+        new THREE.MeshLambertMaterial({color: idx < 9 ? 0xffffff : 0xee2222, side: THREE.DoubleSide})
+    );
     flag.position.set(layout.gx + 3, 13, layout.gz);
     scene.add(flag);
 
-    // Hole number sprite
-    addHoleLabel(holeIndex + 1, layout.gx, layout.gz);
+    // Label
+    addHoleLabel(idx + 1, layout.gx, layout.gz);
 }
 
 function addHoleLabel(num, x, z) {
-    const c = document.createElement('canvas');
+    var c = document.createElement('canvas');
     c.width = 64; c.height = 64;
-    const ctx = c.getContext('2d');
-
+    var ctx = c.getContext('2d');
     ctx.fillStyle = 'rgba(0,40,20,0.85)';
-    ctx.beginPath();
-    ctx.arc(32, 32, 28, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#c8a951';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    ctx.fillStyle = '#c8a951';
-    ctx.font = 'bold 26px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.beginPath(); ctx.arc(32, 32, 28, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#c8a951'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#c8a951'; ctx.font = 'bold 26px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(num.toString(), 32, 33);
-
-    const tex = new THREE.CanvasTexture(c);
-    const mat = new THREE.SpriteMaterial({map: tex, depthTest: false});
-    const sprite = new THREE.Sprite(mat);
+    var tex = new THREE.CanvasTexture(c);
+    var mat = new THREE.SpriteMaterial({map: tex, depthTest: false});
+    var sprite = new THREE.Sprite(mat);
     sprite.scale.set(14, 14, 1);
     sprite.position.set(x, 10, z);
     scene.add(sprite);
 }
 
 function buildTeeBox(layout) {
-    const geo = new THREE.BoxGeometry(9, 0.4, 6);
-    const mat = new THREE.MeshLambertMaterial({color: 0x5a9a50});
-    const mesh = new THREE.Mesh(geo, mat);
+    var mesh = new THREE.Mesh(
+        new THREE.BoxGeometry(9, 0.4, 6),
+        new THREE.MeshStandardMaterial({color: 0x5a9a50, roughness: 0.6})
+    );
     mesh.position.set(layout.tx, 0.2, layout.tz);
     mesh.receiveShadow = true;
     scene.add(mesh);
+
+    // Tee markers
+    var markerMat = new THREE.MeshLambertMaterial({color: 0xffffff});
+    var m1 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 8), markerMat);
+    m1.position.set(layout.tx - 2, 0.8, layout.tz);
+    var m2 = m1.clone();
+    m2.position.set(layout.tx + 2, 0.8, layout.tz);
+    scene.add(m1, m2);
 }
 
-function buildWaterShape(pts, color) {
-    const shape = new THREE.Shape();
-    shape.moveTo(pts[0].x, pts[0].z);
-    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
-    shape.closePath();
+// ══════════════════════════════════════════════════════
+//  WATER
+// ══════════════════════════════════════════════════════
+function buildWater() {
+    buildWaterPoly(RAE_CREEK, 0x1565a0);
+    buildWaterPoly(POND, 0x1976b5);
+}
 
-    const geo = new THREE.ShapeGeometry(shape);
-    const mat = new THREE.MeshLambertMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.88
+function buildWaterPoly(pts, color) {
+    var shape = new THREE.Shape();
+    shape.moveTo(pts[0].x, pts[0].z);
+    for (var i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
+    shape.closePath();
+    var geo = new THREE.ShapeGeometry(shape);
+    var mat = new THREE.MeshStandardMaterial({
+        color: color, transparent: true, opacity: 0.85,
+        roughness: 0.1, metalness: 0.3
     });
-    const mesh = new THREE.Mesh(geo, mat);
+    var mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
-    mesh.position.y = 0.15;
+    mesh.position.y = 0.18;
     scene.add(mesh);
 }
 
+// ══════════════════════════════════════════════════════
+//  BUNKERS
+// ══════════════════════════════════════════════════════
 function buildBunkers() {
-    const mat = new THREE.MeshLambertMaterial({color: 0xd4c49e});
-    for (const b of BUNKERS) {
-        const geo = new THREE.CircleGeometry(1, 14);
-        const mesh = new THREE.Mesh(geo, mat);
+    var mat = new THREE.MeshStandardMaterial({color: 0xdbd0a8, roughness: 0.95});
+    for (var i = 0; i < BUNKERS.length; i++) {
+        var b = BUNKERS[i];
+        var mesh = new THREE.Mesh(new THREE.CircleGeometry(1, 14), mat);
         mesh.rotation.x = -Math.PI / 2;
         mesh.scale.set(b.rx, b.rz, 1);
-        mesh.position.set(b.x, 0.18, b.z);
+        mesh.position.set(b.x, 0.2, b.z);
         mesh.receiveShadow = true;
         scene.add(mesh);
     }
 }
 
-function buildClubhouse() {
-    // Simple clubhouse marker near hole 1 tee / 18 green
-    const geo = new THREE.BoxGeometry(24, 8, 18);
-    const mat = new THREE.MeshLambertMaterial({color: 0xd8cbb8});
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(-28, 4, -185);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-
-    // Roof
-    const roofGeo = new THREE.ConeGeometry(18, 6, 4);
-    const roofMat = new THREE.MeshLambertMaterial({color: 0x886644});
-    const roof = new THREE.Mesh(roofGeo, roofMat);
-    roof.position.set(-28, 11, -185);
-    roof.rotation.y = Math.PI / 4;
-    roof.castShadow = true;
-    scene.add(roof);
-}
-
-// ── TREES ─────────────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  TREES — varied types
+// ══════════════════════════════════════════════════════
 function buildTrees() {
-    const rng = mulberry32(7);
+    var rng = mulberry32(7);
+    var positions = [];
 
-    const trunkMat = new THREE.MeshLambertMaterial({color: 0x5c3a1e});
-    const leaf1Mat = new THREE.MeshLambertMaterial({color: 0x1a5a0e});
-    const leaf2Mat = new THREE.MeshLambertMaterial({color: 0x236b16});
-
-    const positions = [];
-
-    // Perimeter ring — dense treeline around the course
-    for (let i = 0; i < 180; i++) {
-        const angle = (i / 180) * Math.PI * 2;
-        const r = 290 + (rng() - 0.5) * 70;
-        positions.push({x: Math.cos(angle) * r, z: Math.sin(angle) * r, s: 0.7 + rng() * 0.6});
+    // Perimeter dense treeline
+    for (var i = 0; i < 200; i++) {
+        var angle = (i / 200) * Math.PI * 2;
+        var r = 290 + (rng() - 0.5) * 80;
+        positions.push({x: Math.cos(angle)*r, z: Math.sin(angle)*r, s: 0.7 + rng()*0.8, type: rng() > 0.4 ? 0 : 1});
+    }
+    // Interior
+    for (var i = 0; i < 140; i++) {
+        positions.push({x:(rng()-0.5)*500, z:(rng()-0.5)*520, s:0.5+rng()*0.9, type: rng()>0.5?0:1});
+    }
+    // Magnolia Lane
+    for (var i = 0; i < 14; i++) {
+        positions.push({x:-20+(rng()-0.5)*4, z:-200-i*20, s:1.3+rng()*0.3, type:0});
+        positions.push({x:20+(rng()-0.5)*4, z:-200-i*20, s:1.3+rng()*0.3, type:0});
     }
 
-    // Interior trees scattered between holes
-    for (let i = 0; i < 120; i++) {
-        positions.push({
-            x: (rng() - 0.5) * 480,
-            z: (rng() - 0.5) * 500,
-            s: 0.5 + rng() * 0.8
-        });
-    }
+    var total = positions.length;
+    // Pine trees (cones)
+    var trunkGeo = new THREE.CylinderGeometry(0.6, 1.0, 8, 5);
+    var leafGeo1 = new THREE.ConeGeometry(5.5, 12, 7);
+    var leafGeo2 = new THREE.ConeGeometry(4.2, 9, 7);
 
-    // Magnolia Lane (row of magnolias near clubhouse)
-    for (let i = 0; i < 16; i++) {
-        positions.push({x: -18 + (rng() - 0.5) * 4, z: -195 - i * 18, s: 1.2 + rng() * 0.3});
-        positions.push({x:  18 + (rng() - 0.5) * 4, z: -195 - i * 18, s: 1.2 + rng() * 0.3});
-    }
+    var trunkMat = new THREE.MeshLambertMaterial({color: 0x5c3a1e});
+    var pine1Mat = new THREE.MeshLambertMaterial({color: 0x1a5a0e});
+    var pine2Mat = new THREE.MeshLambertMaterial({color: 0x1e6a12});
+    var oak1Mat  = new THREE.MeshLambertMaterial({color: 0x2a7520});
+    var oak2Mat  = new THREE.MeshLambertMaterial({color: 0x327d28});
 
-    const total = positions.length;
-    const trunkGeo = new THREE.CylinderGeometry(0.7, 1.1, 7, 5);
-    const leafGeo  = new THREE.ConeGeometry(5, 10, 6);
+    var trunkIM = new THREE.InstancedMesh(trunkGeo, trunkMat, total);
+    var leaf1IM = new THREE.InstancedMesh(leafGeo1, pine1Mat, total);
+    var leaf2IM = new THREE.InstancedMesh(leafGeo2, pine2Mat, total);
 
-    const trunkIM = new THREE.InstancedMesh(trunkGeo, trunkMat, total);
-    const leafIM  = new THREE.InstancedMesh(leafGeo,  leaf1Mat, total);
-    const leaf2IM = new THREE.InstancedMesh(leafGeo,  leaf2Mat, total);
+    // Oak trees (spheres)
+    var oakGeo = new THREE.SphereGeometry(6, 8, 6);
+    var oakIM  = new THREE.InstancedMesh(oakGeo, oak1Mat, total);
 
-    const dummy = new THREE.Object3D();
-    positions.forEach((pos, i) => {
-        const s = pos.s;
-        dummy.position.set(pos.x, 3.5 * s, pos.z);
-        dummy.scale.setScalar(s);
+    var dummy = new THREE.Object3D();
+    for (var i = 0; i < total; i++) {
+        var p = positions[i];
+        var s = p.s;
+        // Trunk
+        dummy.position.set(p.x, 4*s, p.z);
+        dummy.scale.set(s, s, s);
         dummy.rotation.y = rng() * Math.PI * 2;
         dummy.updateMatrix();
         trunkIM.setMatrixAt(i, dummy.matrix);
 
-        dummy.position.set(pos.x, (10 + rng() * 3) * s, pos.z);
-        dummy.scale.setScalar(s * (0.9 + rng() * 0.3));
-        dummy.updateMatrix();
-        leafIM.setMatrixAt(i, dummy.matrix);
+        if (p.type === 0) {
+            // Pine
+            dummy.position.set(p.x, (11 + rng()*3)*s, p.z);
+            dummy.scale.set(s, s*(0.9+rng()*0.3), s);
+            dummy.updateMatrix();
+            leaf1IM.setMatrixAt(i, dummy.matrix);
 
-        dummy.position.set(pos.x + rng() * 2, (13 + rng() * 2) * s, pos.z + rng() * 2);
-        dummy.scale.setScalar(s * 0.7);
-        dummy.updateMatrix();
-        leaf2IM.setMatrixAt(i, dummy.matrix);
-    });
+            dummy.position.set(p.x, (16+rng()*2)*s, p.z);
+            dummy.scale.set(s*0.72, s*0.8, s*0.72);
+            dummy.updateMatrix();
+            leaf2IM.setMatrixAt(i, dummy.matrix);
+
+            // Hide oak
+            dummy.scale.set(0, 0, 0);
+            dummy.updateMatrix();
+            oakIM.setMatrixAt(i, dummy.matrix);
+        } else {
+            // Oak — large rounded canopy
+            dummy.position.set(p.x, (10+rng()*2)*s, p.z);
+            dummy.scale.set(s*(0.8+rng()*0.4), s*(0.7+rng()*0.3), s*(0.8+rng()*0.4));
+            dummy.updateMatrix();
+            oakIM.setMatrixAt(i, dummy.matrix);
+
+            // Hide pine
+            dummy.scale.set(0, 0, 0);
+            dummy.updateMatrix();
+            leaf1IM.setMatrixAt(i, dummy.matrix);
+            leaf2IM.setMatrixAt(i, dummy.matrix);
+        }
+    }
 
     trunkIM.instanceMatrix.needsUpdate = true;
-    leafIM.instanceMatrix.needsUpdate  = true;
+    leaf1IM.instanceMatrix.needsUpdate = true;
     leaf2IM.instanceMatrix.needsUpdate = true;
+    oakIM.instanceMatrix.needsUpdate   = true;
 
     trunkIM.castShadow = true;
-    leafIM.castShadow  = true;
+    leaf1IM.castShadow = true;
+    oakIM.castShadow   = true;
 
-    scene.add(trunkIM, leafIM, leaf2IM);
+    scene.add(trunkIM, leaf1IM, leaf2IM, oakIM);
 }
 
-// ── SEEDED RNG ────────────────────────────────────
-function mulberry32(seed) {
-    return function() {
-        seed |= 0;
-        seed = seed + 0x6D2B79F5 | 0;
-        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
-        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-        return ((t ^ t >>> 14) >>> 0) / 4294967296;
-    };
+// ══════════════════════════════════════════════════════
+//  AZALEA BUSHES — Augusta is famous for them
+// ══════════════════════════════════════════════════════
+function buildAzaleas() {
+    var rng = mulberry32(42);
+    var colors = [0xd63384, 0xc71585, 0xff69b4, 0xdc3c9e, 0xe8478a];
+    var bushGeo = new THREE.SphereGeometry(3, 8, 6);
+    var flowerGeo = new THREE.SphereGeometry(3.5, 8, 6);
+
+    // Key azalea locations around Augusta
+    var locs = [
+        // Along hole 13 (Azalea hole)
+        {x:-245, z:-5}, {x:-250, z:10}, {x:-255, z:25}, {x:-248, z:38},
+        // Near 12 green
+        {x:-225, z:-42}, {x:-238, z:-55},
+        // Near 6 tee
+        {x:135, z:-185}, {x:148, z:-190},
+        // Near 16 tee
+        {x:-35, z:178}, {x:-22, z:180},
+        // Scattered around
+        {x:90, z:-95}, {x:175, z:-15}, {x:-120, z:-55}, {x:-85, z:90},
+        {x:-180, z:-90}, {x:20, z:-180}, {x:-60, z:-250}, {x:40, z:130},
+    ];
+
+    var bushMat = new THREE.MeshLambertMaterial({color: 0x2d6620});
+
+    for (var i = 0; i < locs.length; i++) {
+        var l = locs[i];
+        var s = 0.8 + rng() * 0.8;
+
+        // Green bush base
+        var bush = new THREE.Mesh(bushGeo, bushMat);
+        bush.position.set(l.x, 2.5*s, l.z);
+        bush.scale.set(s, s*0.7, s);
+        bush.castShadow = true;
+        scene.add(bush);
+
+        // Flower clusters on top
+        var fc = 2 + Math.floor(rng() * 3);
+        for (var j = 0; j < fc; j++) {
+            var ci = Math.floor(rng() * colors.length);
+            var fMat = new THREE.MeshLambertMaterial({color: colors[ci]});
+            var flower = new THREE.Mesh(flowerGeo, fMat);
+            flower.position.set(
+                l.x + (rng() - 0.5) * 4 * s,
+                3.5 * s + rng() * 2,
+                l.z + (rng() - 0.5) * 4 * s
+            );
+            flower.scale.set(s*0.5, s*0.4, s*0.5);
+            scene.add(flower);
+        }
+    }
 }
 
-// ── RENDER LOOP ───────────────────────────────────
+// ══════════════════════════════════════════════════════
+//  GRASS TUFTS — small geometry scattered near fairways
+// ══════════════════════════════════════════════════════
+function buildGrassTufts() {
+    var rng = mulberry32(77);
+    var tufts = [];
+
+    // Scatter along fairway edges
+    for (var h = 0; h < HOLE_LAYOUT.length; h++) {
+        var layout = HOLE_LAYOUT[h];
+        var curve = holeCurves[h];
+        for (var t = 0; t < 20; t++) {
+            var pt = curve.getPoint(t / 20);
+            var spread = layout.width * 0.8;
+            for (var s = 0; s < 3; s++) {
+                tufts.push({
+                    x: pt.x + (rng() - 0.5) * spread,
+                    z: pt.y + (rng() - 0.5) * spread,
+                    s: 0.4 + rng() * 0.8
+                });
+            }
+        }
+    }
+
+    var total = tufts.length;
+    var bladeGeo = new THREE.ConeGeometry(0.3, 2, 4);
+    var bladeMat = new THREE.MeshLambertMaterial({color: 0x3d8a30});
+    var bladeIM = new THREE.InstancedMesh(bladeGeo, bladeMat, total);
+
+    var dummy = new THREE.Object3D();
+    for (var i = 0; i < total; i++) {
+        var tf = tufts[i];
+        dummy.position.set(tf.x, tf.s, tf.z);
+        dummy.scale.set(tf.s, tf.s, tf.s);
+        dummy.rotation.z = (rng() - 0.5) * 0.4;
+        dummy.updateMatrix();
+        bladeIM.setMatrixAt(i, dummy.matrix);
+    }
+    bladeIM.instanceMatrix.needsUpdate = true;
+    scene.add(bladeIM);
+}
+
+// ══════════════════════════════════════════════════════
+//  CLUBHOUSE
+// ══════════════════════════════════════════════════════
+function buildClubhouse() {
+    var group = new THREE.Group();
+    // Main building
+    var body = new THREE.Mesh(
+        new THREE.BoxGeometry(30, 10, 20),
+        new THREE.MeshStandardMaterial({color: 0xe8dcc8, roughness: 0.8})
+    );
+    body.position.y = 5;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    group.add(body);
+
+    // Roof
+    var roof = new THREE.Mesh(
+        new THREE.ConeGeometry(22, 7, 4),
+        new THREE.MeshStandardMaterial({color: 0x6b5a3e, roughness: 0.9})
+    );
+    roof.position.y = 13.5;
+    roof.rotation.y = Math.PI / 4;
+    roof.castShadow = true;
+    group.add(roof);
+
+    // Columns (front)
+    var colGeo = new THREE.CylinderGeometry(0.6, 0.6, 8, 8);
+    var colMat = new THREE.MeshStandardMaterial({color: 0xf0e8d8, roughness: 0.6});
+    for (var i = -2; i <= 2; i++) {
+        var col = new THREE.Mesh(colGeo, colMat);
+        col.position.set(i * 5, 4, 11);
+        col.castShadow = true;
+        group.add(col);
+    }
+
+    group.position.set(-28, 0, -192);
+    scene.add(group);
+}
+
+// ══════════════════════════════════════════════════════
+//  SHOT DATA GENERATION
+// ══════════════════════════════════════════════════════
+function generateShotData() {
+    shotData = [];
+    for (var i = 0; i < HOLES.length; i++) {
+        var h = HOLES[i];
+        var layout = HOLE_LAYOUT[i];
+        var curve = holeCurves[i];
+        var shots = [];
+
+        if (h.par === 3) {
+            // Tee shot to green
+            var from = curve.getPoint(0);
+            var to = curve.getPoint(1);
+            shots.push({type:'Tee Shot', club: h.yds > 200 ? '4-Iron' : '7-Iron',
+                from:{x:from.x, z:from.y}, to:{x:to.x, z:to.y}, arc:35, yds:h.yds});
+            var putts = h.score - 1;
+            for (var p = putts; p > 0; p--) {
+                shots.push({type:'Putt ' + (putts - p + 1), club:'Putter',
+                    from:{x:to.x + p*3, z:to.y + p*2}, to:{x:to.x, z:to.y}, arc:0, yds: p * 8});
+            }
+        } else if (h.par === 4) {
+            var p1 = curve.getPoint(0);
+            var p2 = curve.getPoint(0.58);
+            var p3 = curve.getPoint(1);
+            var driveDist = Math.round(h.yds * 0.62);
+            shots.push({type:'Tee Shot', club:'Driver',
+                from:{x:p1.x,z:p1.y}, to:{x:p2.x,z:p2.y}, arc:50, yds:driveDist});
+            shots.push({type:'Approach', club: (h.yds - driveDist) > 160 ? '7-Iron' : 'PW',
+                from:{x:p2.x,z:p2.y}, to:{x:p3.x,z:p3.y}, arc:35, yds:h.yds - driveDist});
+            var putts = h.score - 2;
+            for (var p = putts; p > 0; p--) {
+                shots.push({type:'Putt ' + (putts - p + 1), club:'Putter',
+                    from:{x:p3.x + p*3, z:p3.y + p*2}, to:{x:p3.x, z:p3.y}, arc:0, yds: p * 10});
+            }
+        } else { // par 5
+            var p1 = curve.getPoint(0);
+            var p2 = curve.getPoint(0.38);
+            var p3 = curve.getPoint(0.72);
+            var p4 = curve.getPoint(1);
+            var d1 = Math.round(h.yds * 0.40);
+            var d2 = Math.round(h.yds * 0.34);
+            var d3 = h.yds - d1 - d2;
+            shots.push({type:'Tee Shot', club:'Driver',
+                from:{x:p1.x,z:p1.y}, to:{x:p2.x,z:p2.y}, arc:55, yds:d1});
+            shots.push({type:'2nd Shot', club:'3-Wood',
+                from:{x:p2.x,z:p2.y}, to:{x:p3.x,z:p3.y}, arc:42, yds:d2});
+            shots.push({type:'Approach', club:'Wedge',
+                from:{x:p3.x,z:p3.y}, to:{x:p4.x,z:p4.y}, arc:28, yds:d3});
+            var putts = h.score - 3;
+            for (var p = putts; p > 0; p--) {
+                shots.push({type:'Putt ' + (putts - p + 1), club:'Putter',
+                    from:{x:p4.x + p*3, z:p4.y + p*2}, to:{x:p4.x, z:p4.y}, arc:0, yds: p * 12});
+            }
+        }
+        shotData.push(shots);
+    }
+}
+
+// ══════════════════════════════════════════════════════
+//  SHOT REPLAY SYSTEM
+// ══════════════════════════════════════════════════════
+var cameraTarget = null;
+var cameraLerp = false;
+var cameraFrom = new THREE.Vector3();
+var cameraTo = new THREE.Vector3();
+var targetFrom = new THREE.Vector3();
+var targetTo = new THREE.Vector3();
+var cameraProgress = 0;
+
+function flyToHole(holeIdx) {
+    var layout = HOLE_LAYOUT[holeIdx];
+    var cx = (layout.tx + layout.gx) / 2;
+    var cz = (layout.tz + layout.gz) / 2;
+    var dx = layout.gx - layout.tx;
+    var dz = layout.gz - layout.tz;
+    var dist = Math.sqrt(dx*dx + dz*dz);
+
+    cameraFrom.copy(camera.position);
+    cameraTo.set(cx + 30, Math.max(80, dist * 0.6), cz + 50);
+    targetFrom.copy(controls.target);
+    targetTo.set(cx, 0, cz);
+    cameraProgress = 0;
+    cameraLerp = true;
+    controls.autoRotate = false;
+}
+
+function getBallPos(shot, t) {
+    var x = shot.from.x + (shot.to.x - shot.from.x) * t;
+    var z = shot.from.z + (shot.to.z - shot.from.z) * t;
+    var y = shot.arc * 4 * t * (1 - t);
+    return {x:x, y:y, z:z};
+}
+
+function showTrajectory(shot) {
+    var pts = [];
+    var N = 40;
+    for (var i = 0; i <= N; i++) {
+        var t = i / N;
+        var p = getBallPos(shot, t);
+        pts.push(new THREE.Vector3(p.x, p.y + 0.5, p.z));
+    }
+    trajectoryLine.geometry.dispose();
+    trajectoryLine.geometry = new THREE.BufferGeometry().setFromPoints(pts);
+    trajectoryLine.visible = true;
+
+    landingMarker.position.set(shot.to.x, 0.3, shot.to.z);
+    landingMarker.visible = true;
+}
+
+function playShot() {
+    if (animating) {
+        animating = false;
+        document.getElementById('playBtn').innerHTML = '&#9654; Play';
+        return;
+    }
+    var shots = shotData[currentHole];
+    if (!shots || currentShot >= shots.length) return;
+
+    var shot = shots[currentShot];
+    animating = true;
+    animProgress = 0;
+    ballMesh.visible = true;
+    showTrajectory(shot);
+    document.getElementById('playBtn').innerHTML = '&#9632; Stop';
+
+    // Fly camera to follow
+    var mid = getBallPos(shot, 0.5);
+    cameraFrom.copy(camera.position);
+    cameraTo.set(shot.from.x + 20, shot.arc + 30, shot.from.z + 30);
+    targetFrom.copy(controls.target);
+    targetTo.set(mid.x, mid.y, mid.z);
+    cameraProgress = 0;
+    cameraLerp = true;
+    controls.autoRotate = false;
+}
+
+function nextShot() {
+    animating = false;
+    document.getElementById('playBtn').innerHTML = '&#9654; Play';
+    var shots = shotData[currentHole];
+    if (!shots) return;
+    if (currentShot < shots.length - 1) {
+        currentShot++;
+    } else {
+        // Move to next hole
+        if (currentHole < 17) {
+            currentHole++;
+            currentShot = 0;
+            flyToHole(currentHole);
+        }
+    }
+    updateShotTracker();
+    showCurrentShotPreview();
+}
+
+function prevShot() {
+    animating = false;
+    document.getElementById('playBtn').innerHTML = '&#9654; Play';
+    if (currentShot > 0) {
+        currentShot--;
+    } else if (currentHole > 0) {
+        currentHole--;
+        currentShot = shotData[currentHole].length - 1;
+        flyToHole(currentHole);
+    }
+    updateShotTracker();
+    showCurrentShotPreview();
+}
+
+function nextHole() {
+    animating = false;
+    document.getElementById('playBtn').innerHTML = '&#9654; Play';
+    if (currentHole < 17) {
+        currentHole++;
+        currentShot = 0;
+        flyToHole(currentHole);
+        updateShotTracker();
+        showCurrentShotPreview();
+    }
+}
+
+function prevHole() {
+    animating = false;
+    document.getElementById('playBtn').innerHTML = '&#9654; Play';
+    if (currentHole > 0) {
+        currentHole--;
+        currentShot = 0;
+        flyToHole(currentHole);
+        updateShotTracker();
+        showCurrentShotPreview();
+    }
+}
+
+function showCurrentShotPreview() {
+    var shots = shotData[currentHole];
+    if (!shots || !shots[currentShot]) return;
+    var shot = shots[currentShot];
+    ballMesh.position.set(shot.from.x, 1.5, shot.from.z);
+    ballMesh.visible = true;
+    showTrajectory(shot);
+}
+
+function updateShotTracker() {
+    var h = HOLES[currentHole];
+    var diff = h.score - h.par;
+    var result = diff === 0 ? 'Par' : diff === -1 ? 'Birdie' : diff === -2 ? 'Eagle' : diff > 0 ? 'Bogey' : '';
+    var resultColor = diff < 0 ? '#2ecc71' : diff === 0 ? '#888' : '#e74c3c';
+
+    document.getElementById('stHoleLabel').innerHTML =
+        'Hole ' + h.hole + ' &mdash; ' + h.name +
+        ' <span class="hole-name-sub">Par ' + h.par + ' &middot; ' + h.yds + ' yds' +
+        ' &middot; <span style="color:' + resultColor + '">' + result + '</span></span>';
+
+    var shots = shotData[currentHole];
+    if (shots && shots[currentShot]) {
+        var s = shots[currentShot];
+        document.getElementById('stShotInfo').innerHTML =
+            '<span class="shot-type">' + s.type + '</span>' +
+            '<span class="shot-club">' + s.club + '</span>' +
+            '<span class="shot-dist">~' + s.yds + ' yds</span>';
+    }
+
+    // Dots
+    var dotsHtml = '';
+    if (shots) {
+        for (var i = 0; i < shots.length; i++) {
+            var cls = 'dot';
+            if (i === currentShot) cls += ' active';
+            else if (i < currentShot) cls += ' done';
+            dotsHtml += '<div class="' + cls + '"></div>';
+        }
+    }
+    document.getElementById('stDots').innerHTML = dotsHtml;
+
+    // Highlight active hole in scorecard
+    var rows = document.querySelectorAll('.hole-row');
+    for (var i = 0; i < rows.length; i++) {
+        rows[i].classList.toggle('active', i === currentHole);
+    }
+}
+
+// ══════════════════════════════════════════════════════
+//  ANIMATION LOOP
+// ══════════════════════════════════════════════════════
 function animate() {
     requestAnimationFrame(animate);
+
+    // Camera lerp
+    if (cameraLerp) {
+        cameraProgress = Math.min(1, cameraProgress + 0.015);
+        var t = easeInOutCubic(cameraProgress);
+        camera.position.lerpVectors(cameraFrom, cameraTo, t);
+        controls.target.lerpVectors(targetFrom, targetTo, t);
+        if (cameraProgress >= 1) cameraLerp = false;
+    }
+
+    // Ball animation
+    if (animating) {
+        var shots = shotData[currentHole];
+        if (shots && shots[currentShot]) {
+            var shot = shots[currentShot];
+            var speed = shot.arc > 0 ? 0.008 : 0.015; // putts faster
+            animProgress = Math.min(1, animProgress + speed);
+            var pos = getBallPos(shot, animProgress);
+            ballMesh.position.set(pos.x, pos.y + 1.5, pos.z);
+
+            if (animProgress >= 1) {
+                animating = false;
+                document.getElementById('playBtn').innerHTML = '&#9654; Play';
+                // Auto-advance to next shot after brief pause
+                setTimeout(function() {
+                    if (!animating && currentShot < shots.length - 1) {
+                        currentShot++;
+                        updateShotTracker();
+                        showCurrentShotPreview();
+                    }
+                }, 600);
+            }
+        }
+    }
+
     controls.update();
     renderer.render(scene, camera);
 }
 
+function easeInOutCubic(t) {
+    return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+}
+
+// ══════════════════════════════════════════════════════
+//  CAMERA CONTROLS
+// ══════════════════════════════════════════════════════
 function onResize() {
-    const container = document.querySelector('.canvas-area');
-    const W = container.clientWidth;
-    const H = container.clientHeight;
+    var container = document.querySelector('.canvas-area');
+    var W = container.clientWidth;
+    var H = container.clientHeight - 62;
     camera.aspect = W / H;
     camera.updateProjectionMatrix();
     renderer.setSize(W, H);
 }
 
-// ── CAMERA CONTROLS ───────────────────────────────
 function resetCamera() {
+    cameraLerp = false;
     camera.position.set(0, 320, 310);
     controls.target.set(0, 0, 0);
+    controls.autoRotate = autoRotate;
 }
 
 function toggleAuto() {
@@ -951,19 +1210,23 @@ function toggleAuto() {
 }
 
 function topView() {
-    camera.position.set(0, 500, 5);
-    controls.target.set(0, 0, 0);
-    camera.lookAt(0, 0, 0);
+    cameraFrom.copy(camera.position);
+    cameraTo.set(0, 500, 5);
+    targetFrom.copy(controls.target);
+    targetTo.set(0, 0, 0);
+    cameraProgress = 0;
+    cameraLerp = true;
+    controls.autoRotate = false;
 }
 
 function zoomIn()  { camera.position.multiplyScalar(0.8); }
 function zoomOut() { camera.position.multiplyScalar(1.25); }
 
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 //  SCORECARD
-// ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════
 function getScoreType(score, par) {
-    const d = score - par;
+    var d = score - par;
     if (d <= -2) return 'eagle';
     if (d === -1) return 'birdie';
     if (d === 0)  return 'par';
@@ -972,58 +1235,61 @@ function getScoreType(score, par) {
 }
 
 function buildScorecard() {
-    let frontHtml = '', backHtml = '';
-    let fTotal = 0, fPar = 0, bTotal = 0, bPar = 0;
-    let eagles = 0, birdies = 0, pars = 0, bogeys = 0;
+    var frontHtml = '', backHtml = '';
+    var fTotal = 0, fPar = 0, bTotal = 0, bPar = 0;
+    var eagles = 0, birdies = 0, pars = 0, bogeys = 0;
 
-    HOLES.forEach((h, i) => {
-        const type = getScoreType(h.score, h.par);
-        if (type === 'eagle')       eagles++;
+    for (var i = 0; i < HOLES.length; i++) {
+        var h = HOLES[i];
+        var type = getScoreType(h.score, h.par);
+        if (type === 'eagle') eagles++;
         else if (type === 'birdie') birdies++;
-        else if (type === 'par')    pars++;
-        else                        bogeys++;
+        else if (type === 'par') pars++;
+        else bogeys++;
 
-        const row = `<div class="hole-row">
-            <span class="h-num">${h.hole}</span>
-            <span class="h-name">${h.name}</span>
-            <span class="h-par">${h.par}</span>
-            <span class="h-yds">${h.yds}</span>
-            <span class="h-score-cell"><span class="score-chip ${type}">${h.score}</span></span>
-        </div>`;
+        var row = '<div class="hole-row" onclick="jumpToHole(' + i + ')">' +
+            '<span class="h-num">' + h.hole + '</span>' +
+            '<span class="h-name">' + h.name + '</span>' +
+            '<span class="h-par">' + h.par + '</span>' +
+            '<span class="h-yds">' + h.yds + '</span>' +
+            '<span class="h-score-cell"><span class="score-chip ' + type + '">' + h.score + '</span></span>' +
+        '</div>';
 
-        if (i < 9) {
-            frontHtml += row;
-            fTotal += h.score;
-            fPar   += h.par;
-        } else {
-            backHtml += row;
-            bTotal += h.score;
-            bPar   += h.par;
-        }
-    });
+        if (i < 9) { frontHtml += row; fTotal += h.score; fPar += h.par; }
+        else       { backHtml += row;  bTotal += h.score; bPar += h.par; }
+    }
 
     document.getElementById('frontNine').innerHTML = frontHtml;
     document.getElementById('backNine').innerHTML  = backHtml;
 
-    const fd = fTotal - fPar;
-    const bd = bTotal - bPar;
-    const fColor = fd < 0 ? '#2ecc71' : fd > 0 ? '#e74c3c' : '#888';
-    const bColor = bd < 0 ? '#2ecc71' : bd > 0 ? '#e74c3c' : '#888';
+    var fd = fTotal - fPar, bd = bTotal - bPar;
+    var fc = fd < 0 ? '#2ecc71' : fd > 0 ? '#e74c3c' : '#888';
+    var bc = bd < 0 ? '#2ecc71' : bd > 0 ? '#e74c3c' : '#888';
 
-    document.getElementById('frontTotal').innerHTML = `
-        <div class="nt-item"><div class="nt-label">Out</div><div class="nt-val">${fTotal}</div></div>
-        <div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">${fPar}</div></div>
-        <div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:${fColor}">${fd > 0 ? '+' : ''}${fd}</div></div>`;
+    document.getElementById('frontTotal').innerHTML =
+        '<div class="nt-item"><div class="nt-label">Out</div><div class="nt-val">' + fTotal + '</div></div>' +
+        '<div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">' + fPar + '</div></div>' +
+        '<div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:' + fc + '">' + (fd>0?'+':'') + fd + '</div></div>';
 
-    document.getElementById('backTotal').innerHTML = `
-        <div class="nt-item"><div class="nt-label">In</div><div class="nt-val">${bTotal}</div></div>
-        <div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">${bPar}</div></div>
-        <div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:${bColor}">${bd > 0 ? '+' : ''}${bd}</div></div>`;
+    document.getElementById('backTotal').innerHTML =
+        '<div class="nt-item"><div class="nt-label">In</div><div class="nt-val">' + bTotal + '</div></div>' +
+        '<div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">' + bPar + '</div></div>' +
+        '<div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:' + bc + '">' + (bd>0?'+':'') + bd + '</div></div>';
 
     document.getElementById('eagleCount').textContent  = eagles;
     document.getElementById('birdieCount').textContent = birdies;
     document.getElementById('parCount').textContent    = pars;
     document.getElementById('bogeyCount').textContent  = bogeys;
+}
+
+function jumpToHole(idx) {
+    currentHole = idx;
+    currentShot = 0;
+    animating = false;
+    document.getElementById('playBtn').innerHTML = '&#9654; Play';
+    flyToHole(idx);
+    updateShotTracker();
+    showCurrentShotPreview();
 }
 
 window.addEventListener('load', init);
