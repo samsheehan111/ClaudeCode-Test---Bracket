@@ -4,104 +4,130 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oprah & Reese Book Club Tracker</title>
+<title>Oprah & Reese Book Club</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
   tailwind.config = {
-    theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } }
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] }
+      }
+    }
   }
 </script>
 
 <style>
-  body { font-family: 'Inter', sans-serif; }
-  .pill-btn.active { background: #2563eb; color: white; }
-  .pill-btn:not(.active) { color: #475569; }
-  .pill-btn:not(.active):hover { background: #f1f5f9; color: #1e293b; }
-  .card-lift { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-  .card-lift:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.12); }
-  #sort-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.55rem center;
-    background-size: 1rem;
+  body { font-family: 'Inter', sans-serif; background: #faf9f7; }
+
+  .club-tab {
+    border-bottom: 2px solid transparent;
+    transition: color 0.1s, border-color 0.1s;
   }
+  .club-tab.active { color: #1c1917; border-bottom-color: #1c1917; }
+  .club-tab:not(.active) { color: #a8a29e; }
+  .club-tab:not(.active):hover { color: #78716c; }
+
+  .year-btn { transition: color 0.1s; }
+  .year-btn.active { color: #1c1917; font-weight: 500; }
+  .year-btn:not(.active) { color: #a8a29e; }
+  .year-btn:not(.active):hover { color: #78716c; }
+
+  .book-card {
+    border-left-width: 3px;
+    transition: background 0.1s;
+  }
+  .book-card:hover { background: #f5f4f1; }
+
+  .oprah-card { border-left-color: #7c3aed; }
+  .reese-card { border-left-color: #e11d48; }
+
+  #sort-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a8a29e'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.25rem center;
+    background-size: 0.85rem;
+  }
+
+  .skel { animation: skel-pulse 1.4s ease-in-out infinite; }
+  @keyframes skel-pulse { 0%, 100% { opacity: 1 } 50% { opacity: 0.4 } }
 </style>
 
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
 
-<!-- ── Header ── -->
-<header class="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-sm">
-  <div class="max-w-7xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
-    <div>
-      <h1 class="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">📚 Book Club Tracker</h1>
-      <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Oprah &amp; Reese picks · live Goodreads ratings · SF Library links</p>
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="border-b border-stone-200 sticky top-0 z-20" style="background:#faf9f7">
+  <div class="max-w-5xl mx-auto px-6 sm:px-10 pt-8 pb-0">
+
+    <div class="flex items-start justify-between gap-6 mb-6">
+      <div>
+        <p class="text-[10px] font-semibold tracking-[0.15em] text-stone-400 uppercase mb-2">Reading List</p>
+        <h1 class="text-2xl sm:text-3xl font-semibold text-stone-900 leading-tight">Oprah &amp; Reese</h1>
+        <p class="text-stone-400 text-xs mt-1.5 leading-relaxed">
+          Book club picks · Goodreads ratings · SF Library availability
+        </p>
+      </div>
+      <div id="header-stats" class="hidden sm:block text-right mt-1">
+        <span id="stat-count" class="text-3xl font-light text-stone-300 tabular-nums leading-none"></span>
+        <p class="text-[10px] tracking-widest text-stone-400 uppercase mt-1">books</p>
+      </div>
     </div>
-    <div id="header-stats" class="hidden sm:flex flex-col items-end">
-      <div id="stat-count" class="text-3xl font-bold text-slate-800 leading-none"></div>
-      <div class="text-xs text-slate-500 mt-0.5">books tracked</div>
-    </div>
+
+    <!-- Club tabs sit on the border-b -->
+    <nav class="flex gap-7 -mb-px">
+      <button class="club-tab active text-sm pb-3" data-club="all">All</button>
+      <button class="club-tab text-sm pb-3" data-club="oprah">Oprah's Club</button>
+      <button class="club-tab text-sm pb-3" data-club="reese">Reese's Club</button>
+    </nav>
+
   </div>
 </header>
 
-<!-- ── Controls ── -->
-<main class="max-w-7xl mx-auto px-5 sm:px-8 py-7">
+<!-- ── Toolbar ─────────────────────────────────────────────────────────────── -->
+<div class="border-b border-stone-100 sticky top-[117px] sm:top-[125px] z-10" style="background:#faf9f7">
+  <div class="max-w-5xl mx-auto px-6 sm:px-10 py-3 flex flex-wrap items-center gap-5">
 
-  <!-- Search -->
-  <div class="relative mb-5">
-    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-    </svg>
-    <input id="search" type="search" placeholder="Search by title or author…"
-      class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-  </div>
-
-  <!-- Filter row -->
-  <div class="flex flex-wrap items-center gap-3 mb-4">
-
-    <!-- Club filter -->
-    <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-      <button class="pill-btn active px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="all">All</button>
-      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="oprah">Oprah</button>
-      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-club="reese">Reese</button>
+    <!-- Search -->
+    <div class="flex-1 min-w-36">
+      <input id="search" type="search" placeholder="Search"
+        class="w-full bg-transparent border-0 border-b border-stone-200 py-1 text-sm text-stone-800
+               placeholder:text-stone-400 focus:outline-none focus:border-stone-500 transition-colors">
     </div>
 
-    <!-- Year filter -->
-    <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-      <button class="pill-btn active px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="all">All Years</button>
-      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2026">2026</button>
-      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2025">2025</button>
-      <button class="pill-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all" data-year="2024">2024</button>
+    <!-- Year pills -->
+    <div class="flex items-center gap-4 text-sm">
+      <button class="year-btn active" data-year="all">All years</button>
+      <button class="year-btn" data-year="2026">2026</button>
+      <button class="year-btn" data-year="2025">2025</button>
+      <button class="year-btn" data-year="2024">2024</button>
     </div>
 
     <!-- Sort -->
-    <div class="ml-auto">
-      <select id="sort-select"
-        class="appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-slate-200 bg-white text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition">
-        <option value="rating-desc">⭐ Highest Rated</option>
-        <option value="rating-asc">Rating: Low to High</option>
-        <option value="year-desc">Newest First</option>
-        <option value="year-asc">Oldest First</option>
-        <option value="title-asc">Title: A – Z</option>
-      </select>
-    </div>
+    <select id="sort-select"
+      class="appearance-none pr-5 bg-transparent border-0 text-xs text-stone-400
+             focus:outline-none cursor-pointer">
+      <option value="rating-desc">Highest rated</option>
+      <option value="rating-asc">Lowest rated</option>
+      <option value="year-desc">Newest first</option>
+      <option value="year-asc">Oldest first</option>
+      <option value="title-asc">A – Z</option>
+    </select>
 
   </div>
+</div>
 
-  <!-- Result count -->
-  <div id="result-count" class="text-sm text-slate-500 mb-5 h-5"></div>
+<!-- ── Content ─────────────────────────────────────────────────────────────── -->
+<main class="max-w-5xl mx-auto px-6 sm:px-10 py-8">
 
-  <!-- Book grid -->
-  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
+  <p id="result-count" class="text-xs text-stone-400 mb-5 h-4"></p>
 
-  <!-- Empty state -->
-  <div id="empty-state" class="hidden text-center py-24">
-    <div class="text-6xl mb-4">🔍</div>
-    <div class="text-lg font-semibold text-slate-700">No books found</div>
-    <div class="text-sm text-slate-500 mt-1">Try adjusting your search or filters</div>
+  <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+
+  <div id="empty-state" class="hidden py-20 text-center text-sm text-stone-400">
+    No books match your search or filters.
   </div>
 
 </main>
@@ -112,7 +138,7 @@ let BOOKS = []
 let clubFilter = 'all'
 let yearFilter = 'all'
 
-// ── Utility ──────────────────────────────────────────────────────────────────
+// ── Utils ──────────────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
   return String(str ?? '')
@@ -120,15 +146,9 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 }
 
-function stars(rating) {
-  const full = Math.floor(rating)
-  const half = (rating - full) >= 0.5
-  return '★'.repeat(full) + (half ? '½' : '')
-}
-
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
-// ── Open Library enrichment ───────────────────────────────────────────────────
+// ── Open Library enrichment ────────────────────────────────────────────────
 
 async function fetchOpenLibraryData(title, author) {
   try {
@@ -160,7 +180,7 @@ async function enrichBooks() {
   }
 }
 
-// ── Load ──────────────────────────────────────────────────────────────────────
+// ── Load ───────────────────────────────────────────────────────────────────
 
 async function loadBooks() {
   showSkeletons()
@@ -172,42 +192,40 @@ async function loadBooks() {
   enrichBooks()
 }
 
-// ── Skeleton ──────────────────────────────────────────────────────────────────
+// ── Skeletons ──────────────────────────────────────────────────────────────
 
 function showSkeletons() {
-  document.getElementById('grid').innerHTML = Array(8).fill(0).map(() => `
-    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm animate-pulse">
-      <div class="h-1.5 bg-slate-200 w-full"></div>
-      <div class="p-5 space-y-3">
-        <div class="h-4 bg-slate-200 rounded-lg w-4/5"></div>
-        <div class="h-3 bg-slate-200 rounded-lg w-1/2"></div>
-        <div class="h-3 bg-slate-200 rounded-lg w-1/3 mt-2"></div>
-        <div class="h-3 bg-slate-200 rounded-lg w-2/3"></div>
-        <div class="flex gap-2 mt-4">
-          <div class="h-8 bg-slate-100 rounded-lg flex-1"></div>
-          <div class="h-8 bg-slate-100 rounded-lg flex-1"></div>
-        </div>
+  document.getElementById('grid').innerHTML = Array(9).fill(0).map(() => `
+    <div class="book-card oprah-card bg-white border border-stone-100 p-5 space-y-3 skel">
+      <div>
+        <div class="h-3.5 bg-stone-200 rounded w-4/5 mb-2"></div>
+        <div class="h-2.5 bg-stone-100 rounded w-1/2"></div>
+      </div>
+      <div class="h-2.5 bg-stone-100 rounded w-1/3"></div>
+      <div class="flex gap-4 pt-2">
+        <div class="h-2 bg-stone-100 rounded w-16"></div>
+        <div class="h-2 bg-stone-100 rounded w-16"></div>
       </div>
     </div>
   `).join('')
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
+// ── Render ─────────────────────────────────────────────────────────────────
 
 function getFiltered() {
-  const search = document.getElementById('search').value.toLowerCase().trim()
+  const q = document.getElementById('search').value.toLowerCase().trim()
   return BOOKS.filter(b => {
     if (clubFilter !== 'all' && b.club !== clubFilter) return false
     if (yearFilter !== 'all' && String(b.year) !== yearFilter) return false
-    if (search && !b.title.toLowerCase().includes(search) && !b.author.toLowerCase().includes(search)) return false
+    if (q && !b.title.toLowerCase().includes(q) && !b.author.toLowerCase().includes(q)) return false
     return true
   })
 }
 
 function getSorted(books) {
-  const sort = document.getElementById('sort-select').value
+  const s = document.getElementById('sort-select').value
   return [...books].sort((a, b) => {
-    switch (sort) {
+    switch (s) {
       case 'rating-desc': return (b.rating ?? -1) - (a.rating ?? -1)
       case 'rating-asc':  return (a.rating ?? 999) - (b.rating ?? 999)
       case 'year-desc':   return b.year - a.year || a.title.localeCompare(b.title)
@@ -219,84 +237,68 @@ function getSorted(books) {
 }
 
 function cardHtml(book) {
-  const t = escapeHtml(book.title)
-  const a = escapeHtml(book.author)
-  const isOprah = book.club === 'oprah'
-
-  const accent  = isOprah ? 'bg-violet-500'  : 'bg-rose-400'
-  const badge   = isOprah
-    ? 'bg-violet-50 text-violet-700 border border-violet-200'
-    : 'bg-rose-50 text-rose-600 border border-rose-200'
-  const label   = isOprah ? "Oprah's Book Club" : "Reese's Book Club"
+  const t  = escapeHtml(book.title)
+  const a  = escapeHtml(book.author)
+  const isOprah  = book.club === 'oprah'
+  const cardClass = isOprah ? 'oprah-card' : 'reese-card'
 
   const ratingHtml = book.rating != null
-    ? `<div class="flex items-baseline gap-1.5">
-         <span class="text-amber-500 text-xs tracking-tighter leading-none">${stars(book.rating)}</span>
-         <span class="font-semibold text-amber-700 text-sm">${book.rating}</span>
-         <span class="text-slate-400 text-xs">${(book.reviews ?? 0).toLocaleString()} ratings</span>
-       </div>`
-    : `<div class="text-xs text-slate-400 italic">Ratings not yet available</div>`
+    ? `<p class="text-xs text-stone-500">
+         ${book.rating}
+         <span class="text-stone-300 mx-1">/</span>5
+         <span class="text-stone-300 mx-1.5">&middot;</span>
+         <span class="text-stone-400">${(book.reviews ?? 0).toLocaleString()} ratings</span>
+       </p>`
+    : `<p class="text-xs text-stone-300">No ratings yet</p>`
 
   const sfUrl        = escapeHtml(book.sf_url)
   const goodreadsUrl = `https://www.goodreads.com/search?q=${encodeURIComponent(book.title + ' ' + book.author)}`
 
   return `
-    <div class="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-sm card-lift flex flex-col">
-      <div class="h-1.5 ${accent} w-full"></div>
-      <div class="p-5 flex flex-col gap-2.5 flex-1">
-
-        <div>
-          <div class="font-bold text-slate-900 leading-snug text-base mb-1">${t}</div>
-          <div class="text-sm text-slate-500 leading-tight">${a}</div>
-        </div>
-
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${badge}">${label}</span>
-          <span class="text-xs text-slate-400 font-medium">${book.year}</span>
-        </div>
-
-        ${ratingHtml}
-
-        <div class="flex gap-2 mt-auto pt-3">
-          <a href="${sfUrl}" target="_blank" rel="noopener noreferrer"
-            class="flex-1 text-center text-xs font-semibold px-3 py-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
-            📖 SF Library
-          </a>
-          <a href="${goodreadsUrl}" target="_blank" rel="noopener noreferrer"
-            class="flex-1 text-center text-xs font-semibold px-3 py-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">
-            ⭐ Goodreads
-          </a>
-        </div>
-
+    <div class="book-card ${cardClass} bg-white border border-stone-100 p-5 flex flex-col gap-3">
+      <div>
+        <p class="font-medium text-stone-900 text-sm leading-snug">${t}</p>
+        <p class="text-stone-400 text-xs mt-1">${a} <span class="text-stone-300">&middot;</span> ${book.year}</p>
+      </div>
+      ${ratingHtml}
+      <div class="flex gap-5 mt-auto pt-1">
+        <a href="${sfUrl}" target="_blank" rel="noopener noreferrer"
+          class="text-xs text-stone-400 hover:text-stone-700 hover:underline underline-offset-2 transition-colors">
+          SF Library
+        </a>
+        <a href="${goodreadsUrl}" target="_blank" rel="noopener noreferrer"
+          class="text-xs text-stone-400 hover:text-stone-700 hover:underline underline-offset-2 transition-colors">
+          Goodreads
+        </a>
       </div>
     </div>
   `
 }
 
 function render() {
-  const grid       = document.getElementById('grid')
-  const emptyState = document.getElementById('empty-state')
-  const countEl    = document.getElementById('result-count')
+  const grid     = document.getElementById('grid')
+  const empty    = document.getElementById('empty-state')
+  const countEl  = document.getElementById('result-count')
 
   const filtered = getFiltered()
   const sorted   = getSorted(filtered)
 
   if (sorted.length === 0) {
     grid.innerHTML = ''
-    emptyState.classList.remove('hidden')
+    empty.classList.remove('hidden')
     countEl.textContent = ''
     return
   }
 
-  emptyState.classList.add('hidden')
+  empty.classList.add('hidden')
   countEl.textContent = filtered.length === BOOKS.length
-    ? `Showing all ${BOOKS.length} books`
-    : `Showing ${filtered.length} of ${BOOKS.length} books`
+    ? `${BOOKS.length} books`
+    : `${filtered.length} of ${BOOKS.length} books`
 
   grid.innerHTML = sorted.map(cardHtml).join('')
 }
 
-// ── Event wiring ──────────────────────────────────────────────────────────────
+// ── Events ─────────────────────────────────────────────────────────────────
 
 document.querySelectorAll('[data-club]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -318,8 +320,6 @@ document.querySelectorAll('[data-year]').forEach(btn => {
 
 document.getElementById('search').addEventListener('input', render)
 document.getElementById('sort-select').addEventListener('change', render)
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
 
 loadBooks()
 
