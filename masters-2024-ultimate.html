@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scottie Scheffler — 2024 Masters Champion — ULTIMATE</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@r128/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --masters-green: #006747;
+            --masters-dark: #004d35;
+            --masters-gold: #c8a951;
+            --fairway: #4a8c5c;
+            --green-surface: #6abf7b;
+            --bunker: #e8d9a0;
+            --water: #4a90c2;
+            --birdie: #2ecc71;
+            --eagle: #f1c40f;
+            --bogey: #e74c3c;
+            --bg: #0a0e17;
+            --panel: #141d32;
+            --text: #e8eef7;
+            --text-muted: #738ba8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: linear-gradient(135deg, rgba(0, 77, 53, 0.99), rgba(0, 103, 71, 0.99));
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.7);
+            border-bottom: 2px solid var(--masters-gold);
+        }
+
+        .header-branding {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 28px;
+            color: var(--masters-gold);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .header-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .header-subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            font-weight: 300;
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(255,255,255,0.08);
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(200, 169, 81, 0.2);
+        }
+
+        .score-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .score-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--masters-gold);
+            line-height: 1;
+        }
+
+        .round-tabs {
+            display: flex;
+            gap: 4px;
+        }
+
+        .round-tab {
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .round-tab:hover {
+            background: rgba(255,255,255,0.12);
+        }
+
+        .round-tab.active {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            border-color: var(--masters-gold);
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(200, 169, 81, 0.3);
+        }
+
+        /* ===== DASHBOARD PANELS ===== */
+        .dashboard {
+            position: fixed;
+            inset: 72px 0 0 0;
+            display: grid;
+            grid-template-columns: 320px 1fr 360px;
+            gap: 0;
+            z-index: 50;
+        }
+
+        .dashboard-panel {
+            background: rgba(20, 29, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.06);
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .dashboard-panel.right {
+            border-right: none;
+            border-left: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .canvas-container {
+            grid-column: 2;
+            grid-row: 1;
+            position: relative;
+        }
+
+        /* ===== LEADERBOARD PANEL ===== */
+        .leaderboard-section {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 13px;
+            color: var(--masters-gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(200, 169, 81, 0.08);
+        }
+
+        .leaderboard-item.leader {
+            background: rgba(200, 169, 81, 0.15);
+            border-left-color: var(--masters-gold);
+        }
+
+        .lb-pos {
+            width: 28px;
+            font-weight: 700;
+            color: var(--masters-gold);
+            font-size: 12px;
+        }
+
+        .lb-name {
+            flex: 1;
+            font-size: 13px;
+            margin-left: 8px;
+        }
+
+        .lb-score {
+            font-weight: 700;
+            width: 50px;
+            text-align: right;
+            font-size: 13px;
+        }
+
+        /* ===== SCORECARD PANEL ===== */
+        .scorecard-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .scorecard-nine {
+            padding: 12px 16px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+
+        .scorecard-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: rgba(255,255,255,0.06);
+            margin: 6px 0;
+        }
+
+        .scorecard-hole {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
+        .hole-num-sc {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(200, 169, 81, 0.2);
+            border: 1px solid rgba(200, 169, 81, 0.4);
+            flex-shrink: 0;
+            font-weight: 600;
+            font-size: 10px;
+        }
+
+        .hole-score-sc {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-left: auto;
+            font-size: 11px;
+        }
+
+        .score-birdie-sc { background: var(--birdie); color: white; }
+        .score-eagle-sc { background: var(--eagle); color: #333; }
+        .score-par-sc { background: rgba(255,255,255,0.1); border: 1px solid var(--text-muted); }
+        .score-bogey-sc { background: var(--bogey); color: white; }
+
+        /* ===== STORY PANEL ===== */
+        .story-content {
+            padding: 20px 16px;
+        }
+
+        .story-moment {
+            padding: 12px;
+            margin-bottom: 12px;
+            background: rgba(255,255,255,0.04);
+            border-left: 3px solid var(--masters-gold);
+            border-radius: 4px;
+        }
+
+        .moment-hole {
+            font-weight: 700;
+            color: var(--masters-gold);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .moment-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ===== CONTROLS ===== */
+        .bottom-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            background: rgba(20, 29, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200, 169, 81, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            z-index: 100;
+        }
+
+        .ctrl-btn {
+            padding: 8px 16px;
+            border-radius: 4px;
+            background: rgba(200, 169, 81, 0.2);
+            border: 1px solid rgba(200, 169, 81, 0.4);
+            color: var(--masters-gold);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(200, 169, 81, 0.35);
+        }
+
+        .ctrl-btn.active {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+        }
+
+        /* ===== EXPORT MODAL ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1001;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.visible {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--panel);
+            border: 1px solid rgba(200, 169, 81, 0.3);
+            border-radius: 12px;
+            padding: 28px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--masters-gold);
+            margin-bottom: 16px;
+        }
+
+        .modal-textarea {
+            width: 100%;
+            height: 350px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(200, 169, 81, 0.2);
+            border-radius: 6px;
+            color: var(--text);
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            margin-bottom: 12px;
+            resize: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.primary {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ===== SCROLLBARS ===== */
+        .dashboard-panel::-webkit-scrollbar { width: 4px; }
+        .dashboard-panel::-webkit-scrollbar-track { background: transparent; }
+        .dashboard-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-thumb { background: rgba(200, 169, 81, 0.3); border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-branding">
+        <div class="header-logo">🏌️ THE MASTERS</div>
+        <div class="header-meta">
+            <div class="header-title">2024 Champion</div>
+            <div class="header-subtitle">Augusta National • April 14, 2024</div>
+        </div>
+    </div>
+
+    <div class="header-center">
+        <div class="score-display">
+            <div class="score-label">Final Score</div>
+            <div class="score-value" id="finalScore">-11</div>
+            <div style="color:var(--text-muted);font-size:12px;">277</div>
+        </div>
+    </div>
+
+    <div class="round-tabs" id="roundTabs">
+        <button class="round-tab active" data-round="all" onclick="selectRound('all')">All Rounds</button>
+        <button class="round-tab" data-round="1" onclick="selectRound('1')">R1: 66</button>
+        <button class="round-tab" data-round="2" onclick="selectRound('2')">R2: 72</button>
+        <button class="round-tab" data-round="3" onclick="selectRound('3')">R3: 71</button>
+        <button class="round-tab" data-round="4" onclick="selectRound('4')">R4: 68</button>
+    </div>
+</header>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+    <!-- LEFT PANEL: LEADERBOARD -->
+    <div class="dashboard-panel">
+        <div class="leaderboard-section">
+            <div class="section-title">🏆 Final Leaderboard</div>
+            <div id="leaderboardList"></div>
+        </div>
+        <div class="leaderboard-section">
+            <div class="section-title">📊 Round Summary</div>
+            <div id="roundSummary"></div>
+        </div>
+    </div>
+
+    <!-- CENTER: 3D CANVAS -->
+    <div class="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <!-- RIGHT PANEL: SCORECARD & STORY -->
+    <div class="dashboard-panel right">
+        <div class="scorecard-header">
+            <div class="section-title">🎯 Scottie's Scorecard</div>
+        </div>
+        <div class="scorecard-nine" id="front9"></div>
+        <div class="scorecard-nine" id="back9"></div>
+
+        <div class="leaderboard-section">
+            <div class="section-title">📖 Championship Story</div>
+            <div class="story-content" id="storyContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="bottom-controls">
+    <button class="ctrl-btn" onclick="resetView()">⟲ Reset View</button>
+    <button class="ctrl-btn" onclick="toggleAnimation()" id="playBtn">▶ Play R4 Animation</button>
+    <button class="ctrl-btn" onclick="exportJSON()">⬇ Export JSON</button>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal" id="exportModal">
+    <div class="modal-content">
+        <div class="modal-title">📊 Tournament Statistics (JSON)</div>
+        <textarea class="modal-textarea" id="exportData" readonly></textarea>
+        <div class="modal-buttons">
+            <button class="modal-btn primary" onclick="copyJSON()">📋 Copy to Clipboard</button>
+            <button class="modal-btn secondary" onclick="closeExport()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// DATA STRUCTURE
+// ============================================================
+
+const TOURNAMENT = {
+    year: 2024,
+    name: "Masters Tournament",
+    location: "Augusta National Golf Club",
+    dates: "April 11-14, 2024",
+    champion: "Scottie Scheffler"
+};
+
+const HOLES = [
+    {hole:1, name:"Tea Olive", par:4, yards:445},
+    {hole:2, name:"Pink Dogwood", par:5, yards:585},
+    {hole:3, name:"Flowering Peach", par:4, yards:350},
+    {hole:4, name:"Flowering Crab Apple", par:3, yards:240},
+    {hole:5, name:"Magnolia", par:4, yards:495},
+    {hole:6, name:"Juniper", par:3, yards:180},
+    {hole:7, name:"Pampas", par:4, yards:450},
+    {hole:8, name:"Yellow Jasmine", par:5, yards:570},
+    {hole:9, name:"Carolina Cherry", par:4, yards:460},
+    {hole:10, name:"Camellia", par:4, yards:495},
+    {hole:11, name:"White Dogwood", par:4, yards:520},
+    {hole:12, name:"Golden Bell", par:3, yards:155},
+    {hole:13, name:"Azalea", par:5, yards:545},
+    {hole:14, name:"Chinese Fir", par:4, yards:440},
+    {hole:15, name:"Firethorn", par:5, yards:550},
+    {hole:16, name:"Redbud", par:3, yards:170},
+    {hole:17, name:"Nandina", par:4, yards:440},
+    {hole:18, name:"Holly", par:4, yards:465}
+];
+
+const SCHEFFLER_SCORES = {
+    1: [4,4,4,3,4,3,4,4,4, 4,4,2,4,4,4,2,4,4],
+    2: [4,5,4,3,4,3,4,4,4, 4,4,3,5,4,5,3,4,5],
+    3: [4,4,4,3,4,3,4,5,4, 4,4,3,4,4,4,3,4,4],
+    4: [4,5,3,4,4,3,5,4,3, 3,5,3,4,3,5,2,4,4],
+};
+
+const LEADERBOARD_FINAL = [
+    {pos:1, name:"Scottie Scheffler", score:-11},
+    {pos:2, name:"Ludvig Åberg", score:-7},
+    {pos:"T3", name:"Max Homa", score:-4},
+    {pos:"T3", name:"Tommy Fleetwood", score:-4},
+    {pos:"T3", name:"Collin Morikawa", score:-4},
+    {pos:"T6", name:"Cam Smith", score:-2},
+    {pos:"T6", name:"Bryson DeChambeau", score:-2},
+];
+
+const CHAMPIONSHIP_STORY = [
+    {hole: 0, text: "Scottie enters Sunday with a one-shot lead at -7 (201 total), looking to win his second green jacket."},
+    {hole: 3, text: "BIRDIE 🎯 Takes a 2-shot lead immediately."},
+    {hole: 4, text: "BOGEY ⚠️ Tee shot flies the green. Three-way tie at -6."},
+    {hole: 7, text: "BOGEY Trees left, bunker right. More turmoil."},
+    {hole: 8, text: "BIRDIE ✨ The comeback begins. Ball in play approaching the turn."},
+    {hole: 9, text: "BIRDIE MAGIC 🌟 Approach to within an inch! Tap-in birdie."},
+    {hole: 10, text: "🔥 THREE IN A ROW! 9-footer drops at the Camellia. Scottie surges to 8-under."},
+    {hole: 11, text: "BOGEY at Amen Corner, but competitors stumble worse."},
+    {hole: 13, text: "BIRDIE Two-putt at the Azalea on this historic par 5."},
+    {hole: 14, text: "BIRDIE Approach to 4 feet. Tap-in. Scottie reaches 10-under."},
+    {hole: 16, text: "🏆 THE CLINCHER! 9-footer at Redbud. Four-shot lead established."},
+    {hole: 18, text: "🥇 CHAMPION! Par to finish. Second green jacket secured at 11-under, 277 total. Four shots clear of Åberg."},
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let scene, camera, renderer, controls;
+let currentRound = 'all';
+let isAnimating = false;
+
+// ============================================================
+// THREE.JS
+// ============================================================
+function initThreeJS() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0e17);
+    scene.fog = new THREE.Fog(0x0a0e17, 700, 1200);
+
+    const canvas = document.getElementById('canvas');
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 2500);
+    camera.position.set(50, 200, 280);
+
+    renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: false});
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.8;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.minDistance = 150;
+    controls.maxDistance = 600;
+
+    // Lighting
+    const hemisphereLight = new THREE.HemisphereLight(0x87ceeb, 0x1a4d2e, 1.4);
+    scene.add(hemisphereLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff8e7, 2);
+    sunLight.position.set(250, 280, 200);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(4096, 4096);
+    sunLight.shadow.camera.left = -500;
+    sunLight.shadow.camera.right = 500;
+    sunLight.shadow.camera.top = 500;
+    sunLight.shadow.camera.bottom = -500;
+    sunLight.shadow.camera.far = 1500;
+    sunLight.shadow.bias = -0.0004;
+    scene.add(sunLight);
+
+    // Terrain
+    createTerrainWithElevation();
+    createAllHoles();
+
+    window.addEventListener('resize', onWindowResize);
+    animate();
+}
+
+function createTerrainWithElevation() {
+    const geometry = new THREE.PlaneGeometry(1000, 1000, 200, 200);
+    const positions = geometry.attributes.position;
+    const posArray = positions.array;
+
+    for (let i = 0; i < posArray.length; i += 3) {
+        const x = posArray[i] / 150;
+        const z = posArray[i + 1] / 150;
+        let elevation = 0;
+        elevation += Math.sin(x * 0.3) * Math.cos(z * 0.3) * 12;
+        elevation += Math.sin(x * 0.08) * Math.cos(z * 0.08) * 18;
+        elevation += (Math.random() - 0.5) * 2;
+        posArray[i + 2] = Math.max(-2, elevation);
+    }
+    positions.needsUpdate = true;
+    geometry.computeVertexNormals();
+
+    const material = new THREE.MeshStandardMaterial({
+        color: 0x2d5a35,
+        roughness: 0.82,
+        metalness: 0,
+    });
+
+    const terrain = new THREE.Mesh(geometry, material);
+    terrain.receiveShadow = true;
+    terrain.rotation.x = -Math.PI / 2;
+    scene.add(terrain);
+}
+
+function createAllHoles() {
+    const positions = generateHoleLayout();
+    positions.forEach((pos, i) => {
+        const hole = HOLES[i];
+        createHole(pos, hole.hole);
+    });
+}
+
+function generateHoleLayout() {
+    return [
+        {x:-180,z:180}, {x:-130,z:220}, {x:-50,z:210}, {x:30,z:150},
+        {x:120,z:90}, {x:180,z:20}, {x:190,z:-80}, {x:160,z:-160},
+        {x:90,z:-220}, {x:20,z:-240}, {x:-60,z:-230}, {x:-140,z:-200},
+        {x:-210,z:-140}, {x:-260,z:-60}, {x:-280,z:40}, {x:-240,z:140},
+        {x:-160,z:200}, {x:-80,z:250}
+    ];
+}
+
+function createHole(pos, holeNum) {
+    const group = new THREE.Group();
+    group.position.set(pos.x, 0, pos.z);
+
+    const greenGeom = new THREE.CircleGeometry(20, 32);
+    const greenMat = new THREE.MeshStandardMaterial({
+        color: 0x6abf7b,
+        roughness: 0.6,
+        metalness: 0,
+    });
+    const green = new THREE.Mesh(greenGeom, greenMat);
+    green.receiveShadow = true;
+    green.rotation.x = -Math.PI / 2;
+    group.add(green);
+
+    const pole = new THREE.CylinderGeometry(0.7, 0.7, 20, 8);
+    const poleMat = new THREE.MeshStandardMaterial({color: 0x222});
+    const poleM = new THREE.Mesh(pole, poleMat);
+    poleM.position.y = 10;
+    poleM.castShadow = true;
+    group.add(poleM);
+
+    const flag = new THREE.BoxGeometry(12, 7, 0.4);
+    const flagMat = new THREE.MeshStandardMaterial({color: 0xf5f5f5});
+    const flagM = new THREE.Mesh(flag, flagMat);
+    flagM.position.set(6, 18, 0);
+    flagM.castShadow = true;
+    group.add(flagM);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#c8a951';
+    ctx.font = 'bold 80px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(holeNum.toString(), 64, 64);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteGeom = new THREE.PlaneGeometry(16, 16);
+    const spriteMat = new THREE.MeshBasicMaterial({map: texture, transparent: true});
+    const sprite = new THREE.Mesh(spriteGeom, spriteMat);
+    sprite.position.y = 0.5;
+    sprite.position.z = 10;
+    group.add(sprite);
+
+    if ([2,4,5,7,12,13,14,15].includes(holeNum)) {
+        const bunker = new THREE.CircleGeometry(11, 16);
+        const bunkerMat = new THREE.MeshStandardMaterial({color: 0xe8d9a0});
+        const bunkerM = new THREE.Mesh(bunker, bunkerMat);
+        bunkerM.rotation.x = -Math.PI / 2;
+        bunkerM.position.set(-28, 0.05, 22);
+        bunkerM.receiveShadow = true;
+        group.add(bunkerM);
+    }
+
+    if ([11,12,13,15,16].includes(holeNum)) {
+        const water = new THREE.CircleGeometry(15, 16);
+        const waterMat = new THREE.MeshStandardMaterial({
+            color: 0x4a90c2,
+            metalness: 0.4,
+            roughness: 0.3,
+        });
+        const waterM = new THREE.Mesh(water, waterMat);
+        waterM.rotation.x = -Math.PI / 2;
+        waterM.position.set(32, 0.05, 18);
+        waterM.receiveShadow = true;
+        group.add(waterM);
+    }
+
+    scene.add(group);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+function onWindowResize() {
+    const canvas = document.getElementById('canvas');
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+}
+
+// ============================================================
+// UI UPDATES
+// ============================================================
+function buildUI() {
+    updateLeaderboard();
+    updateRoundSummary();
+    updateScorecard();
+    updateStory();
+}
+
+function updateLeaderboard() {
+    const html = LEADERBOARD_FINAL.map(p => `
+        <div class="leaderboard-item ${p.name === 'Scottie Scheffler' ? 'leader' : ''}">
+            <div class="lb-pos">${p.pos}</div>
+            <div class="lb-name">${p.name}</div>
+            <div class="lb-score" style="color:${getScoreColor(p.score)}">${p.score > 0 ? '+' : ''}${p.score}</div>
+        </div>
+    `).join('');
+    document.getElementById('leaderboardList').innerHTML = html;
+}
+
+function updateRoundSummary() {
+    const rounds = [1,2,3,4];
+    const html = rounds.map(r => {
+        const scores = SCHEFFLER_SCORES[r];
+        const total = scores.reduce((a,b) => a+b, 0);
+        const vs = total - 72;
+        return `<div style="padding:6px 0;display:flex;justify-content:space-between;font-size:12px;">
+            <span>Round ${r}</span>
+            <span style="font-weight:700;color:${getScoreColor(vs - 72)}">${total} (${vs > 0 ? '+' : ''}${vs})</span>
+        </div>`;
+    }).join('');
+    document.getElementById('roundSummary').innerHTML = html;
+}
+
+function updateScorecard() {
+    const scores = currentRound === 'all'
+        ? HOLES.map((h,i) => [1,2,3,4].map(r => SCHEFFLER_SCORES[r][i]))
+        : HOLES.map((h,i) => [SCHEFFLER_SCORES[parseInt(currentRound)][i]]);
+
+    const front = HOLES.slice(0, 9).map((h, i) => {
+        const score = currentRound === 'all'
+            ? Math.round(scores[i].reduce((a,b) => a+b, 0) / scores[i].length)
+            : scores[i][0];
+        const diff = score - h.par;
+        let scoreClass = 'score-par-sc';
+        if (diff <= -2) scoreClass = 'score-eagle-sc';
+        else if (diff === -1) scoreClass = 'score-birdie-sc';
+        else if (diff === 1) scoreClass = 'score-bogey-sc';
+
+        return `
+            <div class="scorecard-hole">
+                <div class="hole-num-sc">${h.hole}</div>
+                <div style="flex:1;text-align:center">Par ${h.par}</div>
+                <div class="hole-score-sc ${scoreClass}">${score}</div>
+            </div>
+        `;
+    }).join('');
+
+    const back = HOLES.slice(9, 18).map((h, i) => {
+        const score = currentRound === 'all'
+            ? Math.round(scores[i+9].reduce((a,b) => a+b, 0) / scores[i+9].length)
+            : scores[i+9][0];
+        const diff = score - h.par;
+        let scoreClass = 'score-par-sc';
+        if (diff <= -2) scoreClass = 'score-eagle-sc';
+        else if (diff === -1) scoreClass = 'score-birdie-sc';
+        else if (diff === 1) scoreClass = 'score-bogey-sc';
+
+        return `
+            <div class="scorecard-hole">
+                <div class="hole-num-sc">${h.hole}</div>
+                <div style="flex:1;text-align:center">Par ${h.par}</div>
+                <div class="hole-score-sc ${scoreClass}">${score}</div>
+            </div>
+        `;
+    }).join('');
+
+    document.getElementById('front9').innerHTML = front + '<div class="scorecard-divider"></div>';
+    document.getElementById('back9').innerHTML = back;
+}
+
+function updateStory() {
+    const html = CHAMPIONSHIP_STORY.map(s => `
+        <div class="story-moment">
+            ${s.hole > 0 ? `<div class="moment-hole">🏌️ Hole ${s.hole}</div>` : ''}
+            <div class="moment-text">${s.text}</div>
+        </div>
+    `).join('');
+    document.getElementById('storyContent').innerHTML = html;
+}
+
+function getScoreColor(score) {
+    if (score > 0) return '#f1c40f';
+    if (score === 0) return '#2ecc71';
+    if (score === -1) return '#2ecc71';
+    return '#8899aa';
+}
+
+function selectRound(round) {
+    currentRound = round;
+    document.querySelectorAll('.round-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`[data-round="${round}"]`).classList.add('active');
+
+    const scores = round === 'all'
+        ? [1,2,3,4].reduce((a,b) => a + SCHEFFLER_SCORES[b].reduce((x,y) => x+y, 0), 0)
+        : SCHEFFLER_SCORES[parseInt(round)].reduce((a,b) => a+b, 0);
+    const totalPar = round === 'all' ? 288 : 72;
+    const vs = scores - totalPar;
+
+    document.getElementById('finalScore').textContent = `${vs > 0 ? '+' : ''}${vs}`;
+
+    updateScorecard();
+}
+
+function toggleAnimation() {
+    isAnimating = !isAnimating;
+    const btn = document.getElementById('playBtn');
+    btn.textContent = isAnimating ? '⏸ Stop' : '▶ Play R4';
+    btn.classList.toggle('active', isAnimating);
+
+    if (isAnimating) animateRound4();
+}
+
+function animateRound4() {
+    if (!isAnimating) return;
+
+    for (let i = 1; i <= 18; i++) {
+        setTimeout(() => {
+            if (!isAnimating) return;
+            const moment = CHAMPIONSHIP_STORY.find(m => m.hole === i);
+            if (moment) {
+                const html = `
+                    <div class="story-moment">
+                        <div class="moment-hole">🏌️ Hole ${i}</div>
+                        <div class="moment-text">${moment.text}</div>
+                    </div>
+                `;
+                document.getElementById('storyContent').innerHTML = html;
+            }
+        }, i * 1500);
+    }
+}
+
+function resetView() {
+    isAnimating = false;
+    document.getElementById('playBtn').textContent = '▶ Play R4 Animation';
+    document.getElementById('playBtn').classList.remove('active');
+    camera.position.set(50, 200, 280);
+    controls.target.set(0, 0, 0);
+    updateStory();
+}
+
+function exportJSON() {
+    const stats = {
+        tournament: TOURNAMENT,
+        finalLeaderboard: LEADERBOARD_FINAL,
+        champion: {
+            name: "Scottie Scheffler",
+            scorecard: SCHEFFLER_SCORES,
+            totalScore: 277,
+            relativeScore: -11,
+            margin: "4 shots"
+        },
+        course: {
+            name: "Augusta National Golf Club",
+            par: 72,
+            yardage: HOLES.reduce((a, h) => a + h.yards, 0),
+            holes: HOLES
+        },
+        exportedAt: new Date().toISOString()
+    };
+
+    document.getElementById('exportData').value = JSON.stringify(stats, null, 2);
+    document.getElementById('exportModal').classList.add('visible');
+}
+
+function copyJSON() {
+    document.getElementById('exportData').select();
+    document.execCommand('copy');
+    alert('JSON copied to clipboard! 📋');
+}
+
+function closeExport() {
+    document.getElementById('exportModal').classList.remove('visible');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+    initThreeJS();
+    buildUI();
+});
+</script>
+
+</body>
+</html>
