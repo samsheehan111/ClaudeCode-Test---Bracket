@@ -146,18 +146,29 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
 
 async function fetchOpenLibraryData(title, author) {
   try {
-    const q   = encodeURIComponent(`${title} ${author}`)
-    const res = await fetch(
-      `https://openlibrary.org/search.json?q=${q}&limit=1&fields=ratings_average,ratings_count,cover_i`
-    )
+    // Use title + author as separate params (more precise than free-text q=)
+    // Fetch up to 5 results so we can pick the first one that has a cover
+    const params = new URLSearchParams({
+      title, author, limit: '5',
+      fields: 'ratings_average,ratings_count,cover_i'
+    })
+    const res  = await fetch(`https://openlibrary.org/search.json?${params}`)
     const data = await res.json()
-    const doc  = data.docs?.[0]
-    if (!doc) return {}
+    const docs = data.docs ?? []
+    if (!docs.length) return {}
+
+    // For ratings: prefer the doc with the most reviews (most accurate)
+    const ratingDoc = docs.reduce((best, d) =>
+      (d.ratings_count ?? 0) > (best.ratings_count ?? 0) ? d : best, docs[0])
+
+    // For cover: take the first doc that has a cover_i
+    const coverDoc = docs.find(d => d.cover_i)
+
     return {
-      rating:   doc.ratings_average ? Math.round(doc.ratings_average * 10) / 10 : null,
-      reviews:  doc.ratings_count ?? null,
-      coverUrl: doc.cover_i
-        ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
+      rating:   ratingDoc.ratings_average ? Math.round(ratingDoc.ratings_average * 10) / 10 : null,
+      reviews:  ratingDoc.ratings_count ?? null,
+      coverUrl: coverDoc?.cover_i
+        ? `https://covers.openlibrary.org/b/id/${coverDoc.cover_i}-L.jpg`
         : null
     }
   } catch { return {} }
@@ -165,15 +176,18 @@ async function fetchOpenLibraryData(title, author) {
 
 async function fetchGoogleBooksCover(title, author) {
   try {
-    const q   = encodeURIComponent(`intitle:"${title}" inauthor:"${author}"`)
+    // Simple free-text query — strict field qualifiers break on special characters
+    const q   = encodeURIComponent(`${title} ${author}`)
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)`
+      `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=5&fields=items(volumeInfo/imageLinks,volumeInfo/title)`
     )
     const data  = await res.json()
-    const thumb = data.items?.[0]?.volumeInfo?.imageLinks?.thumbnail
+    // Pick first item that actually has a thumbnail
+    const item  = data.items?.find(i => i.volumeInfo?.imageLinks?.thumbnail)
+    const thumb = item?.volumeInfo?.imageLinks?.thumbnail
     if (!thumb) return null
-    // Upgrade to https and request a slightly larger zoom
-    return thumb.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=1')
+    // Upgrade to https; zoom=2 gives a larger, sharper image than default zoom=1
+    return thumb.replace(/^http:/, 'https:').replace(/zoom=\d/, 'zoom=2')
   } catch { return null }
 }
 
