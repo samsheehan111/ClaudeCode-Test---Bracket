@@ -3,668 +3,945 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scottie Scheffler - 2024 Masters</title>
+    <title>Scottie Scheffler — 2024 Masters Champion</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0f1419;
+        html, body {
+            height: 100%;
+            font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+            background: #0d1f16;
             color: #fff;
-            height: 100vh;
             overflow: hidden;
         }
 
-        #canvas {
-            display: block;
-            position: fixed;
-            top: 80px;
-            left: 300px;
-            right: 140px;
-            bottom: 80px;
-            width: calc(100% - 300px - 140px);
-            height: calc(100% - 80px - 80px);
-        }
-
-        /* Professional Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #004d35 0%, #00663d 50%, #004d35 100%);
-            padding: 16px 24px;
-            z-index: 20;
-            border-bottom: 3px solid #c8a951;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            animation: slideDown 0.5s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
+        body {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+        }
+
+        /* ─── HEADER ─────────────────────────────────────────── */
+        .header {
+            flex-shrink: 0;
+            background: linear-gradient(180deg, #003d2b 0%, #004d35 100%);
+            border-bottom: 2px solid #c8a951;
+            padding: 10px 20px;
+            display: flex;
             align-items: center;
+            justify-content: space-between;
+            z-index: 20;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.6);
         }
 
-        .header-left h1 {
-            font-size: 24px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .masters-badge {
+            width: 44px;
+            height: 44px;
+            background: radial-gradient(circle, #d4b86f, #c8a951);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(200,169,81,0.4);
+        }
+
+        .player-info h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 20px;
             color: #c8a951;
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
-        .header-left p {
-            font-size: 12px;
-            color: #aaa;
-            margin: 4px 0 0 0;
+        .player-info p {
+            font-size: 11px;
+            color: rgba(200,169,81,0.55);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 1px;
         }
 
-        .header-middle {
+        .header-center {
             text-align: center;
-            flex: 1;
         }
 
-        .header-middle h2 {
-            font-size: 14px;
-            color: #c8a951;
-            margin: 0;
+        .total-score {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 38px;
+            font-weight: 700;
+            color: #2ecc71;
+            line-height: 1;
+        }
+
+        .total-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.45);
             text-transform: uppercase;
             letter-spacing: 2px;
-        }
-
-        .tournament-info {
-            font-size: 11px;
-            color: #bbb;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
         .header-right {
             text-align: right;
         }
 
-        .score-badge {
-            display: inline-block;
-            background: rgba(200, 169, 81, 0.1);
-            border: 2px solid #c8a951;
-            padding: 8px 16px;
-            border-radius: 6px;
-            margin: 4px 0;
-        }
-
-        .score-badge .score-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #c8a951;
-        }
-
-        .score-badge .score-label {
-            font-size: 10px;
-            color: #aaa;
-            display: block;
-        }
-
-        /* Left Panel - Scoreboard */
-        .left-panel {
-            position: fixed;
-            top: 80px;
-            left: 0;
-            width: 300px;
-            height: calc(100vh - 160px);
-            background: rgba(15, 20, 25, 0.92);
-            border-right: 2px solid #333;
-            overflow-y: auto;
-            padding: 0;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
-            animation: slideRight 0.5s ease-out;
-            z-index: 10;
-        }
-
-        @keyframes slideRight {
-            from { transform: translateX(-100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .scoreboard-section {
-            padding: 16px;
-            border-bottom: 2px solid #333;
-        }
-
-        .scoreboard-section h3 {
-            font-size: 13px;
-            color: #c8a951;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-
-        .nine-holes {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: rgba(200, 169, 81, 0.05);
-            border-radius: 4px;
-            border-left: 3px solid transparent;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .score-row:hover {
-            background: rgba(200, 169, 81, 0.15);
-            border-left-color: #c8a951;
-            transform: translateX(4px);
-        }
-
-        .hole-num {
-            font-weight: bold;
-            color: #c8a951;
-            width: 28px;
-            text-align: center;
-        }
-
-        .hole-name {
-            flex: 1;
-            margin: 0 8px;
-            color: #bbb;
-            font-size: 11px;
-        }
-
-        .hole-score {
-            color: #2ecc71;
-            font-weight: bold;
-            min-width: 45px;
-            text-align: right;
-        }
-
-        .hole-score.eagle {
-            color: #ffb700;
-        }
-
-        .hole-score.birdie {
-            color: #2ecc71;
-        }
-
-        .hole-score.par {
-            color: #888;
-        }
-
-        .nine-summary {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #333;
-        }
-
-        .summary-item {
-            background: rgba(200, 169, 81, 0.1);
-            padding: 8px;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .summary-item .label {
-            font-size: 10px;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        .summary-item .value {
-            font-size: 16px;
-            font-weight: bold;
-            color: #c8a951;
-            margin-top: 4px;
-        }
-
-        /* Stats Widget */
-        .stats-widget {
-            padding: 16px;
-            background: rgba(200, 169, 81, 0.05);
-            border-top: 2px solid #333;
-        }
-
-        .stats-widget h4 {
-            font-size: 12px;
-            color: #c8a951;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-
-        .stat-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-        }
-
-        .stat-item .stat-label {
-            font-size: 10px;
-            color: #888;
-            text-transform: uppercase;
-        }
-
-        .stat-item .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #c8a951;
-            margin-top: 4px;
-        }
-
-        /* Right Panel - Controls */
-        .right-panel {
-            position: fixed;
-            top: 80px;
-            right: 0;
-            width: 140px;
-            height: calc(100vh - 160px);
-            background: rgba(15, 20, 25, 0.92);
-            border-left: 2px solid #333;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.5);
-            animation: slideLeft 0.5s ease-out;
-            z-index: 10;
-        }
-
-        @keyframes slideLeft {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .control-group h4 {
-            font-size: 11px;
-            color: #c8a951;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            font-weight: 700;
-        }
-
-        button {
-            padding: 10px 12px;
-            background: linear-gradient(135deg, #c8a951, #d4b86f);
-            color: #004d35;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        .tournament-name {
+            font-size: 14px;
             font-weight: 600;
-            font-size: 12px;
-            transition: all 0.3s ease;
+            color: #c8a951;
+        }
+
+        .tournament-date {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 3px;
+        }
+
+        .victory-margin {
+            font-size: 11px;
+            color: #2ecc71;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* ─── MAIN LAYOUT ────────────────────────────────────── */
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* ─── SCORECARD PANEL ────────────────────────────────── */
+        .scorecard-panel {
+            width: 290px;
+            flex-shrink: 0;
+            background: #0a1a12;
+            border-right: 1px solid rgba(200,169,81,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .scorecard-panel::-webkit-scrollbar { width: 4px; }
+        .scorecard-panel::-webkit-scrollbar-thumb { background: rgba(200,169,81,0.4); border-radius: 2px; }
+
+        .sc-title {
+            padding: 10px 14px;
+            background: #004d35;
+            border-bottom: 1px solid rgba(200,169,81,0.25);
+            font-size: 10px;
+            letter-spacing: 2.5px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: rgba(200,169,81,0.7);
+            font-weight: 600;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(200, 169, 81, 0.3);
+        .nine-label {
+            padding: 7px 14px 5px;
+            font-size: 9px;
+            color: rgba(200,169,81,0.45);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
 
-        button:active {
-            opacity: 0.8;
-            transform: translateY(0);
+        /* Column headers */
+        .sc-col-heads {
+            display: grid;
+            grid-template-columns: 28px 1fr 24px 34px 34px;
+            padding: 4px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
-        /* Bottom Controls */
-        .bottom-controls {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(15, 20, 25, 0.98), rgba(15, 20, 25, 0.8));
-            padding: 12px;
+        .sc-col-heads span {
+            font-size: 9px;
+            color: rgba(255,255,255,0.25);
+            text-transform: uppercase;
+            letter-spacing: 1px;
             text-align: center;
-            z-index: 15;
-            border-top: 2px solid #333;
+        }
+
+        .sc-col-heads span:nth-child(2) { text-align: left; }
+
+        /* Hole row */
+        .hole-row {
+            display: grid;
+            grid-template-columns: 28px 1fr 24px 34px 34px;
+            align-items: center;
+            padding: 6px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.035);
+            transition: background 0.15s;
+        }
+
+        .hole-row:hover { background: rgba(200,169,81,0.06); }
+
+        .h-num {
+            font-size: 11px;
+            font-weight: 700;
+            color: rgba(200,169,81,0.5);
+            text-align: center;
+        }
+
+        .h-name {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .h-par {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            text-align: center;
+        }
+
+        .h-yds {
+            font-size: 9px;
+            color: rgba(255,255,255,0.2);
+            text-align: center;
+        }
+
+        .h-score-cell {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            align-items: center;
         }
 
-        .bottom-controls button {
-            padding: 10px 20px;
+        /* Score badges — traditional golf notation */
+        .score-chip {
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 50%;
         }
 
-        /* Scrollbar Styling */
-        .left-panel::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .left-panel::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .left-panel::-webkit-scrollbar-thumb {
+        /* Eagle: double circle = gold filled */
+        .score-chip.eagle {
             background: #c8a951;
+            color: #003d2b;
+            outline: 2px solid #c8a951;
+            outline-offset: 3px;
+            box-shadow: 0 0 10px rgba(200,169,81,0.5);
+        }
+
+        /* Birdie: single circle outline */
+        .score-chip.birdie {
+            background: transparent;
+            border: 2px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        /* Par: no decoration */
+        .score-chip.par {
+            background: transparent;
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* Bogey: square */
+        .score-chip.bogey {
+            background: transparent;
+            border: 2px solid #e74c3c;
+            border-radius: 3px;
+            color: #e74c3c;
+        }
+
+        /* Double bogey+: filled square */
+        .score-chip.double-bogey {
+            background: #e74c3c;
+            border-radius: 3px;
+            color: #fff;
+        }
+
+        /* Nine total row */
+        .nine-total {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 8px 14px;
+            background: rgba(200,169,81,0.04);
+            border-bottom: 1px solid rgba(200,169,81,0.15);
+        }
+
+        .nt-item {
+            text-align: center;
+            padding: 5px 4px;
+            background: rgba(0,0,0,0.2);
             border-radius: 3px;
         }
 
-        .left-panel::-webkit-scrollbar-thumb:hover {
-            background: #d4b86f;
+        .nt-item .nt-label {
+            font-size: 8px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .left-panel { width: 200px; }
-            .header-left h1 { font-size: 18px; }
-            .header-middle h2 { font-size: 12px; }
+        .nt-item .nt-val {
+            font-size: 16px;
+            font-weight: 700;
+            color: #c8a951;
+            margin-top: 2px;
+        }
+
+        /* Stats row at bottom */
+        .stats-bar {
+            margin-top: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-top: 1px solid rgba(200,169,81,0.2);
+        }
+
+        .stat-block {
+            padding: 10px 4px;
+            text-align: center;
+            border-right: 1px solid rgba(200,169,81,0.1);
+        }
+
+        .stat-block:last-child { border-right: none; }
+
+        .stat-block .sb-label {
+            font-size: 8px;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-block .sb-val {
+            font-size: 22px;
+            font-weight: 700;
+            color: #c8a951;
+            margin-top: 2px;
+        }
+
+        /* ─── CANVAS AREA ────────────────────────────────────── */
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .view-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            font-size: 10px;
+            color: rgba(200,169,81,0.45);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        .controls-overlay {
+            position: absolute;
+            bottom: 14px;
+            right: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .ctrl-btn {
+            padding: 7px 14px;
+            background: rgba(0, 60, 40, 0.88);
+            border: 1px solid rgba(200,169,81,0.5);
+            color: #c8a951;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .ctrl-btn:hover {
+            background: #c8a951;
+            color: #003d2b;
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            bottom: 14px;
+            left: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            pointer-events: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 9px;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 1px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
         }
     </style>
 </head>
 <body>
 
-<!-- Professional Header -->
+<!-- ─── HEADER ───────────────────────────────────────────────── -->
 <div class="header">
-    <div class="header-content">
-        <div class="header-left">
-            <h1>🏌️ SCOTTIE SCHEFFLER</h1>
-            <p>2024 MASTERS CHAMPION</p>
+    <div class="header-left">
+        <div class="masters-badge">⛳</div>
+        <div class="player-info">
+            <h1>SCOTTIE SCHEFFLER</h1>
+            <p>2024 Masters Champion · World No. 1</p>
         </div>
-        <div class="header-middle">
-            <h2>Augusta National Golf Club</h2>
-            <div class="tournament-info">April 8-14, 2024 • Final Round</div>
-        </div>
-        <div class="header-right">
-            <div class="score-badge">
-                <span class="score-value">-11</span>
-                <span class="score-label">Final Score</span>
-            </div>
-            <div class="score-badge" style="margin-top: 8px;">
-                <span class="score-value">277</span>
-                <span class="score-label">4-Shot Victory</span>
-            </div>
-        </div>
+    </div>
+    <div class="header-center">
+        <div class="total-score">-11</div>
+        <div class="total-label">Final Score &nbsp;·&nbsp; 277 Total</div>
+    </div>
+    <div class="header-right">
+        <div class="tournament-name">The Masters Tournament</div>
+        <div class="tournament-date">Augusta National · April 14, 2024</div>
+        <div class="victory-margin">Won by 4 shots</div>
     </div>
 </div>
 
-<!-- Left Scoreboard Panel -->
-<div class="left-panel">
-        <div class="scoreboard-section">
-            <h3>Front 9</h3>
-            <div class="nine-holes" id="frontNine"></div>
-            <div class="nine-summary" id="frontSummary"></div>
-        </div>
+<!-- ─── MAIN ─────────────────────────────────────────────────── -->
+<div class="main">
 
-        <div class="scoreboard-section">
-            <h3>Back 9</h3>
-            <div class="nine-holes" id="backNine"></div>
-            <div class="nine-summary" id="backSummary"></div>
-        </div>
+    <!-- Scorecard -->
+    <div class="scorecard-panel">
+        <div class="sc-title">Final Round Scorecard</div>
 
-        <!-- Stats Widget -->
-        <div class="stats-widget">
-            <h4>Round Stats</h4>
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <div class="stat-label">Eagles</div>
-                    <div class="stat-value" id="eagleCount">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Birdies</div>
-                    <div class="stat-value" id="birdieCount">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Pars</div>
-                    <div class="stat-value" id="parCount">0</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-label">Bogey+</div>
-                    <div class="stat-value" id="bogeyCount">0</div>
-                </div>
-            </div>
+        <!-- Front 9 -->
+        <div class="nine-label">Front Nine</div>
+        <div class="sc-col-heads">
+            <span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span>Score</span>
+        </div>
+        <div id="frontNine"></div>
+        <div class="nine-total" id="frontTotal"></div>
+
+        <!-- Back 9 -->
+        <div class="nine-label">Back Nine</div>
+        <div class="sc-col-heads">
+            <span>#</span><span>Hole</span><span>Par</span><span>Yds</span><span>Score</span>
+        </div>
+        <div id="backNine"></div>
+        <div class="nine-total" id="backTotal"></div>
+
+        <!-- Stats -->
+        <div class="stats-bar">
+            <div class="stat-block"><div class="sb-label">Eagles</div><div class="sb-val" id="eagleCount">0</div></div>
+            <div class="stat-block"><div class="sb-label">Birdies</div><div class="sb-val" id="birdieCount">0</div></div>
+            <div class="stat-block"><div class="sb-label">Pars</div><div class="sb-val" id="parCount">0</div></div>
+            <div class="stat-block"><div class="sb-label">Bogeys</div><div class="sb-val" id="bogeyCount">0</div></div>
         </div>
     </div>
 
-<!-- Canvas -->
-<canvas id="canvas"></canvas>
-
-<!-- Right Controls Panel -->
-<div class="right-panel">
-    <div class="control-group">
-        <h4>Course</h4>
-        <button onclick="resetCamera()" title="Reset camera to default position">Reset View</button>
-        <button onclick="toggleAuto()" title="Toggle automatic rotation">Auto Rotate</button>
+    <!-- 3D Course -->
+    <div class="canvas-area">
+        <canvas id="canvas"></canvas>
+        <div class="view-tag">Augusta National · 3D Course</div>
+        <div class="controls-overlay">
+            <button class="ctrl-btn" onclick="resetCamera()">Reset View</button>
+            <button class="ctrl-btn" onclick="toggleAuto()">Auto Rotate</button>
+            <button class="ctrl-btn" onclick="topView()">Top View</button>
+            <button class="ctrl-btn" onclick="zoomIn()">Zoom In</button>
+            <button class="ctrl-btn" onclick="zoomOut()">Zoom Out</button>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4a8c3f"></div>Fairway</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#5cbf4e"></div>Green</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#d4c49e"></div>Bunker</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#1a6b9e"></div>Water</div>
+        </div>
     </div>
-</div>
 
-<!-- Bottom Controls -->
-<div class="bottom-controls">
-    <button onclick="zoomIn()" title="Zoom closer to the course">Zoom In</button>
-    <button onclick="zoomOut()" title="Zoom further from course">Zoom Out</button>
-    <button onclick="topView()" title="View from above">Top View</button>
 </div>
 
 <script>
-// Masters Data
+// ══════════════════════════════════════════════════
+//  HOLE DATA — Scottie Scheffler Final Round 2024
+// ══════════════════════════════════════════════════
 const HOLES = [
-    {hole: 1, name: "Tea Olive", par: 4, score: 4},
-    {hole: 2, name: "Pink Dogwood", par: 5, score: 4},
-    {hole: 3, name: "Flowering Peach", par: 4, score: 4},
-    {hole: 4, name: "Crab Apple", par: 3, score: 3},
-    {hole: 5, name: "Magnolia", par: 4, score: 4},
-    {hole: 6, name: "Juniper", par: 3, score: 3},
-    {hole: 7, name: "Pampas", par: 4, score: 4},
-    {hole: 8, name: "Yellow Jasmine", par: 5, score: 4},
-    {hole: 9, name: "Carolina Cherry", par: 4, score: 4},
-    {hole: 10, name: "Camellia", par: 4, score: 4},
-    {hole: 11, name: "White Dogwood", par: 4, score: 4},
-    {hole: 12, name: "Golden Bell", par: 3, score: 2},
-    {hole: 13, name: "Azalea", par: 5, score: 4},
-    {hole: 14, name: "Chinese Fir", par: 4, score: 4},
-    {hole: 15, name: "Firethorn", par: 5, score: 4},
-    {hole: 16, name: "Redbud", par: 3, score: 2},
-    {hole: 17, name: "Nandina", par: 4, score: 4},
-    {hole: 18, name: "Holly", par: 4, score: 4},
+    {hole:1,  name:"Tea Olive",       par:4, score:4, yds:445},
+    {hole:2,  name:"Pink Dogwood",    par:5, score:4, yds:575},
+    {hole:3,  name:"Flowering Peach", par:4, score:4, yds:350},
+    {hole:4,  name:"Crab Apple",      par:3, score:3, yds:240},
+    {hole:5,  name:"Magnolia",        par:4, score:4, yds:495},
+    {hole:6,  name:"Juniper",         par:3, score:3, yds:180},
+    {hole:7,  name:"Pampas",          par:4, score:4, yds:450},
+    {hole:8,  name:"Yellow Jasmine",  par:5, score:4, yds:570},
+    {hole:9,  name:"Carolina Cherry", par:4, score:4, yds:460},
+    {hole:10, name:"Camellia",        par:4, score:4, yds:495},
+    {hole:11, name:"White Dogwood",   par:4, score:4, yds:505},
+    {hole:12, name:"Golden Bell",     par:3, score:2, yds:155},
+    {hole:13, name:"Azalea",          par:5, score:4, yds:510},
+    {hole:14, name:"Chinese Fir",     par:4, score:4, yds:440},
+    {hole:15, name:"Firethorn",       par:5, score:4, yds:530},
+    {hole:16, name:"Redbud",          par:3, score:2, yds:170},
+    {hole:17, name:"Nandina",         par:4, score:4, yds:440},
+    {hole:18, name:"Holly",           par:4, score:4, yds:465},
 ];
 
-let scene, camera, renderer, controls;
-let autoRotate = true;
-let holeNumberTexture;
+// ══════════════════════════════════════════════════
+//  AUGUSTA NATIONAL — approximate course layout
+//  Coordinates: X=east, Z=south (centered at origin)
+// ══════════════════════════════════════════════════
+const HOLE_LAYOUT = [
+    // 1: Tea Olive — slight dogleg right, SE from clubhouse
+    {tx:-30,tz:-175, gx:75,gz:-85,  cps:[{x:10,z:-150},{x:50,z:-115}], width:22, greenR:16},
+    // 2: Pink Dogwood — long par 5, S then SE
+    {tx:75, tz:-85,  gx:165,gz:30,  cps:[{x:90,z:-35},{x:135,z:-5}],   width:24, greenR:18},
+    // 3: Flowering Peach — short par 4, NE
+    {tx:165,tz:30,   gx:205,gz:-55, cps:[{x:180,z:5},{x:198,z:-25}],   width:18, greenR:14},
+    // 4: Crab Apple — par 3, west (downhill)
+    {tx:205,tz:-55,  gx:155,gz:-88, cps:[{x:182,z:-70}],               width:15, greenR:12},
+    // 5: Magnolia — long par 4, S
+    {tx:155,tz:-88,  gx:142,gz:-195,cps:[{x:153,z:-135},{x:147,z:-165}],width:22,greenR:16},
+    // 6: Juniper — par 3, W
+    {tx:142,tz:-195, gx:72, gz:-200,cps:[{x:105,z:-198}],              width:15, greenR:12},
+    // 7: Pampas — par 4, SW
+    {tx:72, tz:-200, gx:55, gz:-268,cps:[{x:68,z:-228},{x:59,z:-252}], width:20, greenR:15},
+    // 8: Yellow Jasmine — par 5, NW (long uphill)
+    {tx:55, tz:-268, gx:-80,gz:-238,cps:[{x:15,z:-275},{x:-35,z:-265},{x:-62,z:-252}],width:24,greenR:17},
+    // 9: Carolina Cherry — par 4, N back toward clubhouse
+    {tx:-80,tz:-238, gx:-35,gz:-168,cps:[{x:-68,z:-215},{x:-50,z:-188}],width:21,greenR:15},
 
-// Create texture atlas for hole numbers
-function createHoleNumberAtlas() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fillRect(0, 0, 512, 512);
+    // 10: Camellia — par 4, S (downhill — back nine)
+    {tx:-30,tz:-162, gx:-92,gz:-68, cps:[{x:-52,z:-132},{x:-78,z:-100}],width:22,greenR:16},
+    // 11: White Dogwood — par 4, W toward Amen Corner
+    {tx:-92,tz:-68,  gx:-205,gz:-80,cps:[{x:-140,z:-65},{x:-178,z:-72}],width:20,greenR:15},
+    // 12: Golden Bell — short par 3, iconic (over Rae's Creek)
+    {tx:-205,tz:-80, gx:-232,gz:-50,cps:[{x:-220,z:-65}],              width:13, greenR:11},
+    // 13: Azalea — par 5, dogleg left along Rae's Creek
+    {tx:-232,tz:-50, gx:-218,gz:60, cps:[{x:-255,z:-8},{x:-242,z:28},{x:-222,z:48}],width:25,greenR:18},
+    // 14: Chinese Fir — par 4, E
+    {tx:-218,tz:60,  gx:-95, gz:82, cps:[{x:-165,z:70},{x:-130,z:76}], width:20, greenR:15},
+    // 15: Firethorn — par 5, SE (over pond)
+    {tx:-95, tz:82,  gx:-30, gz:172,cps:[{x:-75,z:112},{x:-52,z:148}], width:22, greenR:16},
+    // 16: Redbud — par 3, NE over pond
+    {tx:-30, tz:172, gx:40,  gz:145,cps:[{x:5,z:162}],                 width:14, greenR:13},
+    // 17: Nandina — par 4, N
+    {tx:40,  tz:145, gx:35,  gz:58, cps:[{x:40,z:110},{x:38,z:78}],   width:20, greenR:14},
+    // 18: Holly — par 4, NW back to clubhouse (uphill)
+    {tx:35,  tz:58,  gx:-30, gz:-158,cps:[{x:20,z:22},{x:5,z:-48},{x:-14,z:-102}],width:22,greenR:16},
+];
 
-    // Create 6x3 grid for 18 holes
-    const cols = 6;
-    const rows = 3;
-    const cellSize = 512 / cols;
+// Rae's Creek (flows through Amen Corner — holes 11/12/13)
+const RAE_CREEK_PTS = [
+    {x:-145,z:-48},{x:-165,z:-42},{x:-190,z:-35},{x:-215,z:-28},
+    {x:-242,z:-18},{x:-258,z:-2},{x:-252,z:18},{x:-238,z:32},
+    {x:-220,z:40},{x:-200,z:38},{x:-180,z:28},{x:-165,z:10},
+    {x:-155,z:-10},{x:-148,z:-30},{x:-143,z:-44},
+];
 
-    ctx.fillStyle = '#c8a951';
-    ctx.font = 'bold 40px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+// Pond near holes 15/16
+const POND_PTS = [
+    {x:-50,z:122},{x:-18,z:115},{x:8,z:122},{x:12,z:145},
+    {x:-4,z:160},{x:-28,z:163},{x:-52,z:150},
+];
 
-    for (let i = 0; i < 18; i++) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const x = col * cellSize + cellSize / 2;
-        const y = row * cellSize + cellSize / 2;
-        ctx.fillText((i + 1).toString(), x, y);
-    }
+// Key bunkers (approx Augusta positions)
+const BUNKERS = [
+    {x:52,  z:-115, rx:9,  rz:6},   // 1 greenside
+    {x:148, z:18,   rx:10, rz:6},   // 2 greenside
+    {x:152, z:-88,  rx:8,  rz:5},   // 4/5 area
+    {x:50,  z:-265, rx:9,  rz:6},   // 7 greenside
+    {x:-68, z:-258, rx:8,  rz:5},   // 8 fairway
+    {x:-200,z:-88,  rx:10, rz:6},   // 11 greenside
+    {x:-218,z:55,   rx:11, rz:7},   // 13 greenside
+    {x:-42, z:165,  rx:8,  rz:5},   // 15 greenside
+    {x:15,  z:50,   rx:9,  rz:6},   // 17 greenside
+    {x:-8,  z:-128, rx:8,  rz:5},   // 18 fairway right
+    {x:12,  z:-152, rx:7,  rz:5},   // 18 greenside
+];
 
-    holeNumberTexture = new THREE.CanvasTexture(canvas);
-    holeNumberTexture.magFilter = THREE.LinearFilter;
-    holeNumberTexture.minFilter = THREE.LinearFilter;
-    return holeNumberTexture;
-}
+// ══════════════════════════════════════════════════
+//  THREE.JS SCENE
+// ══════════════════════════════════════════════════
+let scene, camera, renderer, controls, autoRotate = true;
 
-// Get UV coordinates for a hole number in the atlas
-function getHoleUVs(holeIndex) {
-    const cols = 6;
-    const col = holeIndex % cols;
-    const row = Math.floor(holeIndex / cols);
-    const u = col / cols;
-    const v = row / 3;
-    return {u, v, uSize: 1/cols, vSize: 1/3};
-}
-
-// Initialize Three.js
 function init() {
-    const canvas = document.getElementById('canvas');
+    const canvasEl = document.getElementById('canvas');
+    const container = canvasEl.parentElement;
+    const W = container.clientWidth;
+    const H = container.clientHeight;
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a1428);
-    scene.fog = new THREE.Fog(0x0a1428, 500, 1000);
+    scene.background = new THREE.Color(0x1a3a28);
+    scene.fog = new THREE.FogExp2(0x1a3a28, 0.0012);
 
-    camera = new THREE.PerspectiveCamera(
-        50,
-        canvas.clientWidth / canvas.clientHeight,
-        0.1,
-        2000
-    );
-    camera.position.set(0, 150, 200);
+    camera = new THREE.PerspectiveCamera(52, W / H, 0.5, 2000);
+    camera.position.set(0, 320, 310);
+    camera.lookAt(0, 0, 0);
 
-    renderer = new THREE.WebGLRenderer({canvas, antialias: true});
-    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer = new THREE.WebGLRenderer({canvas: canvasEl, antialias: true});
+    renderer.setSize(W, H);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
+    // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 1;
+    controls.autoRotateSpeed = 0.4;
     controls.enableDamping = true;
-    controls.dampingFactor = 0.1;
+    controls.dampingFactor = 0.05;
     controls.minDistance = 80;
-    controls.maxDistance = 400;
+    controls.maxDistance = 700;
+    controls.maxPolarAngle = Math.PI / 2.05;
+    controls.target.set(0, 0, 0);
 
-    // Lights
-    const light1 = new THREE.HemisphereLight(0x87ceeb, 0x1a5a2d, 1.2);
-    scene.add(light1);
+    // Lighting
+    const ambLight = new THREE.AmbientLight(0x9fc8aa, 0.8);
+    scene.add(ambLight);
 
-    const light2 = new THREE.DirectionalLight(0xfff8e7, 1.5);
-    light2.position.set(150, 200, 100);
-    light2.castShadow = true;
-    scene.add(light2);
+    const sun = new THREE.DirectionalLight(0xfff5d0, 1.4);
+    sun.position.set(200, 450, 150);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    sun.shadow.camera.near = 50;
+    sun.shadow.camera.far = 1000;
+    sun.shadow.camera.left = -400;
+    sun.shadow.camera.right = 400;
+    sun.shadow.camera.top = 400;
+    sun.shadow.camera.bottom = -400;
+    scene.add(sun);
 
-    // OPTIMIZED: Reduced terrain geometry from 32x32 to 16x16
-    const terrainGeo = new THREE.PlaneGeometry(600, 600, 16, 16);
-    const terrainMat = new THREE.MeshStandardMaterial({color: 0x2d5a35});
-    const terrain = new THREE.Mesh(terrainGeo, terrainMat);
-    terrain.rotation.x = -Math.PI / 2;
-    terrain.receiveShadow = true;
-    scene.add(terrain);
+    const fillLight = new THREE.DirectionalLight(0x4a8aff, 0.25);
+    fillLight.position.set(-200, 200, -100);
+    scene.add(fillLight);
 
-    // Create hole number texture atlas
-    createHoleNumberAtlas();
+    // Build the course
+    buildCourse();
+    buildTrees();
 
-    // Add holes
-    addHoles();
-
-    window.addEventListener('resize', onWindowResize);
-    showScores();
+    window.addEventListener('resize', onResize);
+    buildScorecard();
     animate();
 }
 
-function addHoles() {
-    const positions = [
-        {x: -150, z: 150}, {x: -100, z: 180}, {x: -30, z: 170}, {x: 40, z: 120},
-        {x: 100, z: 60}, {x: 150, z: 0}, {x: 160, z: -60}, {x: 140, z: -130},
-        {x: 80, z: -170}, {x: 20, z: -180}, {x: -50, z: -170}, {x: -120, z: -140},
-        {x: -170, z: -100}, {x: -200, z: -40}, {x: -210, z: 30}, {x: -180, z: 100},
-        {x: -120, z: 150}, {x: -50, z: 180}
-    ];
+// ── COURSE GEOMETRY ──────────────────────────────
+function buildCourse() {
+    // Rough (ground base)
+    const roughGeo = new THREE.PlaneGeometry(820, 820, 1, 1);
+    const roughMat = new THREE.MeshLambertMaterial({color: 0x2a5c1e});
+    const rough = new THREE.Mesh(roughGeo, roughMat);
+    rough.rotation.x = -Math.PI / 2;
+    rough.receiveShadow = true;
+    scene.add(rough);
 
-    positions.forEach((pos, i) => {
-        const group = new THREE.Group();
-        group.position.set(pos.x, 0, pos.z);
+    // Water
+    buildWaterShape(RAE_CREEK_PTS, 0x1565a0);
+    buildWaterShape(POND_PTS, 0x1a6b9e);
 
-        // Green
-        const greenGeo = new THREE.CircleGeometry(18, 16);
-        const greenMat = new THREE.MeshStandardMaterial({color: 0x6abf7b});
-        const green = new THREE.Mesh(greenGeo, greenMat);
-        green.rotation.x = -Math.PI / 2;
-        green.receiveShadow = true;
-        group.add(green);
-
-        // Flag pole
-        const poleGeo = new THREE.CylinderGeometry(0.5, 0.5, 15, 6);
-        const poleMat = new THREE.MeshStandardMaterial({color: 0x333});
-        const pole = new THREE.Mesh(poleGeo, poleMat);
-        pole.position.y = 7.5;
-        pole.castShadow = true;
-        group.add(pole);
-
-        // Flag
-        const flagGeo = new THREE.BoxGeometry(8, 5, 0.3);
-        const flagMat = new THREE.MeshStandardMaterial({color: 0xf0f0f0});
-        const flag = new THREE.Mesh(flagGeo, flagMat);
-        flag.position.set(4, 14, 0);
-        flag.castShadow = true;
-        group.add(flag);
-
-        // OPTIMIZED: Use texture atlas instead of creating individual canvases
-        const spriteGeo = new THREE.PlaneGeometry(10, 10);
-        const spriteMat = new THREE.MeshBasicMaterial({map: holeNumberTexture, transparent: true});
-
-        // Set UV coordinates to point to the correct hole number in the atlas
-        const uvs = getHoleUVs(i);
-        const posAttr = spriteGeo.attributes.uv;
-        for (let j = 0; j < posAttr.count; j++) {
-            const x = posAttr.getX(j);
-            const y = posAttr.getY(j);
-            posAttr.setXY(j, uvs.u + x * uvs.uSize, uvs.v + y * uvs.vSize);
-        }
-        posAttr.needsUpdate = true;
-
-        const sprite = new THREE.Mesh(spriteGeo, spriteMat);
-        sprite.position.y = 0.5;
-        sprite.position.z = 9;
-        group.add(sprite);
-
-        scene.add(group);
+    // Fairways + greens + tees
+    HOLE_LAYOUT.forEach((layout, i) => {
+        buildFairway(layout);
+        buildGreen(layout, i);
+        buildTeeBox(layout);
     });
+
+    // Bunkers
+    buildBunkers();
+
+    // Clubhouse marker
+    buildClubhouse();
 }
 
+// Creates a flat fairway strip following a spline path
+function buildFairway(layout) {
+    const pts2d = [];
+    pts2d.push(new THREE.Vector2(layout.tx, layout.tz));
+    for (const cp of layout.cps) {
+        pts2d.push(new THREE.Vector2(cp.x, cp.z));
+    }
+    pts2d.push(new THREE.Vector2(layout.gx, layout.gz));
+
+    const curve = new THREE.SplineCurve(pts2d);
+    const N = 32;
+    const sampled = curve.getPoints(N);
+    const hw = layout.width / 2;
+
+    const leftPts = [];
+    const rightPts = [];
+
+    for (let i = 0; i <= N; i++) {
+        const p = sampled[i];
+        let dx, dy;
+        if (i < N) {
+            dx = sampled[i+1].x - p.x;
+            dy = sampled[i+1].y - p.y;
+        } else {
+            dx = p.x - sampled[i-1].x;
+            dy = p.y - sampled[i-1].y;
+        }
+        const len = Math.sqrt(dx*dx + dy*dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+        leftPts.push( new THREE.Vector2(p.x + nx * hw, p.y + ny * hw) );
+        rightPts.push(new THREE.Vector2(p.x - nx * hw, p.y - ny * hw) );
+    }
+
+    const shape = new THREE.Shape();
+    shape.moveTo(leftPts[0].x, leftPts[0].y);
+    for (let i = 1; i <= N; i++) shape.lineTo(leftPts[i].x, leftPts[i].y);
+    for (let i = N; i >= 0; i--) shape.lineTo(rightPts[i].x, rightPts[i].y);
+    shape.closePath();
+
+    const geo = new THREE.ShapeGeometry(shape);
+    const mat = new THREE.MeshLambertMaterial({color: 0x4a8c3f});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.1;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+}
+
+function buildGreen(layout, holeIndex) {
+    // Green circle
+    const geo = new THREE.CircleGeometry(layout.greenR, 20);
+    const mat = new THREE.MeshLambertMaterial({color: 0x5cbf4e});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.set(layout.gx, 0.2, layout.gz);
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    // Flag pole
+    const poleGeo = new THREE.CylinderGeometry(0.35, 0.35, 14, 6);
+    const poleMat = new THREE.MeshLambertMaterial({color: 0x777777});
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.set(layout.gx, 7, layout.gz);
+    pole.castShadow = true;
+    scene.add(pole);
+
+    // Flag
+    const flagGeo = new THREE.PlaneGeometry(6, 4);
+    const flagColor = holeIndex < 9 ? 0xffffff : 0xee2222;
+    const flagMat = new THREE.MeshLambertMaterial({color: flagColor, side: THREE.DoubleSide});
+    const flag = new THREE.Mesh(flagGeo, flagMat);
+    flag.position.set(layout.gx + 3, 13, layout.gz);
+    scene.add(flag);
+
+    // Hole number sprite
+    addHoleLabel(holeIndex + 1, layout.gx, layout.gz);
+}
+
+function addHoleLabel(num, x, z) {
+    const c = document.createElement('canvas');
+    c.width = 64; c.height = 64;
+    const ctx = c.getContext('2d');
+
+    ctx.fillStyle = 'rgba(0,40,20,0.85)';
+    ctx.beginPath();
+    ctx.arc(32, 32, 28, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#c8a951';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = '#c8a951';
+    ctx.font = 'bold 26px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(num.toString(), 32, 33);
+
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({map: tex, depthTest: false});
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(14, 14, 1);
+    sprite.position.set(x, 10, z);
+    scene.add(sprite);
+}
+
+function buildTeeBox(layout) {
+    const geo = new THREE.BoxGeometry(9, 0.4, 6);
+    const mat = new THREE.MeshLambertMaterial({color: 0x5a9a50});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(layout.tx, 0.2, layout.tz);
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+}
+
+function buildWaterShape(pts, color) {
+    const shape = new THREE.Shape();
+    shape.moveTo(pts[0].x, pts[0].z);
+    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i].x, pts[i].z);
+    shape.closePath();
+
+    const geo = new THREE.ShapeGeometry(shape);
+    const mat = new THREE.MeshLambertMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.88
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.15;
+    scene.add(mesh);
+}
+
+function buildBunkers() {
+    const mat = new THREE.MeshLambertMaterial({color: 0xd4c49e});
+    for (const b of BUNKERS) {
+        const geo = new THREE.CircleGeometry(1, 14);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.scale.set(b.rx, b.rz, 1);
+        mesh.position.set(b.x, 0.18, b.z);
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+    }
+}
+
+function buildClubhouse() {
+    // Simple clubhouse marker near hole 1 tee / 18 green
+    const geo = new THREE.BoxGeometry(24, 8, 18);
+    const mat = new THREE.MeshLambertMaterial({color: 0xd8cbb8});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(-28, 4, -185);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    scene.add(mesh);
+
+    // Roof
+    const roofGeo = new THREE.ConeGeometry(18, 6, 4);
+    const roofMat = new THREE.MeshLambertMaterial({color: 0x886644});
+    const roof = new THREE.Mesh(roofGeo, roofMat);
+    roof.position.set(-28, 11, -185);
+    roof.rotation.y = Math.PI / 4;
+    roof.castShadow = true;
+    scene.add(roof);
+}
+
+// ── TREES ─────────────────────────────────────────
+function buildTrees() {
+    const rng = mulberry32(7);
+
+    const trunkMat = new THREE.MeshLambertMaterial({color: 0x5c3a1e});
+    const leaf1Mat = new THREE.MeshLambertMaterial({color: 0x1a5a0e});
+    const leaf2Mat = new THREE.MeshLambertMaterial({color: 0x236b16});
+
+    const positions = [];
+
+    // Perimeter ring — dense treeline around the course
+    for (let i = 0; i < 180; i++) {
+        const angle = (i / 180) * Math.PI * 2;
+        const r = 290 + (rng() - 0.5) * 70;
+        positions.push({x: Math.cos(angle) * r, z: Math.sin(angle) * r, s: 0.7 + rng() * 0.6});
+    }
+
+    // Interior trees scattered between holes
+    for (let i = 0; i < 120; i++) {
+        positions.push({
+            x: (rng() - 0.5) * 480,
+            z: (rng() - 0.5) * 500,
+            s: 0.5 + rng() * 0.8
+        });
+    }
+
+    // Magnolia Lane (row of magnolias near clubhouse)
+    for (let i = 0; i < 16; i++) {
+        positions.push({x: -18 + (rng() - 0.5) * 4, z: -195 - i * 18, s: 1.2 + rng() * 0.3});
+        positions.push({x:  18 + (rng() - 0.5) * 4, z: -195 - i * 18, s: 1.2 + rng() * 0.3});
+    }
+
+    const total = positions.length;
+    const trunkGeo = new THREE.CylinderGeometry(0.7, 1.1, 7, 5);
+    const leafGeo  = new THREE.ConeGeometry(5, 10, 6);
+
+    const trunkIM = new THREE.InstancedMesh(trunkGeo, trunkMat, total);
+    const leafIM  = new THREE.InstancedMesh(leafGeo,  leaf1Mat, total);
+    const leaf2IM = new THREE.InstancedMesh(leafGeo,  leaf2Mat, total);
+
+    const dummy = new THREE.Object3D();
+    positions.forEach((pos, i) => {
+        const s = pos.s;
+        dummy.position.set(pos.x, 3.5 * s, pos.z);
+        dummy.scale.setScalar(s);
+        dummy.rotation.y = rng() * Math.PI * 2;
+        dummy.updateMatrix();
+        trunkIM.setMatrixAt(i, dummy.matrix);
+
+        dummy.position.set(pos.x, (10 + rng() * 3) * s, pos.z);
+        dummy.scale.setScalar(s * (0.9 + rng() * 0.3));
+        dummy.updateMatrix();
+        leafIM.setMatrixAt(i, dummy.matrix);
+
+        dummy.position.set(pos.x + rng() * 2, (13 + rng() * 2) * s, pos.z + rng() * 2);
+        dummy.scale.setScalar(s * 0.7);
+        dummy.updateMatrix();
+        leaf2IM.setMatrixAt(i, dummy.matrix);
+    });
+
+    trunkIM.instanceMatrix.needsUpdate = true;
+    leafIM.instanceMatrix.needsUpdate  = true;
+    leaf2IM.instanceMatrix.needsUpdate = true;
+
+    trunkIM.castShadow = true;
+    leafIM.castShadow  = true;
+
+    scene.add(trunkIM, leafIM, leaf2IM);
+}
+
+// ── SEEDED RNG ────────────────────────────────────
+function mulberry32(seed) {
+    return function() {
+        seed |= 0;
+        seed = seed + 0x6D2B79F5 | 0;
+        let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+}
+
+// ── RENDER LOOP ───────────────────────────────────
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
 }
 
-function onWindowResize() {
-    const canvas = document.getElementById('canvas');
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    camera.aspect = w / h;
+function onResize() {
+    const container = document.querySelector('.canvas-area');
+    const W = container.clientWidth;
+    const H = container.clientHeight;
+    camera.aspect = W / H;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setSize(W, H);
 }
 
+// ── CAMERA CONTROLS ───────────────────────────────
 function resetCamera() {
-    camera.position.set(0, 150, 200);
+    camera.position.set(0, 320, 310);
     controls.target.set(0, 0, 0);
 }
 
@@ -673,117 +950,83 @@ function toggleAuto() {
     controls.autoRotate = autoRotate;
 }
 
-function zoomIn() {
-    const distance = camera.position.length();
-    camera.position.multiplyScalar(0.8);
-}
-
-function zoomOut() {
-    const distance = camera.position.length();
-    camera.position.multiplyScalar(1.2);
-}
-
 function topView() {
-    camera.position.set(0, 300, 50);
+    camera.position.set(0, 500, 5);
     controls.target.set(0, 0, 0);
+    camera.lookAt(0, 0, 0);
 }
 
+function zoomIn()  { camera.position.multiplyScalar(0.8); }
+function zoomOut() { camera.position.multiplyScalar(1.25); }
+
+// ══════════════════════════════════════════════════
+//  SCORECARD
+// ══════════════════════════════════════════════════
 function getScoreType(score, par) {
-    const diff = score - par;
-    if (diff <= -2) return 'eagle';
-    if (diff === -1) return 'birdie';
-    if (diff === 0) return 'par';
-    return 'bogey';
+    const d = score - par;
+    if (d <= -2) return 'eagle';
+    if (d === -1) return 'birdie';
+    if (d === 0)  return 'par';
+    if (d === 1)  return 'bogey';
+    return 'double-bogey';
 }
 
-function showScores() {
-    // Front 9
-    let frontHtml = '';
-    let frontTotal = 0;
-    let frontPar = 0;
-
-    for (let i = 0; i < 9; i++) {
-        const h = HOLES[i];
-        frontTotal += h.score;
-        frontPar += h.par;
-        const diff = h.score - h.par;
-        const scoreType = getScoreType(h.score, h.par);
-        const vs = diff > 0 ? '+' : '';
-        frontHtml += `<div class="score-row">
-            <span class="hole-num">#${h.hole}</span>
-            <span class="hole-name">${h.name}</span>
-            <span class="hole-score ${scoreType}">${h.score}</span>
-        </div>`;
-    }
-
-    document.getElementById('frontNine').innerHTML = frontHtml;
-
-    const frontDiff = frontTotal - frontPar;
-    const frontVs = frontDiff > 0 ? '+' : '';
-    document.getElementById('frontSummary').innerHTML = `
-        <div class="summary-item">
-            <div class="label">Total</div>
-            <div class="value">${frontTotal}</div>
-        </div>
-        <div class="summary-item">
-            <div class="label">vs Par</div>
-            <div class="value" style="color: ${frontDiff < 0 ? '#2ecc71' : frontDiff > 0 ? '#ff6b6b' : '#888'}">${frontVs}${frontDiff}</div>
-        </div>
-    `;
-
-    // Back 9
-    let backHtml = '';
-    let backTotal = 0;
-    let backPar = 0;
-
-    for (let i = 9; i < 18; i++) {
-        const h = HOLES[i];
-        backTotal += h.score;
-        backPar += h.par;
-        const diff = h.score - h.par;
-        const scoreType = getScoreType(h.score, h.par);
-        const vs = diff > 0 ? '+' : '';
-        backHtml += `<div class="score-row">
-            <span class="hole-num">#${h.hole}</span>
-            <span class="hole-name">${h.name}</span>
-            <span class="hole-score ${scoreType}">${h.score}</span>
-        </div>`;
-    }
-
-    document.getElementById('backNine').innerHTML = backHtml;
-
-    const backDiff = backTotal - backPar;
-    const backVs = backDiff > 0 ? '+' : '';
-    document.getElementById('backSummary').innerHTML = `
-        <div class="summary-item">
-            <div class="label">Total</div>
-            <div class="value">${backTotal}</div>
-        </div>
-        <div class="summary-item">
-            <div class="label">vs Par</div>
-            <div class="value" style="color: ${backDiff < 0 ? '#2ecc71' : backDiff > 0 ? '#ff6b6b' : '#888'}">${backVs}${backDiff}</div>
-        </div>
-    `;
-
-    // Calculate stats
+function buildScorecard() {
+    let frontHtml = '', backHtml = '';
+    let fTotal = 0, fPar = 0, bTotal = 0, bPar = 0;
     let eagles = 0, birdies = 0, pars = 0, bogeys = 0;
-    HOLES.forEach(h => {
-        const diff = h.score - h.par;
-        if (diff <= -2) eagles++;
-        else if (diff === -1) birdies++;
-        else if (diff === 0) pars++;
-        else bogeys++;
+
+    HOLES.forEach((h, i) => {
+        const type = getScoreType(h.score, h.par);
+        if (type === 'eagle')       eagles++;
+        else if (type === 'birdie') birdies++;
+        else if (type === 'par')    pars++;
+        else                        bogeys++;
+
+        const row = `<div class="hole-row">
+            <span class="h-num">${h.hole}</span>
+            <span class="h-name">${h.name}</span>
+            <span class="h-par">${h.par}</span>
+            <span class="h-yds">${h.yds}</span>
+            <span class="h-score-cell"><span class="score-chip ${type}">${h.score}</span></span>
+        </div>`;
+
+        if (i < 9) {
+            frontHtml += row;
+            fTotal += h.score;
+            fPar   += h.par;
+        } else {
+            backHtml += row;
+            bTotal += h.score;
+            bPar   += h.par;
+        }
     });
 
-    document.getElementById('eagleCount').textContent = eagles;
+    document.getElementById('frontNine').innerHTML = frontHtml;
+    document.getElementById('backNine').innerHTML  = backHtml;
+
+    const fd = fTotal - fPar;
+    const bd = bTotal - bPar;
+    const fColor = fd < 0 ? '#2ecc71' : fd > 0 ? '#e74c3c' : '#888';
+    const bColor = bd < 0 ? '#2ecc71' : bd > 0 ? '#e74c3c' : '#888';
+
+    document.getElementById('frontTotal').innerHTML = `
+        <div class="nt-item"><div class="nt-label">Out</div><div class="nt-val">${fTotal}</div></div>
+        <div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">${fPar}</div></div>
+        <div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:${fColor}">${fd > 0 ? '+' : ''}${fd}</div></div>`;
+
+    document.getElementById('backTotal').innerHTML = `
+        <div class="nt-item"><div class="nt-label">In</div><div class="nt-val">${bTotal}</div></div>
+        <div class="nt-item"><div class="nt-label">Par</div><div class="nt-val">${bPar}</div></div>
+        <div class="nt-item"><div class="nt-label">vs Par</div><div class="nt-val" style="color:${bColor}">${bd > 0 ? '+' : ''}${bd}</div></div>`;
+
+    document.getElementById('eagleCount').textContent  = eagles;
     document.getElementById('birdieCount').textContent = birdies;
-    document.getElementById('parCount').textContent = pars;
-    document.getElementById('bogeyCount').textContent = bogeys;
+    document.getElementById('parCount').textContent    = pars;
+    document.getElementById('bogeyCount').textContent  = bogeys;
 }
 
-// Start
 window.addEventListener('load', init);
 </script>
-
 </body>
 </html>
