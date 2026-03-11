@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scottie Scheffler — 2024 Masters Champion — 3D</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@r128/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --masters-green: #006747;
+            --masters-dark: #004d35;
+            --masters-gold: #c8a951;
+            --masters-cream: #f5f0e8;
+            --fairway: #4a8c5c;
+            --fairway-light: #5ea86e;
+            --rough: #2d6b3f;
+            --green-surface: #6abf7b;
+            --bunker: #e8d9a0;
+            --water: #4a90c2;
+            --birdie: #2ecc71;
+            --eagle: #f1c40f;
+            --bogey: #e74c3c;
+            --bg: #1a1a2e;
+            --panel: #16213e;
+            --text: #eee;
+            --text-muted: #8899aa;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: linear-gradient(135deg, rgba(0, 77, 53, 0.95), rgba(0, 103, 71, 0.95));
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            border-bottom: 2px solid var(--masters-gold);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            font-family: 'Playfair Display', serif;
+            font-weight: 900;
+            font-size: 22px;
+            color: var(--masters-gold);
+            letter-spacing: 1px;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.75);
+            font-weight: 300;
+        }
+
+        .header-player {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .player-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .player-score {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .round-selector {
+            display: flex;
+            gap: 6px;
+        }
+
+        .round-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .round-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .round-btn.active {
+            background: var(--masters-gold);
+            color: var(--masters-dark);
+            border-color: var(--masters-gold);
+            font-weight: 700;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 64px;
+            width: 280px;
+            height: calc(100vh - 64px);
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            overflow-y: auto;
+            padding: 16px 0;
+            z-index: 90;
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            color: var(--masters-gold);
+            padding: 0 16px 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hole-row {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-left: 3px solid transparent;
+        }
+
+        .hole-row:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .hole-row.active {
+            background: rgba(200, 169, 81, 0.1);
+            border-left-color: var(--masters-gold);
+        }
+
+        .hole-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+
+        .hole-name {
+            flex: 1;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .hole-par {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-right: 8px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .hole-score {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .score-eagle { background: var(--eagle); color: #333; }
+        .score-birdie { background: var(--birdie); color: white; }
+        .score-par { background: transparent; color: var(--text-muted); border: 1px solid var(--text-muted); }
+        .score-bogey { background: var(--bogey); color: white; }
+
+        .sidebar-section {
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin-top: 8px;
+        }
+
+        .sidebar-section-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+        }
+
+        .stat-label { color: var(--text-muted); }
+        .stat-value { font-weight: 600; }
+
+        .turn-divider {
+            border-top: 1px solid rgba(255,255,255,0.06);
+            margin: 4px 16px;
+        }
+
+        .turn-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            padding: 8px 16px 4px;
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 50;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: rgba(22, 33, 62, 0.9);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            background: rgba(200, 169, 81, 0.3);
+            border-color: var(--masters-gold);
+        }
+
+        /* ===== LEGEND ===== */
+        .legend {
+            position: fixed;
+            top: 80px;
+            right: 16px;
+            background: rgba(22, 33, 62, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 12px 16px;
+            z-index: 50;
+            font-size: 11px;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--masters-gold);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        /* ===== INFO PANEL ===== */
+        .info-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 300px;
+            background: rgba(22, 33, 62, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200, 169, 81, 0.3);
+            border-radius: 12px;
+            padding: 16px 24px;
+            z-index: 50;
+            display: none;
+            align-items: center;
+            gap: 24px;
+            max-width: 500px;
+        }
+
+        .info-panel.visible {
+            display: flex;
+        }
+
+        .info-hole {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--masters-gold);
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .info-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+    <div class="header-left">
+        <div>
+            <div class="header-logo">THE MASTERS 3D</div>
+            <div class="header-subtitle">Augusta National — April 11-14, 2024</div>
+        </div>
+    </div>
+    <div class="header-player">
+        <div class="player-name">Scottie Scheffler</div>
+        <div class="player-score" id="totalScore">-11 (277)</div>
+    </div>
+    <div class="round-selector" id="roundSelector">
+        <button class="round-btn active" data-round="all">All</button>
+        <button class="round-btn" data-round="1">R1: 66</button>
+        <button class="round-btn" data-round="2">R2: 72</button>
+        <button class="round-btn" data-round="3">R3: 71</button>
+        <button class="round-btn" data-round="4">R4: 68</button>
+    </div>
+</header>
+
+<!-- SIDEBAR SCORECARD -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-title">Scorecard</div>
+    <div class="turn-label">Front Nine</div>
+    <div id="frontNine"></div>
+    <div class="turn-divider"></div>
+    <div class="turn-label">Back Nine</div>
+    <div id="backNine"></div>
+    <div class="sidebar-section" id="statsSection">
+        <div class="sidebar-section-title">Statistics</div>
+    </div>
+</div>
+
+<!-- CANVAS -->
+<canvas id="canvas"></canvas>
+
+<!-- LEGEND -->
+<div class="legend">
+    <div class="legend-title">Shot Result</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--eagle)"></div> Eagle</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--birdie)"></div> Birdie</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,255,255,0.4)"></div> Par</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--bogey)"></div> Bogey</div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+    <button class="control-btn" onclick="resetView()" title="Reset View">⟲</button>
+    <button class="control-btn" onclick="togglePlayAnimation()" id="playBtn" title="Play Animation">▶</button>
+    <button class="control-btn" onclick="toggleWireframe()" title="Toggle Wireframe">⊞</button>
+</div>
+
+<!-- INFO PANEL -->
+<div class="info-panel" id="infoPanel">
+    <div class="info-hole" id="infoHole"></div>
+    <div class="info-content">
+        <div class="info-title" id="infoTitle"></div>
+        <div class="info-desc" id="infoDesc"></div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// COURSE & SCORING DATA
+// ============================================================
+
+const COURSE = [
+    { hole: 1,  name: "Tea Olive",            par: 4, yards: 445 },
+    { hole: 2,  name: "Pink Dogwood",          par: 5, yards: 585 },
+    { hole: 3,  name: "Flowering Peach",       par: 4, yards: 350 },
+    { hole: 4,  name: "Flowering Crab Apple",  par: 3, yards: 240 },
+    { hole: 5,  name: "Magnolia",              par: 4, yards: 495 },
+    { hole: 6,  name: "Juniper",               par: 3, yards: 180 },
+    { hole: 7,  name: "Pampas",                par: 4, yards: 450 },
+    { hole: 8,  name: "Yellow Jasmine",        par: 5, yards: 570 },
+    { hole: 9,  name: "Carolina Cherry",       par: 4, yards: 460 },
+    { hole: 10, name: "Camellia",              par: 4, yards: 495 },
+    { hole: 11, name: "White Dogwood",         par: 4, yards: 520 },
+    { hole: 12, name: "Golden Bell",           par: 3, yards: 155 },
+    { hole: 13, name: "Azalea",                par: 5, yards: 545 },
+    { hole: 14, name: "Chinese Fir",           par: 4, yards: 440 },
+    { hole: 15, name: "Firethorn",             par: 5, yards: 550 },
+    { hole: 16, name: "Redbud",                par: 3, yards: 170 },
+    { hole: 17, name: "Nandina",               par: 4, yards: 440 },
+    { hole: 18, name: "Holly",                 par: 4, yards: 465 },
+];
+
+const SCORES = {
+    1: {
+        scores: [4, 4, 4, 3, 4, 3, 4, 4, 4,  4, 4, 2, 4, 4, 4, 2, 4, 4],
+        notes: "Bogey-free 66. Holed bunker shot on 12. Ball stayed dry on 13."
+    },
+    2: {
+        scores: [4, 5, 4, 3, 4, 3, 4, 4, 4,  4, 4, 3, 5, 4, 5, 3, 4, 5],
+        notes: "Even-par 72. Steady play maintained top position."
+    },
+    3: {
+        scores: [4, 4, 4, 3, 4, 3, 4, 5, 4,  4, 4, 3, 4, 4, 4, 3, 4, 4],
+        notes: "1-under 71. Took one-shot lead into final round."
+    },
+    4: {
+        scores: [4, 5, 3, 4, 4, 3, 5, 4, 3,  3, 5, 3, 4, 3, 5, 2, 4, 4],
+        notes: "4-under 68. Championship finish: 3 birdies (8-9-10), tap-in on 14, clincher on 16."
+    }
+};
+
+// 3D Hole positions (in world space)
+const HOLE_POSITIONS = [
+    { pos: [-80, 0, 80],   fairwayDir: [0, 0, -1], length: 445, width: 35 },  // 1
+    { pos: [-40, 0, 120],  fairwayDir: [0.2, 0, -1], length: 585, width: 40 }, // 2
+    { pos: [20, 0, 100],   fairwayDir: [0.3, 0, -1], length: 350, width: 32 },  // 3
+    { pos: [60, 0, 50],    fairwayDir: [0, 0, -1], length: 240, width: 20 },    // 4
+    { pos: [100, 0, 10],   fairwayDir: [0, 0, -1], length: 495, width: 35 },    // 5
+    { pos: [140, 5, -30],  fairwayDir: [0, 0, -1], length: 180, width: 25 },    // 6
+    { pos: [160, 0, 10],   fairwayDir: [0, 0, 1], length: 450, width: 33 },     // 7
+    { pos: [150, 0, 70],   fairwayDir: [0, 0, 1], length: 570, width: 38 },     // 8
+    { pos: [110, 0, 120],  fairwayDir: [0, 0, 1], length: 460, width: 34 },     // 9
+    { pos: [60, 0, 130],   fairwayDir: [-0.3, 0, 1], length: 495, width: 36 },  // 10
+    { pos: [0, 0, 120],    fairwayDir: [-0.2, 0, 1], length: 520, width: 37 },  // 11
+    { pos: [-40, 0, 100],  fairwayDir: [-0.2, 0, 1], length: 155, width: 22 },  // 12
+    { pos: [-80, 0, 70],   fairwayDir: [-0.1, 0, 1], length: 545, width: 39 },  // 13
+    { pos: [-120, 0, 40],  fairwayDir: [0, 0, -1], length: 440, width: 33 },    // 14
+    { pos: [-140, 0, 0],   fairwayDir: [0, 0, -1], length: 550, width: 38 },    // 15
+    { pos: [-150, 0, -40], fairwayDir: [-0.2, 0, 1], length: 170, width: 20 },  // 16
+    { pos: [-130, 0, -70], fairwayDir: [-0.3, 0, -1], length: 440, width: 34 }, // 17
+    { pos: [-80, 0, -100], fairwayDir: [-0.2, 0, -1], length: 465, width: 35 }, // 18
+];
+
+// ============================================================
+// THREE.JS SETUP
+// ============================================================
+
+let scene, camera, renderer, controls;
+let holeObjects = [];
+let shotLines = [];
+let currentRound = 'all';
+let selectedHole = null;
+let isAnimating = false;
+let animationProgress = 0;
+let wireframeMode = false;
+
+function initThreeJS() {
+    // Scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a1428);
+    scene.fog = new THREE.Fog(0x0a1428, 400, 800);
+
+    // Camera
+    const canvas = document.getElementById('canvas');
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 2000);
+    camera.position.set(0, 150, 200);
+
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setSize(w, h);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+
+    // Controls
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.autoRotate = false;
+    controls.autoRotateSpeed = 2;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 50;
+    controls.maxDistance = 400;
+
+    // Lighting
+    const skyLight = new THREE.HemisphereLight(0x87ceeb, 0x1a5a2d, 1.2);
+    scene.add(skyLight);
+
+    const sunLight = new THREE.DirectionalLight(0xfff5e6, 1.5);
+    sunLight.position.set(150, 200, 100);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.left = -300;
+    sunLight.shadow.camera.right = 300;
+    sunLight.shadow.camera.top = 300;
+    sunLight.shadow.camera.bottom = -300;
+    sunLight.shadow.camera.far = 1000;
+    scene.add(sunLight);
+
+    // Terrain base
+    createTerrain();
+
+    // Holes
+    createHoles();
+
+    // Event listeners
+    window.addEventListener('resize', onWindowResize);
+    renderer.domElement.addEventListener('click', onCanvasClick);
+
+    // Start animation loop
+    animate();
+}
+
+function createTerrain() {
+    // Ground plane with subtle elevation
+    const geometry = new THREE.PlaneGeometry(500, 500, 64, 64);
+    const positions = geometry.attributes.position;
+    const posArray = positions.array;
+
+    for (let i = 0; i < posArray.length; i += 3) {
+        const x = posArray[i];
+        const y = posArray[i + 1];
+        // Add subtle noise for elevation
+        posArray[i + 2] = Math.sin(x * 0.02) * 5 + Math.cos(y * 0.02) * 5 + Math.random() * 2;
+    }
+    positions.needsUpdate = true;
+    geometry.computeVertexNormals();
+
+    const material = new THREE.MeshStandardMaterial({
+        color: 0x2d5a35,
+        roughness: 0.8,
+        metalness: 0,
+    });
+
+    const terrain = new THREE.Mesh(geometry, material);
+    terrain.receiveShadow = true;
+    terrain.rotation.x = -Math.PI / 2;
+    scene.add(terrain);
+}
+
+function createHoles() {
+    HOLE_POSITIONS.forEach((hole, i) => {
+        const holeNum = i + 1;
+        const pos = new THREE.Vector3(...hole.pos);
+        const group = new THREE.Group();
+        group.position.copy(pos);
+        group.userData = { holeNum, ...hole };
+
+        // Fairway
+        const fairwayGeom = new THREE.CylinderGeometry(hole.width / 2, hole.width / 2, 0.1, 32);
+        const fairwayMat = new THREE.MeshStandardMaterial({
+            color: 0x4a8c5c,
+            roughness: 0.7,
+            metalness: 0,
+        });
+        const fairway = new THREE.Mesh(fairwayGeom, fairwayMat);
+        fairway.position.y = 0.05;
+        fairway.receiveShadow = true;
+        fairway.castShadow = true;
+        group.add(fairway);
+
+        // Green
+        const greenGeom = new THREE.CylinderGeometry(15, 15, 0.15, 32);
+        const greenMat = new THREE.MeshStandardMaterial({
+            color: 0x6abf7b,
+            roughness: 0.6,
+            metalness: 0,
+        });
+        const green = new THREE.Mesh(greenGeom, greenMat);
+        green.position.y = 0.1;
+        green.receiveShadow = true;
+        green.castShadow = true;
+        group.add(green);
+
+        // Flag
+        const flagPole = new THREE.CylinderGeometry(0.5, 0.5, 15, 8);
+        const poleMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+        const pole = new THREE.Mesh(flagPole, poleMat);
+        pole.position.y = 7.5;
+        pole.castShadow = true;
+        group.add(pole);
+
+        const flagGeom = new THREE.BoxGeometry(8, 5, 0.5);
+        const flagMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
+        const flag = new THREE.Mesh(flagGeom, flagMat);
+        flag.position.set(4, 13, 0);
+        flag.castShadow = true;
+        group.add(flag);
+
+        // Hole number label
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#c8a951';
+        ctx.font = 'bold 80px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(holeNum.toString(), 64, 64);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const spriteGeom = new THREE.PlaneGeometry(12, 12);
+        const spriteMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Mesh(spriteGeom, spriteMat);
+        sprite.position.y = 0.5;
+        sprite.position.z = 8;
+        group.add(sprite);
+
+        // Bunkers
+        if ([2, 4, 5, 12, 13, 14, 15].includes(holeNum)) {
+            const bunkerGeom = new THREE.CylinderGeometry(8, 8, 0.1, 16);
+            const bunkerMat = new THREE.MeshStandardMaterial({ color: 0xe8d9a0 });
+            const bunker = new THREE.Mesh(bunkerGeom, bunkerMat);
+            bunker.position.set(-20, 0, 15);
+            bunker.receiveShadow = true;
+            group.add(bunker);
+        }
+
+        // Water
+        if ([11, 12, 13, 15, 16].includes(holeNum)) {
+            const waterGeom = new THREE.CylinderGeometry(12, 12, 0.1, 16);
+            const waterMat = new THREE.MeshStandardMaterial({
+                color: 0x4a90c2,
+                metalness: 0.3,
+                roughness: 0.4,
+            });
+            const water = new THREE.Mesh(waterGeom, waterMat);
+            water.position.set(30, -0.05, 10);
+            water.receiveShadow = true;
+            group.add(water);
+        }
+
+        group.userData.meshes = group.children;
+        holeObjects.push(group);
+        scene.add(group);
+    });
+}
+
+function createShotLine(fromHole, toHole, score, par, round) {
+    const fromPos = holeObjects[fromHole - 1].position;
+    const toPos = holeObjects[toHole - 1].position;
+
+    // Determine shot color based on score
+    let color = 0x777777;
+    if (score - par === -2) color = 0xf1c40f;  // Eagle
+    else if (score - par === -1) color = 0x2ecc71; // Birdie
+    else if (score - par === 0) color = 0xcccccc; // Par
+    else color = 0xe74c3c; // Bogey
+
+    // Create curve for ball flight
+    const curve = new THREE.QuadraticBezierCurve3(
+        fromPos,
+        new THREE.Vector3(
+            (fromPos.x + toPos.x) / 2,
+            Math.max(fromPos.y, toPos.y) + 30,
+            (fromPos.z + toPos.z) / 2
+        ),
+        toPos
+    );
+
+    const points = curve.getPoints(50);
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+        color,
+        linewidth: 2,
+        opacity: 0.7,
+        transparent: true,
+    });
+
+    const line = new THREE.Line(geometry, material);
+    line.userData = { fromHole, toHole, score, par, round };
+    shotLines.push(line);
+    scene.add(line);
+}
+
+function renderShots() {
+    // Clear existing shot lines
+    shotLines.forEach(line => scene.remove(line));
+    shotLines = [];
+
+    const rounds = currentRound === 'all' ? [1, 2, 3, 4] : [parseInt(currentRound)];
+
+    rounds.forEach(r => {
+        const roundScores = SCORES[r].scores;
+        roundScores.forEach((score, i) => {
+            if (selectedHole && selectedHole !== i + 1) return;
+            createShotLine(i + 1, 19, score, COURSE[i].par, r); // Dummy line to clubhouse
+        });
+    });
+}
+
+function buildSidebar() {
+    const frontDiv = document.getElementById('frontNine');
+    const backDiv = document.getElementById('backNine');
+    frontDiv.innerHTML = '';
+    backDiv.innerHTML = '';
+
+    COURSE.forEach((hole, i) => {
+        const scores = getScoresForHole(hole.hole);
+        const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+        const vsPar = avgScore - hole.par;
+        const scoreClass = getScoreClass(avgScore, hole.par);
+
+        const displayScore = currentRound === 'all'
+            ? (vsPar === 0 ? 'E' : (vsPar > 0 ? '+' + vsPar.toFixed(1) : vsPar.toFixed(1)))
+            : scores[0];
+
+        const row = document.createElement('div');
+        row.className = `hole-row${selectedHole === hole.hole ? ' active' : ''}`;
+        row.onclick = () => selectHole(hole.hole);
+
+        const bgColor = getHoleNumBg(scoreClass);
+        const textColor = getHoleNumColor(scoreClass);
+
+        row.innerHTML = `
+            <div class="hole-num" style="background:${bgColor};color:${textColor}">${hole.hole}</div>
+            <div class="hole-name">${hole.name}</div>
+            <div class="hole-par">Par ${hole.par}</div>
+            <div class="hole-score ${scoreClass}">${displayScore}</div>
+        `;
+
+        if (i < 9) frontDiv.appendChild(row);
+        else backDiv.appendChild(row);
+    });
+}
+
+function getScoresForHole(holeNum) {
+    if (currentRound === 'all') {
+        return [1, 2, 3, 4].map(r => SCORES[r].scores[holeNum - 1]);
+    }
+    return [SCORES[parseInt(currentRound)].scores[holeNum - 1]];
+}
+
+function getScoreClass(score, par) {
+    const diff = score - par;
+    if (diff <= -2) return 'score-eagle';
+    if (diff === -1) return 'score-birdie';
+    if (diff === 0) return 'score-par';
+    return 'score-bogey';
+}
+
+function getHoleNumBg(cls) {
+    const map = {
+        'score-eagle': '#f1c40f',
+        'score-birdie': '#2ecc71',
+        'score-par': 'transparent',
+        'score-bogey': '#e74c3c',
+    };
+    return map[cls] || 'transparent';
+}
+
+function getHoleNumColor(cls) {
+    if (cls === 'score-par') return 'var(--text-muted)';
+    if (cls === 'score-eagle') return '#333';
+    return 'white';
+}
+
+function updateStats() {
+    const section = document.getElementById('statsSection');
+    const rounds = currentRound === 'all' ? [1, 2, 3, 4] : [parseInt(currentRound)];
+
+    let birdies = 0, pars = 0, bogeys = 0, eagles = 0;
+    let totalScore = 0;
+
+    rounds.forEach(r => {
+        SCORES[r].scores.forEach((score, i) => {
+            const diff = score - COURSE[i].par;
+            totalScore += score;
+            if (diff <= -2) eagles++;
+            else if (diff === -1) birdies++;
+            else if (diff === 0) pars++;
+            else bogeys++;
+        });
+    });
+
+    const totalPar = rounds.length * 72;
+
+    section.innerHTML = `
+        <div class="sidebar-section-title">Statistics</div>
+        <div class="stat-row"><span class="stat-label">Eagles</span><span class="stat-value" style="color:#f1c40f">${eagles}</span></div>
+        <div class="stat-row"><span class="stat-label">Birdies</span><span class="stat-value" style="color:#2ecc71">${birdies}</span></div>
+        <div class="stat-row"><span class="stat-label">Pars</span><span class="stat-value">${pars}</span></div>
+        <div class="stat-row"><span class="stat-label">Bogeys</span><span class="stat-value" style="color:#e74c3c">${bogeys}</span></div>
+        <div class="stat-row"><span class="stat-label">Total</span><span class="stat-value">${totalScore} (${totalScore - totalPar >= 0 ? '+' : ''}${totalScore - totalPar})</span></div>
+    `;
+}
+
+function selectHole(holeNum) {
+    if (selectedHole === holeNum) {
+        selectedHole = null;
+        resetView();
+    } else {
+        selectedHole = holeNum;
+        // Zoom to hole
+        const hole = holeObjects[holeNum - 1];
+        const target = hole.position.clone();
+        target.y = 50;
+        camera.position.lerp(target, 0.1);
+        controls.target.copy(hole.position);
+    }
+    buildSidebar();
+    renderShots();
+}
+
+function resetView() {
+    selectedHole = null;
+    camera.position.set(0, 150, 200);
+    controls.target.set(0, 0, 0);
+    buildSidebar();
+    renderShots();
+}
+
+function togglePlayAnimation() {
+    isAnimating = !isAnimating;
+    const btn = document.getElementById('playBtn');
+    btn.textContent = isAnimating ? '⏸' : '▶';
+}
+
+function toggleWireframe() {
+    wireframeMode = !wireframeMode;
+    holeObjects.forEach(hole => {
+        hole.children.forEach(child => {
+            if (child.material) {
+                child.material.wireframe = wireframeMode;
+            }
+        });
+    });
+}
+
+function onCanvasClick(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * 2 - 1;
+    const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+
+    const allMeshes = [];
+    holeObjects.forEach(hole => hole.children.forEach(child => {
+        if (child.isMesh) allMeshes.push(child);
+    }));
+
+    const intersects = raycaster.intersectObjects(allMeshes);
+    if (intersects.length > 0) {
+        const mesh = intersects[0].object;
+        let hole = mesh;
+        while (hole.parent && !hole.userData.holeNum) {
+            hole = hole.parent;
+        }
+        if (hole.userData.holeNum) {
+            selectHole(hole.userData.holeNum);
+        }
+    }
+}
+
+function onWindowResize() {
+    const canvas = document.getElementById('canvas');
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    if (isAnimating) {
+        animationProgress += 0.01;
+        if (animationProgress > 1) {
+            isAnimating = false;
+            document.getElementById('playBtn').textContent = '▶';
+            animationProgress = 0;
+        }
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+// Setup UI
+function setupRoundButtons() {
+    document.querySelectorAll('.round-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.round-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentRound = btn.dataset.round;
+            document.getElementById('totalScore').textContent = currentRound === 'all'
+                ? '-11 (277)'
+                : (() => {
+                    const r = parseInt(currentRound);
+                    const total = SCORES[r].scores.reduce((a, b) => a + b, 0);
+                    const vs = total - 72;
+                    return `${vs === 0 ? 'E' : (vs > 0 ? '+' + vs : vs)} (${total})`;
+                })();
+            buildSidebar();
+            renderShots();
+            updateStats();
+        };
+    });
+}
+
+// Initialize
+window.addEventListener('load', () => {
+    initThreeJS();
+    setupRoundButtons();
+    buildSidebar();
+    renderShots();
+    updateStats();
+});
+</script>
+
+</body>
+</html>
