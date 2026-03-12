@@ -36,6 +36,81 @@
     }
     .heart-btn:hover { transform: scale(1.25); }
     .heart-btn.saved { background: rgba(76,5,25,.8); border-color: #be123c; }
+    /* Recommendation box */
+    .rec-box {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      border: 1px solid #4f46e5;
+      border-radius: 16px;
+      padding: 20px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .rec-box::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .rec-input {
+      width: 100%;
+      background: rgba(15,23,42,.8);
+      border: 1px solid #4338ca;
+      border-radius: 12px;
+      padding: 12px 16px 12px 42px;
+      font-size: 15px;
+      color: #e0e7ff;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .rec-input::placeholder { color: #6366f1; }
+    .rec-input:focus {
+      outline: none;
+      border-color: #818cf8;
+      box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+    }
+    .rec-btn {
+      padding: 10px 22px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      white-space: nowrap;
+    }
+    .rec-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,70,229,.4); }
+    .rec-btn:active { transform: scale(.97); }
+    .rec-results {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 4px 0 8px;
+      scrollbar-width: thin;
+      scrollbar-color: #4338ca transparent;
+    }
+    .rec-card {
+      flex: 0 0 160px;
+      background: rgba(15,23,42,.7);
+      border: 1px solid #312e81;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .18s, border-color .18s;
+    }
+    .rec-card:hover { transform: translateY(-3px); border-color: #818cf8; }
+    .rec-card img { width: 100%; height: 200px; object-fit: cover; }
+    .rec-card-body { padding: 8px 10px; }
+    .rec-card-title { font-size: 12px; font-weight: 700; color: #e0e7ff; line-height: 1.3;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .rec-card-meta { font-size: 10px; color: #818cf8; margin-top: 3px; }
+    .rec-tag {
+      display: inline-block; font-size: 10px; font-weight: 600;
+      padding: 2px 8px; border-radius: 9999px; margin: 2px 3px 2px 0;
+      background: rgba(99,102,241,.15); border: 1px solid #4338ca; color: #a5b4fc;
+      cursor: pointer; transition: all .15s;
+    }
+    .rec-tag:hover { background: rgba(99,102,241,.3); color: #e0e7ff; }
   </style>
 </head>
 
@@ -62,6 +137,43 @@
       </div>
     </div>
   </header>
+
+  <!-- ── Recommendation Search ──────────────────────────────────────────── -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+    <div class="rec-box">
+      <div style="position:relative;z-index:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:20px">✨</span>
+          <h2 style="font-size:16px;font-weight:800;color:#e0e7ff;margin:0">Find Your Next Show</h2>
+          <span style="font-size:11px;color:#6366f1;font-weight:500">— tell us what you like</span>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div style="flex:1;min-width:240px;position:relative">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;color:#6366f1;pointer-events:none">💬</span>
+            <input type="text" id="recInput" class="rec-input"
+              placeholder='e.g. "I like shows like Severance" or "dark thriller with mystery"'>
+          </div>
+          <button id="recBtn" class="rec-btn" onclick="getRecommendations()">Get Suggestions</button>
+        </div>
+        <div id="recExamples" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">
+          <span style="font-size:10px;color:#4338ca;font-weight:600;margin-right:2px">TRY:</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">I like Severance</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">dark mystery thriller</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">funny comedy like The Office</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">sci-fi with action</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">true crime documentary</span>
+          <span class="rec-tag" onclick="tryRecExample(this)">feel-good family drama</span>
+        </div>
+        <div id="recResults" style="margin-top:14px;display:none">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <p id="recLabel" style="font-size:12px;font-weight:700;color:#a5b4fc;margin:0"></p>
+            <button onclick="clearRecs()" style="font-size:11px;color:#6366f1;background:none;border:none;cursor:pointer;font-weight:600">✕ Clear</button>
+          </div>
+          <div id="recCards" class="rec-results"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── Filters ────────────────────────────────────────────────────────── -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -706,6 +818,205 @@
 
     document.getElementById('resetBtn').addEventListener('click', resetFilters);
     document.getElementById('refreshBtn').addEventListener('click', fetchShows);
+
+    // ── Recommendation Engine ──────────────────────────────────────────────
+    const GENRE_MAP = {
+      10759: 'action adventure',
+      16: 'animation anime cartoon',
+      35: 'comedy funny humor sitcom',
+      80: 'crime detective',
+      99: 'documentary docuseries true crime',
+      18: 'drama serious emotional',
+      10751: 'family kids',
+      10762: 'kids children',
+      9648: 'mystery suspense whodunit',
+      10763: 'news',
+      10764: 'reality',
+      10765: 'sci-fi fantasy science fiction supernatural',
+      10766: 'soap opera',
+      10767: 'talk show',
+      10768: 'war politics military',
+      37: 'western',
+      53: 'thriller suspense dark intense',
+      27: 'horror scary',
+      28: 'action',
+      12: 'adventure',
+      14: 'fantasy',
+      36: 'history historical',
+      10402: 'music',
+      10749: 'romance love romantic',
+      878: 'sci-fi science fiction',
+    };
+
+    // Keyword clusters to broaden matching
+    const KEYWORD_CLUSTERS = [
+      ['dark', 'gritty', 'intense', 'noir', 'bleak'],
+      ['funny', 'comedy', 'humor', 'hilarious', 'sitcom', 'laugh'],
+      ['thriller', 'suspense', 'tension', 'edge', 'gripping'],
+      ['mystery', 'whodunit', 'detective', 'puzzle', 'clue'],
+      ['sci-fi', 'science fiction', 'futuristic', 'space', 'dystopian', 'cyberpunk'],
+      ['horror', 'scary', 'creepy', 'terrifying', 'spooky'],
+      ['drama', 'emotional', 'serious', 'powerful', 'heartfelt'],
+      ['action', 'explosive', 'fighting', 'combat', 'adrenaline'],
+      ['romance', 'love', 'romantic', 'relationship', 'heartwarming'],
+      ['family', 'wholesome', 'feel-good', 'heartwarming', 'uplifting'],
+      ['crime', 'criminal', 'heist', 'mob', 'gangster', 'true crime'],
+      ['documentary', 'docuseries', 'true story', 'real life', 'nonfiction'],
+      ['fantasy', 'magical', 'supernatural', 'mythical', 'enchanting'],
+      ['animated', 'animation', 'anime', 'cartoon'],
+      ['political', 'politics', 'government', 'conspiracy', 'espionage', 'spy'],
+      ['historical', 'history', 'period', 'era', 'vintage'],
+      ['war', 'military', 'battle', 'combat', 'soldier'],
+      ['western', 'cowboy', 'frontier'],
+    ];
+
+    function getRecommendations() {
+      const input = document.getElementById('recInput').value.trim().toLowerCase();
+      if (!input || allShows.length === 0) return;
+
+      // 1. Find if user mentioned any show names
+      const mentionedShows = allShows.filter(s =>
+        input.includes(s.name.toLowerCase())
+      );
+
+      // 2. Collect genre IDs from mentioned shows
+      const likedGenres = new Set();
+      mentionedShows.forEach(s => (s.genre_ids || []).forEach(g => likedGenres.add(g)));
+
+      // 3. Expand input with keyword clusters
+      const inputWords = input.split(/[\s,]+/).filter(w => w.length > 2);
+      const expandedTerms = new Set(inputWords);
+      KEYWORD_CLUSTERS.forEach(cluster => {
+        if (cluster.some(kw => input.includes(kw))) {
+          cluster.forEach(kw => expandedTerms.add(kw));
+        }
+      });
+
+      // 4. Match genre keywords from input to genre IDs
+      for (const [gid, keywords] of Object.entries(GENRE_MAP)) {
+        const kws = keywords.split(' ');
+        if (kws.some(kw => expandedTerms.has(kw) || input.includes(kw))) {
+          likedGenres.add(+gid);
+        }
+      }
+
+      // 5. Score each show
+      const mentionedIds = new Set(mentionedShows.map(s => s.id));
+      const scored = allShows
+        .filter(s => !mentionedIds.has(s.id)) // exclude shows they already mentioned
+        .map(s => {
+          let score = 0;
+          const showGenres = new Set(s.genre_ids || []);
+
+          // Genre overlap
+          for (const g of likedGenres) {
+            if (showGenres.has(g)) score += 20;
+          }
+
+          // Overview keyword matching
+          const overview = (s.overview || '').toLowerCase();
+          for (const term of expandedTerms) {
+            if (overview.includes(term)) score += 5;
+          }
+          // Name keyword matching
+          const nameLower = s.name.toLowerCase();
+          for (const term of expandedTerms) {
+            if (nameLower.includes(term)) score += 8;
+          }
+
+          // Boost for quality
+          const rating = s._imdbRating ?? s._tmdbRating ?? 0;
+          if (rating >= 8) score += 15;
+          else if (rating >= 7) score += 8;
+          else if (rating >= 6) score += 3;
+
+          // Boost for trending
+          if (s._trendingRank != null) score += 10;
+
+          return { show: s, score };
+        })
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+
+      // 6. Render results
+      const resultsDiv = document.getElementById('recResults');
+      const cardsDiv = document.getElementById('recCards');
+      const label = document.getElementById('recLabel');
+
+      if (scored.length === 0) {
+        resultsDiv.style.display = 'block';
+        label.textContent = 'No matching shows found — try different keywords!';
+        cardsDiv.innerHTML = '';
+        return;
+      }
+
+      const matchReason = mentionedShows.length > 0
+        ? `Based on your love of ${mentionedShows.map(s => s.name).join(', ')}`
+        : `Shows matching "${input}"`;
+      label.textContent = `${matchReason} — ${scored.length} suggestion${scored.length !== 1 ? 's' : ''}`;
+
+      cardsDiv.innerHTML = scored.map(({ show, score }) => {
+        const rating = show._imdbRating ?? show._tmdbRating ?? 0;
+        const poster = show.poster_path
+          ? `<img src="${IMG_SM}${show.poster_path}" alt="${show.name.replace(/"/g,'&quot;')}" loading="lazy">`
+          : `<div style="height:200px;background:#1e1b4b;display:flex;align-items:center;justify-content:center">
+               <span style="font-size:48px;color:#4338ca44;font-weight:900">${show.name[0]}</span>
+             </div>`;
+        const providers = (show._providers || [])
+          .filter(p => PROVIDERS[p.provider_id])
+          .slice(0, 2)
+          .map(p => PROVIDERS[p.provider_id].name)
+          .join(', ') || 'TBD';
+        return `
+          <div class="rec-card" onclick="scrollToShow(${show.id})" title="Click to find in grid">
+            ${poster}
+            <div class="rec-card-body">
+              <div class="rec-card-title">${show.name}</div>
+              <div class="rec-card-meta">
+                ${rating > 0 ? '⭐ ' + rating.toFixed(1) : ''} · ${providers}
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+
+      resultsDiv.style.display = 'block';
+    }
+
+    function scrollToShow(id) {
+      // Clear filters so show is visible, then scroll to it
+      resetFilters();
+      setTimeout(() => {
+        const cards = document.querySelectorAll('#cardGrid .card');
+        for (const card of cards) {
+          if (card.innerHTML.includes(`toggleWatchlist(${id})`)) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.style.outline = '2px solid #818cf8';
+            card.style.outlineOffset = '3px';
+            setTimeout(() => {
+              card.style.outline = 'none';
+            }, 2500);
+            break;
+          }
+        }
+      }, 100);
+    }
+
+    function clearRecs() {
+      document.getElementById('recResults').style.display = 'none';
+      document.getElementById('recCards').innerHTML = '';
+      document.getElementById('recInput').value = '';
+    }
+
+    function tryRecExample(el) {
+      document.getElementById('recInput').value = el.textContent;
+      getRecommendations();
+    }
+
+    // Allow Enter key to trigger recommendations
+    document.getElementById('recInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') getRecommendations();
+    });
   </script>
 
 </body>
