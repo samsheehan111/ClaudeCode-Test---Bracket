@@ -264,12 +264,14 @@ function init(){
     rim.position.set(-100,80,300);
     scene.add(rim);
 
+    // Build hole curves first (needed by terrain flattening)
+    for(var i=0;i<HL.length;i++) holeCurves.push(mkCurve(HL[i]));
+
     // Build everything
     buildSky();
     buildTerrain();
     buildWater();
     for(var i=0;i<HL.length;i++){
-        holeCurves.push(mkCurve(HL[i]));
         buildFairway(HL[i]);
         buildGreen(HL[i],i);
         buildTeeBox(HL[i]);
