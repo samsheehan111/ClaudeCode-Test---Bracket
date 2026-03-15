@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShowChart — Track What You Watch</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d0d12;
+      --surface:      #16161f;
+      --surface2:     #1f1f2e;
+      --surface3:     #252538;
+      --border:       #2a2a3d;
+      --border2:      #373750;
+      --text:         #e8e8f0;
+      --text-muted:   #888899;
+      --text-dim:     #44445a;
+      --accent:       #7c3aed;
+      --accent-hover: #6d28d9;
+      --accent-light: #c084fc;
+      --danger:       #ef4444;
+      --danger-bg:    #450a0a;
+      --danger-border:#7f1d1d;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .logo em { color: var(--text); font-style: normal; font-weight: 400; }
+
+    .search-wrap {
+      flex: 1;
+      position: relative;
+      max-width: 380px;
+    }
+    .search-wrap svg {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 15px;
+      height: 15px;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 7px 12px 7px 34px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--text-dim); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border2); }
+    .btn-secondary:hover { background: var(--surface3); color: var(--text); }
+    .btn-danger { background: var(--danger-bg); color: #fca5a5; border: 1px solid var(--danger-border); }
+    .btn-danger:hover { background: var(--danger-border); }
+    .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+
+    /* ── CHART SECTION ── */
+    #chart-section {
+      flex: 1;
+      padding: 20px 20px 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    #chart-outer {
+      width: 100%;
+      max-width: 980px;
+    }
+
+    #chart-row {
+      display: flex;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .y-axis-label {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 4px 0;
+    }
+
+    #chart {
+      flex: 1;
+      height: 560px;
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .x-axis-label {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* Chart internals */
+    .grid-line {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(255,255,255,0.04);
+    }
+    .grid-line.v { width: 1px; top: 0; bottom: 0; }
+    .grid-line.h { height: 1px; left: 0; right: 0; }
+    .grid-line.mid { background: rgba(124,58,237,0.18) !important; }
+
+    .quad-label {
+      position: absolute;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      font-style: italic;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .axis-tick {
+      position: absolute;
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      pointer-events: none;
+    }
+    .axis-tick.yt { right: 7px; transform: translateY(-50%); }
+    .axis-tick.xt { bottom: 6px; transform: translateX(-50%); }
+
+    .chart-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--border2);
+      pointer-events: none;
+    }
+    .chart-empty svg { width: 52px; height: 52px; }
+    .chart-empty p { font-size: 0.88rem; }
+
+    /* ── SHOW CARDS ── */
+    .show-card {
+      position: absolute;
+      width: 74px;
+      transform: translate(-50%, -50%);
+      cursor: grab;
+      text-align: center;
+      z-index: 10;
+      transition: opacity 0.2s;
+    }
+    .show-card:active { cursor: grabbing; }
+    .show-card.faded { opacity: 0.12; pointer-events: none; }
+    .show-card:hover { z-index: 50; }
+
+    .show-card .poster {
+      width: 74px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 7px;
+      border: 2px solid var(--border2);
+      display: block;
+      background: var(--surface2);
+      box-shadow: 0 4px 18px rgba(0,0,0,0.65);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .show-card:hover .poster {
+      border-color: var(--accent-light);
+      box-shadow: 0 6px 22px rgba(124,58,237,0.45);
+    }
+
+    /* Poster placeholder (no image) */
+    .show-card .poster-placeholder {
+      width: 74px;
+      height: 110px;
+      border-radius: 7px;
+      border: 2px solid var(--border2);
+      background: var(--surface2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.65);
+      transition: border-color 0.2s;
+    }
+    .show-card:hover .poster-placeholder { border-color: var(--accent-light); }
+    .poster-placeholder .initial {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      line-height: 1;
+    }
+    .poster-placeholder .ph-label {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .show-card .card-title {
+      font-size: 0.61rem;
+      color: #c0c0d0;
+      margin-top: 5px;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.9);
+    }
+
+    .show-card .x-btn {
+      position: absolute;
+      top: -7px;
+      right: -7px;
+      width: 20px;
+      height: 20px;
+      background: var(--danger);
+      border: 2px solid var(--bg);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 0.58rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 60;
+      line-height: 1;
+    }
+    .show-card:hover .x-btn { display: flex; }
+
+    /* ── UPCOMING SECTION ── */
+    #upcoming-section {
+      padding: 14px 20px 18px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .upcoming-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .upcoming-header h2 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    #upcoming-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 34px;
+    }
+
+    .up-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 5px 8px 5px 14px;
+      font-size: 0.82rem;
+    }
+    .up-name { font-weight: 600; color: var(--text); }
+    .up-date { color: var(--accent-light); font-size: 0.77rem; }
+    .up-rm {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 0.72rem;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .up-rm:hover { background: var(--border); color: var(--danger); }
+    .upcoming-empty { color: var(--text-dim); font-size: 0.82rem; font-style: italic; }
+
+    /* ── MODALS ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+    .overlay.hidden { display: none; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+    }
+    .modal h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-light);
+      margin-bottom: 16px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 8px;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-input::placeholder { color: var(--text-dim); }
+
+    #search-results {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 220px;
+      overflow-y: auto;
+      margin-bottom: 14px;
+    }
+    #search-results:empty { display: none; margin-bottom: 0; }
+
+    .r-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .r-item:last-child { border-bottom: none; }
+    .r-item:hover { background: var(--surface2); }
+    .r-item.active { background: #2d1f4a; }
+    .r-item img {
+      width: 34px;
+      height: 51px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--surface2);
+      flex-shrink: 0;
+    }
+    .r-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .r-year { font-size: 0.78rem; color: var(--text-muted); }
+
+    /* Selected show preview */
+    .show-preview {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+    .show-preview.hidden { display: none; }
+
+    .preview-poster {
+      width: 64px;
+      height: 95px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: var(--surface3);
+      flex-shrink: 0;
+    }
+    .preview-placeholder {
+      width: 64px;
+      height: 95px;
+      border-radius: 6px;
+      background: var(--surface3);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent-light);
+    }
+    .preview-info { flex: 1; min-width: 0; }
+    .preview-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .slider-row { margin-bottom: 12px; }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .slider-label strong { color: var(--accent-light); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+    .modal-footer .spacer { flex: 1; }
+
+    /* Upcoming modal form */
+    .form-field { margin-bottom: 14px; }
+    .form-field label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+    /* Search loading */
+    .search-status {
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <div class="logo">Show<em>Chart</em></div>
+
+  <div class="search-wrap">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input type="text" id="filter-input" placeholder="Filter shows on chart…" autocomplete="off">
+  </div>
+
+  <button class="btn btn-primary" id="add-show-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+    Add Show
+  </button>
+</header>
+
+<!-- ── CHART ── -->
+<main id="chart-section">
+  <div id="chart-outer">
+    <div id="chart-row">
+      <div class="y-axis-label">Entertainment ↑</div>
+      <div id="chart"><!-- rendered by JS --></div>
+    </div>
+    <div class="x-axis-label">← Low Brainpower &nbsp;·&nbsp; High Brainpower →</div>
+  </div>
+</main>
+
+<!-- ── UPCOMING ── -->
+<section id="upcoming-section">
+  <div class="upcoming-header">
+    <h2>Upcoming / Between Seasons</h2>
+    <button class="btn btn-primary btn-sm" id="add-upcoming-btn">+ Add</button>
+  </div>
+  <div id="upcoming-list"></div>
+</section>
+
+<!-- ── ADD / EDIT SHOW MODAL ── -->
+<div class="overlay hidden" id="show-overlay">
+  <div class="modal">
+    <h2 id="modal-heading">Add a Show</h2>
+    <input class="modal-input" type="text" id="modal-search" placeholder="Search for a show…" autocomplete="off">
+    <div id="search-results"></div>
+
+    <div class="show-preview hidden" id="show-preview">
+      <!-- poster filled by JS -->
+      <div class="preview-info">
+        <div class="preview-title" id="preview-title"></div>
+        <div class="slider-row">
+          <div class="slider-label">Entertainment <strong id="ent-val">5</strong>/10</div>
+          <input type="range" id="ent-slider" min="0" max="10" step="0.5" value="5">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label">Brainpower <strong id="brain-val">5</strong>/10</div>
+          <input type="range" id="brain-slider" min="0" max="10" step="0.5" value="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-danger hidden" id="delete-btn">Remove Show</button>
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" id="cancel-show-btn">Cancel</button>
+      <button class="btn btn-primary" id="save-show-btn">Add to Chart</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── UPCOMING MODAL ── -->
+<div class="overlay hidden" id="upcoming-overlay">
+  <div class="modal" style="max-width:360px;">
+    <h2>Upcoming Show</h2>
+    <div class="form-field">
+      <label>Show Name</label>
+      <input class="modal-input" type="text" id="up-name" placeholder="e.g. The Bear" style="margin-bottom:0;">
+    </div>
+    <div class="form-field">
+      <label>Return / Premiere Date <span style="color:var(--text-dim)">(optional)</span></label>
+      <input class="modal-input" type="date" id="up-date" style="margin-bottom:0;">
+    </div>
+    <div class="modal-footer">
+      <div class="spacer"></div>
+      <button class="btn btn-secondary" id="cancel-upcoming-btn">Cancel</button>
+      <button class="btn btn-primary" id="save-upcoming-btn">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ════════════════════════════════════════════════
+// State
+// ════════════════════════════════════════════════
+const PAD = 75; // px chart padding (keeps cards inside borders)
+
+let shows    = load('sc_shows') ?? [];
+let upcoming = load('sc_upcoming') ?? [];
+let filterQ  = '';
+let editId   = null;   // null = adding new, string = editing existing
+let picked   = null;   // { title, poster } from search or manual entry
+let dragSt   = null;   // active drag state
+let lastDragMoved = false;
+let searchTmr = null;
+
+function load(k) {
+  try { return JSON.parse(localStorage.getItem(k)); } catch { return null; }
+}
+function save()    { localStorage.setItem('sc_shows',    JSON.stringify(shows)); }
+function saveUp()  { localStorage.setItem('sc_upcoming', JSON.stringify(upcoming)); }
+function uid()     { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function snap(v)   { return Math.round(clamp(v, 0, 10) * 2) / 2; } // 0.5 increments
+
+// ════════════════════════════════════════════════
+// Chart rendering
+// ════════════════════════════════════════════════
+function renderChart() {
+  const chart = document.getElementById('chart');
+  chart.innerHTML = '';
+
+  const W = chart.offsetWidth;
+  const H = chart.offsetHeight;
+  const iW = W - PAD * 2;
+  const iH = H - PAD * 2;
+
+  // Grid lines at 0, 2, 4, 5, 6, 8, 10
+  [0, 2, 4, 6, 8, 10].forEach(v => {
+    const pct = v / 10;
+    const mid = v === 5;
+
+    const vl = mk('div', 'grid-line v' + (mid ? ' mid' : ''));
+    vl.style.left = (PAD + pct * iW) + 'px';
+    chart.appendChild(vl);
+
+    const hl = mk('div', 'grid-line h' + (mid ? ' mid' : ''));
+    hl.style.top = (H - PAD - pct * iH) + 'px';
+    chart.appendChild(hl);
+
+    // Tick labels (skip 0)
+    if (v > 0) {
+      const yt = mk('div', 'axis-tick yt');
+      yt.textContent = v;
+      yt.style.top = (H - PAD - pct * iH) + 'px';
+      chart.appendChild(yt);
+
+      const xt = mk('div', 'axis-tick xt');
+      xt.textContent = v;
+      xt.style.left = (PAD + pct * iW) + 'px';
+      chart.appendChild(xt);
+    }
+  });
+
+  // Midpoint crosshair center dot
+  const dot = mk('div');
+  Object.assign(dot.style, {
+    position: 'absolute',
+    left: (PAD + iW/2) + 'px',
+    top:  (PAD + iH/2) + 'px',
+    width: '6px', height: '6px',
+    background: 'rgba(124,58,237,0.35)',
+    borderRadius: '50%',
+    transform: 'translate(-50%,-50%)',
+    pointerEvents: 'none',
+  });
+  chart.appendChild(dot);
+
+  // Quadrant labels
+  [
+    ['Fun & Easy',         PAD + iW*0.18, PAD + iH*0.08],
+    ['Gripping & Complex', PAD + iW*0.82, PAD + iH*0.08],
+    ['Background TV',      PAD + iW*0.18, PAD + iH*0.92],
+    ['Brainy But Slow',    PAD + iW*0.82, PAD + iH*0.92],
+  ].forEach(([text, x, y]) => {
+    const q = mk('div', 'quad-label');
+    q.textContent = text;
+    q.style.left = x + 'px';
+    q.style.top  = y + 'px';
+    q.style.transform = 'translate(-50%,-50%)';
+    chart.appendChild(q);
+  });
+
+  // Empty state
+  if (shows.length === 0) {
+    const e = mk('div', 'chart-empty');
+    e.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/>
+        <path d="M8 21h8M12 17v4"/>
+      </svg>
+      <p>Add your first show to get started</p>`;
+    chart.appendChild(e);
+    return;
+  }
+
+  // Show cards
+  shows.forEach(show => {
+    const x = PAD + (show.brainpower    / 10) * iW;
+    const y = H - PAD - (show.entertainment / 10) * iH;
+
+    const isFaded = filterQ && !show.title.toLowerCase().includes(filterQ);
+    const card = mk('div', 'show-card' + (isFaded ? ' faded' : ''));
+    card.style.left = x + 'px';
+    card.style.top  = y + 'px';
+    card.dataset.id = show.id;
+
+    // Poster or placeholder
+    if (show.poster) {
+      const img = mk('img', 'poster');
+      img.src  = show.poster;
+      img.alt  = show.title;
+      img.draggable = false;
+      img.onerror = () => {
+        img.replaceWith(makePlaceholder(show.title));
+      };
+      card.appendChild(img);
+    } else {
+      card.appendChild(makePlaceholder(show.title));
+    }
+
+    const title = mk('div', 'card-title');
+    title.textContent = show.title;
+    card.appendChild(title);
+
+    const xBtn = mk('button', 'x-btn');
+    xBtn.textContent = '✕';
+    xBtn.title = 'Remove ' + show.title;
+    xBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      removeShow(show.id);
+    });
+    card.appendChild(xBtn);
+
+    // Click to edit (guard against drag)
+    card.addEventListener('click', () => {
+      if (lastDragMoved) { lastDragMoved = false; return; }
+      openEditModal(show.id);
+    });
+
+    // Drag: mouse
+    card.addEventListener('mousedown', e => {
+      if (e.target === xBtn) return;
+      e.preventDefault();
+      startDrag(e.clientX, e.clientY, card, show, x, y, W, H, iW, iH);
+    });
+
+    // Drag: touch
+    card.addEventListener('touchstart', e => {
+      if (e.target === xBtn) return;
+      const t = e.touches[0];
+      startDrag(t.clientX, t.clientY, card, show, x, y, W, H, iW, iH);
+    }, { passive: true });
+
+    chart.appendChild(card);
+  });
+}
+
+function makePlaceholder(title) {
+  const ph = mk('div', 'poster-placeholder');
+  const initEl = mk('div', 'initial');
+  initEl.textContent = (title || '?')[0].toUpperCase();
+  const lbl = mk('div', 'ph-label');
+  lbl.textContent = 'No Image';
+  ph.appendChild(initEl);
+  ph.appendChild(lbl);
+  return ph;
+}
+
+// ════════════════════════════════════════════════
+// Drag and drop
+// ════════════════════════════════════════════════
+function startDrag(cx, cy, card, show, origX, origY, W, H, iW, iH) {
+  dragSt = { card, show, cx, cy, origX, origY, W, H, iW, iH, moved: false };
+  card.style.zIndex = 100;
+}
+
+function onMove(cx, cy) {
+  if (!dragSt) return;
+  const dx = cx - dragSt.cx;
+  const dy = cy - dragSt.cy;
+  if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragSt.moved = true;
+  const newX = clamp(dragSt.origX + dx, PAD, PAD + dragSt.iW);
+  const newY = clamp(dragSt.origY + dy, PAD, PAD + dragSt.iH);
+  dragSt.card.style.left = newX + 'px';
+  dragSt.card.style.top  = newY + 'px';
+}
+
+function endDrag() {
+  if (!dragSt) return;
+  const ds = dragSt;
+  dragSt = null;
+  ds.card.style.zIndex = '';
+  lastDragMoved = ds.moved;
+  if (ds.moved) {
+    const newX = parseFloat(ds.card.style.left);
+    const newY = parseFloat(ds.card.style.top);
+    ds.show.brainpower    = snap((newX - PAD) / ds.iW * 10);
+    ds.show.entertainment = snap((ds.H - PAD - newY) / ds.iH * 10);
+    save();
+    // No full re-render needed — card already in new position
+  }
+}
+
+document.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+document.addEventListener('touchmove', e => {
+  const t = e.touches[0]; onMove(t.clientX, t.clientY);
+}, { passive: true });
+document.addEventListener('mouseup',  endDrag);
+document.addEventListener('touchend', endDrag);
+
+// ════════════════════════════════════════════════
+// Show modal — Add / Edit
+// ════════════════════════════════════════════════
+function openAddModal() {
+  editId = null;
+  picked = null;
+  resetModal();
+  document.getElementById('modal-heading').textContent = 'Add a Show';
+  document.getElementById('save-show-btn').textContent = 'Add to Chart';
+  document.getElementById('delete-btn').classList.add('hidden');
+  showOverlay('show-overlay');
+  defer(() => document.getElementById('modal-search').focus());
+}
+
+function openEditModal(id) {
+  const s = shows.find(x => x.id === id);
+  if (!s) return;
+  editId = id;
+  picked = { title: s.title, poster: s.poster };
+  resetModal();
+  document.getElementById('modal-search').value = s.title;
+  document.getElementById('modal-heading').textContent = 'Edit Show';
+  document.getElementById('save-show-btn').textContent = 'Save Changes';
+  document.getElementById('delete-btn').classList.remove('hidden');
+  setPreview(s.title, s.poster, s.entertainment, s.brainpower);
+  showOverlay('show-overlay');
+}
+
+function resetModal() {
+  document.getElementById('modal-search').value = '';
+  document.getElementById('search-results').innerHTML = '';
+  document.getElementById('show-preview').classList.add('hidden');
+  setSlider('ent', 5);
+  setSlider('brain', 5);
+}
+
+function closeShowModal() {
+  hideOverlay('show-overlay');
+  editId = null;
+  picked = null;
+}
+
+function setPreview(title, poster, ent, brain) {
+  document.getElementById('preview-title').textContent = title;
+  // Rebuild poster area
+  const preview = document.getElementById('show-preview');
+  const existingMedia = preview.querySelector('.preview-poster, .preview-placeholder');
+  const info = preview.querySelector('.preview-info');
+
+  let mediaEl;
+  if (poster) {
+    mediaEl = mk('img', 'preview-poster');
+    mediaEl.src = poster;
+    mediaEl.alt = title;
+    mediaEl.onerror = () => {
+      const ph = mk('div', 'preview-placeholder');
+      ph.textContent = (title || '?')[0].toUpperCase();
+      mediaEl.replaceWith(ph);
+    };
+  } else {
+    mediaEl = mk('div', 'preview-placeholder');
+    mediaEl.textContent = (title || '?')[0].toUpperCase();
+  }
+
+  if (existingMedia) existingMedia.replaceWith(mediaEl);
+  else preview.insertBefore(mediaEl, info);
+
+  setSlider('ent',   ent   ?? 5);
+  setSlider('brain', brain ?? 5);
+  preview.classList.remove('hidden');
+}
+
+function setSlider(id, val) {
+  document.getElementById(id + '-slider').value = val;
+  document.getElementById(id + '-val').textContent = val;
+}
+
+function saveShow() {
+  if (!picked) {
+    const typed = document.getElementById('modal-search').value.trim();
+    if (!typed) return;
+    picked = { title: typed, poster: '' };
+  }
+  const ent   = parseFloat(document.getElementById('ent-slider').value);
+  const brain = parseFloat(document.getElementById('brain-slider').value);
+
+  if (editId) {
+    const s = shows.find(x => x.id === editId);
+    if (s) { s.title = picked.title; s.poster = picked.poster; s.entertainment = ent; s.brainpower = brain; }
+  } else {
+    shows.push({ id: uid(), title: picked.title, poster: picked.poster, entertainment: ent, brainpower: brain });
+  }
+  save();
+  renderChart();
+  closeShowModal();
+}
+
+function removeShow(id) {
+  shows = shows.filter(s => s.id !== id);
+  save();
+  renderChart();
+}
+
+// ════════════════════════════════════════════════
+// TVMaze search
+// ════════════════════════════════════════════════
+document.getElementById('modal-search').addEventListener('input', e => {
+  clearTimeout(searchTmr);
+  const q = e.target.value.trim();
+  if (q.length < 2) { document.getElementById('search-results').innerHTML = ''; return; }
+  searchTmr = setTimeout(() => doSearch(q), 300);
+});
+
+function doSearch(q) {
+  const results = document.getElementById('search-results');
+  results.innerHTML = '<div class="search-status">Searching…</div>';
+  fetch('https://api.tvmaze.com/search/shows?q=' + encodeURIComponent(q))
+    .then(r => r.json())
+    .then(items => renderResults(items))
+    .catch(() => {
+      results.innerHTML = '<div class="search-status">Search unavailable — type a name and click Add to Chart.</div>';
+    });
+}
+
+function renderResults(items) {
+  const container = document.getElementById('search-results');
+  container.innerHTML = '';
+  if (!items.length) {
+    container.innerHTML = '<div class="search-status">No results found.</div>';
+    return;
+  }
+  items.slice(0, 8).forEach(({ show }) => {
+    const item = mk('div', 'r-item');
+
+    const img = mk('img');
+    img.src = show.image?.medium ?? '';
+    img.alt = '';
+    img.onerror = () => { img.style.background = 'var(--surface3)'; img.removeAttribute('src'); };
+
+    const info = mk('div');
+    const name = mk('div', 'r-name');
+    name.textContent = show.name;
+    const year = mk('div', 'r-year');
+    year.textContent = show.premiered?.slice(0,4) ?? '';
+    info.appendChild(name);
+    info.appendChild(year);
+
+    item.appendChild(img);
+    item.appendChild(info);
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.r-item').forEach(r => r.classList.remove('active'));
+      item.classList.add('active');
+      picked = { title: show.name, poster: show.image?.medium ?? '' };
+      const e = parseFloat(document.getElementById('ent-slider').value);
+      const b = parseFloat(document.getElementById('brain-slider').value);
+      setPreview(show.name, show.image?.medium ?? '', e, b);
+    });
+    container.appendChild(item);
+  });
+}
+
+// Slider live update
+document.getElementById('ent-slider').addEventListener('input', e => {
+  document.getElementById('ent-val').textContent = e.target.value;
+});
+document.getElementById('brain-slider').addEventListener('input', e => {
+  document.getElementById('brain-val').textContent = e.target.value;
+});
+
+// ════════════════════════════════════════════════
+// Upcoming shows
+// ════════════════════════════════════════════════
+function renderUpcoming() {
+  const list = document.getElementById('upcoming-list');
+  list.innerHTML = '';
+  if (!upcoming.length) {
+    const e = mk('div', 'upcoming-empty');
+    e.textContent = 'No upcoming shows yet — click + Add to track them.';
+    list.appendChild(e);
+    return;
+  }
+  [...upcoming]
+    .sort((a, b) => (a.date || '9999') < (b.date || '9999') ? -1 : 1)
+    .forEach(item => {
+      const chip = mk('div', 'up-chip');
+
+      const name = mk('span', 'up-name');
+      name.textContent = item.name;
+
+      const date = mk('span', 'up-date');
+      if (item.date) {
+        const d = new Date(item.date + 'T12:00:00');
+        date.textContent = d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+      } else {
+        date.textContent = 'TBD';
+      }
+
+      const rm = mk('button', 'up-rm');
+      rm.textContent = '✕';
+      rm.addEventListener('click', () => {
+        upcoming = upcoming.filter(u => u.id !== item.id);
+        saveUp();
+        renderUpcoming();
+      });
+
+      chip.appendChild(name);
+      chip.appendChild(date);
+      chip.appendChild(rm);
+      list.appendChild(chip);
+    });
+}
+
+function openUpcomingModal() {
+  document.getElementById('up-name').value = '';
+  document.getElementById('up-date').value = '';
+  showOverlay('upcoming-overlay');
+  defer(() => document.getElementById('up-name').focus());
+}
+
+function closeUpcomingModal() { hideOverlay('upcoming-overlay'); }
+
+function saveUpcoming() {
+  const name = document.getElementById('up-name').value.trim();
+  if (!name) return;
+  upcoming.push({ id: uid(), name, date: document.getElementById('up-date').value });
+  saveUp();
+  renderUpcoming();
+  closeUpcomingModal();
+}
+
+// ════════════════════════════════════════════════
+// Event wiring
+// ════════════════════════════════════════════════
+document.getElementById('add-show-btn').addEventListener('click', openAddModal);
+document.getElementById('add-upcoming-btn').addEventListener('click', openUpcomingModal);
+document.getElementById('cancel-show-btn').addEventListener('click', closeShowModal);
+document.getElementById('cancel-upcoming-btn').addEventListener('click', closeUpcomingModal);
+document.getElementById('save-show-btn').addEventListener('click', saveShow);
+document.getElementById('save-upcoming-btn').addEventListener('click', saveUpcoming);
+document.getElementById('delete-btn').addEventListener('click', () => {
+  if (!editId) return;
+  removeShow(editId);
+  closeShowModal();
+});
+
+document.getElementById('filter-input').addEventListener('input', e => {
+  filterQ = e.target.value.trim().toLowerCase();
+  renderChart();
+});
+
+// Close overlay on backdrop click
+['show-overlay', 'upcoming-overlay'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target.id === id) {
+      id === 'show-overlay' ? closeShowModal() : closeUpcomingModal();
+    }
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeShowModal(); closeUpcomingModal(); }
+  if (e.key === 'Enter') {
+    const showOpen = !document.getElementById('show-overlay').classList.contains('hidden');
+    const upOpen   = !document.getElementById('upcoming-overlay').classList.contains('hidden');
+    if (showOpen)  saveShow();
+    if (upOpen)    saveUpcoming();
+  }
+});
+
+// ════════════════════════════════════════════════
+// Helpers
+// ════════════════════════════════════════════════
+function mk(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+function showOverlay(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideOverlay(id) { document.getElementById(id).classList.add('hidden'); }
+function defer(fn)       { setTimeout(fn, 80); }
+
+// ════════════════════════════════════════════════
+// Init
+// ════════════════════════════════════════════════
+renderChart();
+renderUpcoming();
+window.addEventListener('resize', renderChart);
+</script>
+</body>
+</html>
