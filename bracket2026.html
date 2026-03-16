@@ -207,10 +207,10 @@ html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-sy
     <div id="sidebar">
       <div id="sb-head">
         <div class="sbtitle">Title Odds</div>
-        <div class="sbsub">Real-time path probability</div>
+        <div class="sbsub">DraftKings · Selection Sunday 2026</div>
       </div>
       <div id="sb-body">
-        <div id="sb-empty" style="font-size:10px;color:#cbd5e1;text-align:center;padding:28px 0;line-height:2">Make picks to see<br>championship odds</div>
+        <div id="sb-empty" style="display:none"></div>
       </div>
       <div id="sb-em">
         <div class="em-hdr">&#128202; Evan Miya 2026 Key Insights</div>
@@ -226,9 +226,10 @@ html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-sy
         <div class="em-item"><span class="em-tag">TITLE</span><span class="em-txt">68% chance a 1-seed wins · Contenders: Duke, Houston, Florida</span></div>
       </div>
       <div id="sb-model">
-        <div style="font-size:8px;letter-spacing:1px;color:#cbd5e1;margin-bottom:5px;font-weight:600;text-transform:uppercase">Model</div>
-        KenPom AEM est. (2026)<br>1 AEM = 25 Elo pts<br>Tourney mult ×1.07<br>P=1/(1+10^(&#8722;d/400))<br>Log5 path probability<br>
-        <div style="margin-top:4px;color:#c4b5fd;font-size:8px">&#128202; Evan Miya BPR shown as EM↑<br>1-seeds: Duke #1 · Michigan #2<br>Arizona #3 · Florida #4<br>AEM values: estimated from KenPom O/D ranks &amp; s-curve · Not official KenPom data</div>
+        <div style="font-size:8px;letter-spacing:1px;color:#cbd5e1;margin-bottom:5px;font-weight:600;text-transform:uppercase">Bracket Model</div>
+        KenPom AEM est. (2026)<br>1 AEM = 25 Elo pts<br>Tourney mult ×1.07<br>P=1/(1+10^(&#8722;d/400))<br>
+        <div style="margin-top:4px;color:#c4b5fd;font-size:8px">&#128202; Evan Miya BPR shown as EM↑<br>1-seeds: Duke #1 · Michigan #2<br>Arizona #3 · Florida #4<br>AEM values: est. from KenPom O/D ranks &amp; s-curve</div>
+        <div style="margin-top:5px;border-top:1px solid #e2e8f0;padding-top:5px;font-size:8px;color:#94a3b8">&#127922; Title odds via DraftKings<br>as of Selection Sunday, Mar 15 2026<br>Odds subject to change · Gamble responsibly</div>
       </div>
     </div>
   </div>
@@ -456,47 +457,56 @@ function propagate(reg, r, mi, winner) {
 }
 
 // ═══════════════════════════════════════════
-// CHAMPIONSHIP ODDS
+// REAL TITLE ODDS (DraftKings · Selection Sunday 2026)
+// Positive American odds format (e.g. 330 = +330)
 // ═══════════════════════════════════════════
-function calcOdds() {
-  const REGS=['South','West','East','Midwest'], rp={};
-  for (const reg of REGS) {
-    rp[reg]={};
-    function pReg(k,r,mi){
-      if(r>3)return 1;
-      const m=S[reg][r][mi]; if(!m)return 1;
-      const opp=m.t===k?m.b:m.t; if(!opp)return 1;
-      return winP(T[k].aem,T[opp].aem)*pReg(k,r+1,Math.floor(mi/2));
-    }
-    const seen=new Set();
-    for(let r=0;r<4;r++)for(let mi=0;mi<S[reg][r].length;mi++){
-      const m=S[reg][r][mi];
-      for(const side of['t','b']){
-        const k=m[side]; if(!k||seen.has(k))continue; seen.add(k);
-        let alive=true;
-        outer:for(let rr=0;rr<4;rr++)for(const mm of S[reg][rr])
-          if(mm.w&&mm.w!==k&&(mm.t===k||mm.b===k)){alive=false;break outer;}
-        if(alive)rp[reg][k]=pReg(k,r,mi);
-      }
-    }
-  }
-  const odds={};
-  for(const reg of REGS){
-    const fi=(reg==='South'||reg==='West')?0:1;
-    const otherR=fi===0?(reg==='South'?'West':'South'):(reg==='East'?'Midwest':'East');
-    const cfi=1-fi, cRegs=cfi===0?['South','West']:['East','Midwest'];
-    for(const[k,rpr]of Object.entries(rp[reg])){
-      const ffM=S.FF[fi], ffOpp=ffM.t===k?ffM.b:ffM.t;
-      let ffp;
-      if(ffOpp){ffp=winP(T[k].aem,T[ffOpp].aem);}
-      else{const ops=Object.entries(rp[otherR]);if(!ops.length)ffp=1;else{const tot=ops.reduce((s,[,p])=>s+p,0);ffp=ops.reduce((s,[ok,op])=>s+op*winP(T[k].aem,T[ok].aem),0)/tot;}}
-      const cM=S.FF[cfi];let cp;
-      if(cM.w){cp=winP(T[k].aem,T[cM.w].aem);}
-      else{let tot=0,sum=0;for(const cr of cRegs)for(const[ok,op]of Object.entries(rp[cr])){sum+=op*winP(T[k].aem,T[ok].aem);tot+=op;}cp=tot>0?sum/tot:1;}
-      odds[k]=(odds[k]||0)+rpr*ffp*cp;
-    }
-  }
-  return odds;
+const TITLE_ODDS = {
+  // ── 1-seeds ──
+  E1:330, M1:350, W1:400, S1:750,
+  // ── 2-seeds ──
+  S2:1000, M2:1500, E2:3000, W2:2500,
+  // ── 3-seeds ──
+  S3:1900, W3:4000, E3:4500, M3:7500,
+  // ── 4-seeds ──
+  E4:7500, W4:6000, M4:18000, S4:10000,
+  // ── 5-seeds ──
+  E5:6000, W5:7500, M5:13000, S5:7500,
+  // ── 6-seeds ──
+  E6:12000, W6:25000, M6:12000, S6:25000,
+  // ── 7-seeds ──
+  E7:18000, W7:40000, M7:20000, S7:30000,
+  // ── 8-seeds ──
+  E8:25000, W8:25000, M8:50000, S8:25000,
+  // ── 9-seeds ──
+  E9:40000, W9:40000, M9:40000, S9:30000,
+  // ── 10-seeds ──
+  E10:40000, W10:50000, M10:50000, S10:35000,
+  // ── 11-seeds ──
+  E11:100000, W11:30000, M11:150000, S11:50000,
+  // ── 12-seeds ──
+  E12:200000, W12:200000, M12:100000, S12:100000,
+  // ── 13-seeds ──
+  E13:200000, W13:200000, M13:200000, S13:200000,
+  // ── 14-seeds ──
+  E14:500000, W14:500000, M14:500000, S14:150000,
+  // ── 15-seeds ──
+  E15:500000, W15:500000, M15:500000, S15:500000,
+  // ── 16-seeds ──
+  E16:1000000, W16:1000000, M16:1000000, S16:1000000,
+};
+
+function fmtOdds(n) {
+  if (n >= 1000000) return '+1M';
+  if (n >= 1000)    return '+' + (n/1000) + 'K';
+  return '+' + n;
+}
+function oddsColor(n) {
+  if (n <= 750)   return '#dc2626';
+  if (n <= 1900)  return '#ea580c';
+  if (n <= 7500)  return '#d97706';
+  if (n <= 20000) return '#ca8a04';
+  if (n <= 50000) return '#6b7280';
+  return '#2563eb';
 }
 
 // ═══════════════════════════════════════════
@@ -774,29 +784,29 @@ function updateHeader() {
 // ═══════════════════════════════════════════
 // UPDATE SIDEBAR ODDS
 // ═══════════════════════════════════════════
+const _SIDEBAR_BUILT = false;
 function updateSidebar() {
   const body=document.getElementById('sb-body');
-  const empty=document.getElementById('sb-empty');
-  document.querySelectorAll('.or').forEach(r=>r.remove());
+  if(body.querySelector('.or')) return; // already built — odds are static
 
-  const odds=calcOdds();
-  const sorted=Object.entries(odds).sort((a,b)=>b[1]-a[1]).filter(([,p])=>p>.0005).slice(0,22);
+  const MAX_IMPL = 100/(330+100); // Duke's implied prob as 100% bar
+  const sorted = Object.entries(TITLE_ODDS).sort((a,b)=>a[1]-b[1]);
 
-  if(!sorted.length){empty.style.display='block';return;}
-  empty.style.display='none';
-
-  sorted.forEach(([k,prob],i)=>{
+  sorted.forEach(([k,n],i)=>{
     const team=T[k];
-    const sColor=sc(team.s), pColor=probColor(prob);
-    const bw=Math.min(prob*320,100);
+    if(!team) return;
+    const sColor=sc(team.s);
+    const oColor=oddsColor(n);
+    const impl=100/(n+100);
+    const bw=Math.min((impl/MAX_IMPL)*100, 100);
     const emTag=team.em?'<span style="font-size:7px;color:#7c3aed;font-weight:700;margin-left:2px">EM↑</span>':'';
     const row=document.createElement('div'); row.className='or';
     row.innerHTML=`
       <span class="o-rank">${i+1}</span>
       <span class="o-seed" style="color:${sColor}">${team.s}</span>
       <span class="o-name">${team.n}${emTag}</span>
-      <div class="o-bw"><div class="o-bb"><div class="o-bf" style="width:${bw}%;background:${pColor}"></div></div></div>
-      <span class="o-pct" style="color:${pColor}">${prob<.005?'<1%':pct(prob)+'%'}</span>`;
+      <div class="o-bw"><div class="o-bb"><div class="o-bf" style="width:${bw}%;background:${oColor}"></div></div></div>
+      <span class="o-pct" style="color:${oColor}">${fmtOdds(n)}</span>`;
     body.appendChild(row);
   });
 }
