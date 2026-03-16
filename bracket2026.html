@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>2026 NCAA March Madness — KenPom AEM · Evan Miya Comparison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#eef1f7}
+::-webkit-scrollbar-thumb{background:#c8d0dd;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#9aabbd}
+
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden;color:#1e293b}
+
+/* ── HEADER ── */
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;gap:14px;flex-shrink:0;background:#ffffff;border-bottom:1px solid #e2e8f0;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.title{font-size:17px;font-weight:800;letter-spacing:.3px;color:#0f172a;white-space:nowrap;line-height:1.15}
+.sub{font-size:9px;color:#94a3b8;margin-top:3px;letter-spacing:.2px}
+#hdr-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.btn{font-family:inherit;font-size:11px;font-weight:600;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 13px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{color:#ef4444;border-color:#fca5a5;background:#fff5f5}
+.btn.dl:hover{color:#10b981;border-color:#6ee7b7;background:#f0fdf4}
+#pick-ctr{text-align:center;min-width:44px}
+#pick-ctr .pnum{font-size:22px;font-weight:800;color:#ef4444;line-height:1}
+#pick-ctr .plbl{font-size:8px;color:#94a3b8;letter-spacing:1.5px;font-weight:600;text-transform:uppercase}
+#champ-badge{display:none;align-items:center;gap:8px;padding:5px 12px;border:1px solid #fbbf24;border-radius:8px;background:linear-gradient(90deg,#fffbeb,#fef3c7)}
+#champ-badge .cn{font-size:13px;font-weight:700;color:#92400e;letter-spacing:.3px}
+.leg{display:flex;align-items:center;gap:5px}
+.li{display:flex;align-items:center;gap:2px;white-space:nowrap;font-size:9px;font-weight:500}
+.ld{width:7px;height:7px;border-radius:2px;flex-shrink:0}
+
+/* ── MAIN LAYOUT ── */
+#main{display:flex;flex:1;min-height:0;overflow:hidden}
+#bracket-scroll{flex:1;overflow:auto}
+#bracket{display:flex;flex-direction:row;align-items:stretch;min-width:max-content;padding:14px 16px 20px}
+
+#left-half{display:flex;flex-direction:column;flex-shrink:0}
+#right-half{display:flex;flex-direction:column;flex-shrink:0}
+
+/* All region rows use normal flex-direction:row.
+   Right-side regions achieve E8→R64 order by JS appending columns in [3,2,1,0] order. */
+.region-row{display:flex;flex-direction:row;align-items:stretch;flex-shrink:0}
+
+/* vertical region label */
+.rlabel{width:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.rlabel span{writing-mode:vertical-rl;font-weight:700;font-size:8px;letter-spacing:4px;white-space:nowrap;user-select:none;text-transform:uppercase}
+
+/* one round column */
+.rcol{width:148px;flex-shrink:0;display:flex;flex-direction:column}
+.col-hdr{font-size:8.5px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;text-align:center;padding:7px 4px 5px;border-bottom:1px solid #e2e8f0;flex-shrink:0}
+.col-body{flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:3px 0}
+
+/* matchup card */
+.mu{border:1px solid #e2e8f0;border-radius:7px;overflow:hidden;background:#ffffff;margin:2px 4px;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:box-shadow .15s}
+.mu:hover{box-shadow:0 2px 10px rgba(0,0,0,.09)}
+
+/* team row button */
+.tr{display:flex;align-items:center;gap:4px;width:100%;padding:3px 8px;border:none;border-left:3px solid transparent;background:transparent;cursor:default;font-family:inherit;text-align:left;position:relative;overflow:hidden;outline:none;height:23px;transition:background .1s}
+.tr.can{cursor:pointer}
+.tr.can:hover{background:#f8fafc}
+.tr.lost{opacity:.22}
+.trbar{position:absolute;left:0;top:0;bottom:0;pointer-events:none}
+.tseed{font-size:9px;font-weight:700;min-width:17px;text-align:center;border-radius:3px;padding:1px 2px;flex-shrink:0;position:relative;z-index:1;line-height:1.5;background:#f1f5f9}
+.tname{font-size:10px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:1;font-weight:500;color:#334155}
+.tpct{font-size:9px;font-weight:700;flex-shrink:0;position:relative;z-index:1}
+.tarr{font-size:8px;flex-shrink:0;position:relative;z-index:1;margin-left:1px}
+.tem{font-size:7px;flex-shrink:0;position:relative;z-index:1;color:#7c3aed;font-weight:700;margin-left:1px;line-height:1}
+.tdiv{height:1px;background:#f1f5f9}
+
+/* separator between South/West and East/Midwest */
+.region-sep{height:2px;background:#dde3ec;flex-shrink:0}
+
+/* ── CENTER PANEL ── */
+#center{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;width:188px;padding:0 8px}
+#ff-panel{background:#ffffff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 12px;display:flex;flex-direction:column;gap:9px;width:100%;box-shadow:0 3px 16px rgba(0,0,0,.09)}
+.ff-label{font-size:8.5px;font-weight:700;color:#94a3b8;letter-spacing:1.5px;text-align:center;margin-bottom:3px;text-transform:uppercase}
+.ff-sep{height:1px;background:#f1f5f9;margin:1px 0}
+.champ-lbl{font-size:8.5px;font-weight:700;color:#b45309;letter-spacing:1.5px;text-align:center;margin-bottom:3px;text-transform:uppercase}
+.mu-inline{border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;background:#fafafa}
+#winner-box{display:none;padding:10px 8px;border:2px solid #fbbf24;border-radius:8px;background:linear-gradient(135deg,#fffbeb,#fef3c7);text-align:center;margin-top:2px}
+#winner-box .wt{font-size:22px}
+#winner-box .wn{font-size:13px;font-weight:800;color:#92400e;letter-spacing:1.5px;line-height:1.2;margin-top:5px}
+#winner-box .ws{font-size:9px;color:#b45309;letter-spacing:.5px;margin-top:5px}
+
+/* ── SIDEBAR ── */
+#sidebar{width:242px;flex-shrink:0;display:flex;flex-direction:column;background:#f8fafc;border-left:1px solid #e2e8f0}
+#sb-head{padding:13px 14px 8px;border-bottom:1px solid #e2e8f0}
+.sbtitle{font-size:13px;font-weight:700;color:#0f172a;letter-spacing:.2px}
+.sbsub{font-size:9px;color:#94a3b8;margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+#sb-body{flex:1;overflow-y:auto;padding:6px 8px}
+.or{display:flex;align-items:center;gap:5px;padding:5px 4px;border-radius:6px;margin-bottom:2px;border:1px solid transparent;transition:all .1s;cursor:default}
+.or:hover{background:#ffffff;border-color:#e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.o-rank{font-size:9px;color:#cbd5e1;min-width:14px;text-align:right;font-weight:600}
+.o-seed{font-size:8px;font-weight:700;width:15px;text-align:center;background:#f1f5f9;border-radius:2px;padding:1px 0;flex-shrink:0}
+.o-name{font-size:10px;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:500;color:#1e293b}
+.o-bw{width:36px;flex-shrink:0}
+.o-bb{height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden}
+.o-bf{height:100%;border-radius:2px;transition:width .35s}
+.o-pct{font-size:9px;font-weight:700;min-width:28px;text-align:right}
+#sb-model{padding:8px 14px;border-top:1px solid #e2e8f0;font-size:8.5px;color:#94a3b8;line-height:2;flex-shrink:0}
+#sb-em{padding:8px 14px;border-top:1px solid #e2e8f0;font-size:8px;color:#7c3aed;line-height:1.8;flex-shrink:0;background:#faf5ff}
+.em-hdr{font-size:8px;letter-spacing:1px;color:#7c3aed;margin-bottom:4px;font-weight:700;text-transform:uppercase}
+.em-item{display:flex;align-items:center;gap:4px;margin-bottom:2px}
+.em-tag{font-size:7px;font-weight:700;background:#ede9fe;color:#7c3aed;border-radius:2px;padding:1px 4px;flex-shrink:0}
+.em-txt{font-size:8px;color:#6d28d9;flex:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div>
+      <div class="title">
+        <span style="color:#ef4444">MARCH</span>
+        <span style="color:#0f172a"> MADNESS</span>
+        <span style="font-size:11px;color:#94a3b8;font-weight:600;letter-spacing:1px"> 2026</span>
+      </div>
+      <div class="sub">KenPom AEM (est.) · Log5 × 1.07 Tourney Mult · <span style="color:#7c3aed">EM↑</span> = Evan Miya underseeded · Click any team to advance</div>
+    </div>
+    <div id="hdr-right">
+      <div id="champ-badge">
+        <span style="font-size:16px">&#127942;</span>
+        <div>
+          <div style="font-size:8px;color:#b45309;letter-spacing:1px;font-weight:600;text-transform:uppercase">2026 Champion</div>
+          <div class="cn" id="champ-name"></div>
+        </div>
+      </div>
+      <div class="leg">
+        <span style="color:#94a3b8;margin-right:3px;font-size:9px;font-weight:600">WIN%</span>
+        <div class="li"><div class="ld" style="background:#dc2626"></div><span style="color:#dc2626">&#8805;85</span></div>
+        <div class="li"><div class="ld" style="background:#ea580c"></div><span style="color:#ea580c">75</span></div>
+        <div class="li"><div class="ld" style="background:#d97706"></div><span style="color:#d97706">65</span></div>
+        <div class="li"><div class="ld" style="background:#ca8a04"></div><span style="color:#ca8a04">55</span></div>
+        <div class="li"><div class="ld" style="background:#6b7280"></div><span style="color:#6b7280">~50</span></div>
+        <div class="li"><div class="ld" style="background:#2563eb"></div><span style="color:#2563eb">35</span></div>
+        <div class="li"><div class="ld" style="background:#1e3a8a"></div><span style="color:#1e3a8a">&#8804;25</span></div>
+      </div>
+      <div id="pick-ctr">
+        <div class="plbl">Picks</div>
+        <div class="pnum"><span id="pick-num">0</span><span style="font-size:11px;color:#cbd5e1;font-weight:500">/63</span></div>
+      </div>
+      <button class="btn dl" id="dl-btn">&#11015; Download</button>
+      <button class="btn" id="reset-btn">&#8635; Reset</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <div id="bracket-scroll">
+      <div id="bracket">
+
+        <!-- LEFT HALF: South (top) + West (bottom), rounds L→R: R64 R32 S16 E8 -->
+        <div id="left-half">
+          <div id="south-row" class="region-row"></div>
+          <div class="region-sep"></div>
+          <div id="west-row" class="region-row"></div>
+        </div>
+
+        <!-- CENTER: Final Four + Championship -->
+        <div id="center">
+          <div id="ff-panel">
+            <div>
+              <div class="ff-label">South · West</div>
+              <div class="mu-inline" id="ff0"></div>
+            </div>
+            <div>
+              <div class="ff-label">East · Midwest</div>
+              <div class="mu-inline" id="ff1"></div>
+            </div>
+            <div class="ff-sep"></div>
+            <div>
+              <div class="champ-lbl">Championship</div>
+              <div class="mu-inline" id="champ-mu"></div>
+            </div>
+            <div id="winner-box">
+              <div class="wt">&#127942;</div>
+              <div class="wn" id="w-name"></div>
+              <div class="ws" id="w-sub"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT HALF: East (top) + Midwest (bottom), rounds L→R: E8 S16 R32 R64
+             Achieved by JS appending columns in reverse order [3,2,1,0], NOT flex-direction:row-reverse -->
+        <div id="right-half">
+          <div id="east-row" class="region-row"></div>
+          <div class="region-sep"></div>
+          <div id="midwest-row" class="region-row"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="sidebar">
+      <div id="sb-head">
+        <div class="sbtitle">Title Odds</div>
+        <div class="sbsub">Real-time path probability</div>
+      </div>
+      <div id="sb-body">
+        <div id="sb-empty" style="font-size:10px;color:#cbd5e1;text-align:center;padding:28px 0;line-height:2">Make picks to see<br>championship odds</div>
+      </div>
+      <div id="sb-em">
+        <div class="em-hdr">&#128202; Evan Miya 2026 Key Insights</div>
+        <div style="font-size:7.5px;color:#6d28d9;margin-bottom:5px;line-height:1.6">Underseeded teams advance 69% farther than others on same seed line. Teams within 6.5 Relative Rating pts of top-rated team have won 9 of last 9 titles.</div>
+        <div class="em-item"><span class="em-tag">EM↑ S11</span><span class="em-txt">VCU — >50% vs. N. Carolina (6 seed)</span></div>
+        <div class="em-item"><span class="em-tag">EM↑ M11</span><span class="em-txt">Miami OH (31-1) — massive 1st-round edge vs. SMU</span></div>
+        <div class="em-item"><span class="em-tag">EM↑ M10</span><span class="em-txt">Santa Clara — 1st appearance since 1996; underseeded</span></div>
+        <div class="em-item"><span class="em-tag">EM↑ E11</span><span class="em-txt">S. Florida (Am. champ) — stronger than 11 seed</span></div>
+        <div class="em-item"><span class="em-tag">EM↑ W9</span><span class="em-txt">Utah State 28-6 — underseeded at 9</span></div>
+        <div class="em-item"><span class="em-tag">STAR</span><span class="em-txt">Duke: Cameron Boozer — highest ORtg in KenPom history</span></div>
+        <div class="em-item"><span class="em-tag">INJURY</span><span class="em-txt">Duke: C. Foster ❌ (foot) · ISU: K. Gilbert ❌ · UK: L. Butler ❌</span></div>
+        <div class="em-item"><span class="em-tag">SNUB</span><span class="em-txt">Auburn left out despite + WAB — biggest bubble controversy</span></div>
+        <div class="em-item"><span class="em-tag">TITLE</span><span class="em-txt">68% chance a 1-seed wins · Contenders: Duke, Houston, Florida</span></div>
+      </div>
+      <div id="sb-model">
+        <div style="font-size:8px;letter-spacing:1px;color:#cbd5e1;margin-bottom:5px;font-weight:600;text-transform:uppercase">Model</div>
+        KenPom AEM est. (2026)<br>1 AEM = 25 Elo pts<br>Tourney mult ×1.07<br>P=1/(1+10^(&#8722;d/400))<br>Log5 path probability<br>
+        <div style="margin-top:4px;color:#c4b5fd;font-size:8px">&#128202; Evan Miya BPR shown as EM↑<br>1-seeds: Duke #1 · Michigan #2<br>Arizona #3 · Florida #4<br>AEM values: estimated from KenPom O/D ranks &amp; s-curve · Not official KenPom data</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════
+// MODEL
+// ═══════════════════════════════════════════
+function winP(aemA, aemB) {
+  const d = (aemA - aemB) * 25 * 1.07;
+  return 1 / (1 + Math.pow(10, -d / 400));
+}
+function pct(p) { return Math.round(p * 100); }
+
+// ═══════════════════════════════════════════
+// TEAMS (2026 KenPom AEM estimates + Evan Miya flags)
+// AEM values estimated from KenPom O/D rankings, s-curve, and
+// Evan Miya BPR reports. EM:true = Evan Miya identifies as underseeded.
+// 1-seeds: Duke (E), Michigan (M), Arizona (W), Florida (S)
+// Source: Selection Sunday March 15 2026 (ESPN, CBS, NCAA.com)
+// ═══════════════════════════════════════════
+const T = {
+  // ── SOUTH (Florida #1) ──
+  S1:{n:'Florida',s:1,aem:29.4},          S16:{n:'Lehigh',s:16,aem:-3.2},        // FF: Lehigh def. Prairie View
+  S8:{n:'Clemson',s:8,aem:12.3},          S9:{n:'Iowa',s:9,aem:10.2},
+  S5:{n:'Vanderbilt',s:5,aem:15.6},       S12:{n:'McNeese',s:12,aem:9.2},
+  S4:{n:'Nebraska',s:4,aem:17.5},         S13:{n:'Troy',s:13,aem:6.8},
+  S6:{n:'N. Carolina',s:6,aem:13.9},      S11:{n:'VCU',s:11,aem:14.6,em:true},   // Evan Miya: 54% vs UNC
+  S3:{n:'Illinois',s:3,aem:21.2},         S14:{n:'Penn',s:14,aem:4.7},
+  S7:{n:"Saint Mary's",s:7,aem:13.2},    S10:{n:'Texas A&M',s:10,aem:11.1},
+  S2:{n:'Houston',s:2,aem:27.1},          S15:{n:'Idaho',s:15,aem:2.1},
+
+  // ── WEST (Arizona #1) ──
+  W1:{n:'Arizona',s:1,aem:31.1},          W16:{n:'LIU',s:16,aem:-4.3},
+  W8:{n:'Villanova',s:8,aem:12.1},        W9:{n:'Utah State',s:9,aem:12.4,em:true}, // Evan Miya underseeded
+  W5:{n:'Wisconsin',s:5,aem:15.2},        W12:{n:'High Point',s:12,aem:8.3},
+  W4:{n:'Arkansas',s:4,aem:17.1},         W13:{n:'Hawaii',s:13,aem:6.4},
+  W6:{n:'BYU',s:6,aem:13.6},             W11:{n:'NC State',s:11,aem:11.1},        // FF: NC State def. Texas
+  W3:{n:'Gonzaga',s:3,aem:20.9},          W14:{n:'Kennesaw St.',s:14,aem:4.2},
+  W7:{n:'Miami (FL)',s:7,aem:13.4},       W10:{n:'Missouri',s:10,aem:10.0},
+  W2:{n:'Purdue',s:2,aem:23.3},           W15:{n:'Queens',s:15,aem:2.6},
+
+  // ── EAST (Duke #1) ──
+  E1:{n:'Duke',s:1,aem:35.6},             E16:{n:'Siena',s:16,aem:-1.8},
+  E8:{n:'Ohio State',s:8,aem:12.4},       E9:{n:'TCU',s:9,aem:11.3},
+  E5:{n:"St. John's",s:5,aem:16.3},       E12:{n:'Northern Iowa',s:12,aem:9.6},
+  E4:{n:'Kansas',s:4,aem:18.4},           E13:{n:'Cal Baptist',s:13,aem:7.1},
+  E6:{n:'Louisville',s:6,aem:14.4},       E11:{n:'S. Florida',s:11,aem:10.8,em:true}, // Evan Miya underseeded
+  E3:{n:'Michigan St.',s:3,aem:21.7},     E14:{n:'N. Dakota St.',s:14,aem:5.1},
+  E7:{n:'UCLA',s:7,aem:14.0},             E10:{n:'UCF',s:10,aem:10.5},
+  E2:{n:'UConn',s:2,aem:25.6},            E15:{n:'Furman',s:15,aem:2.4},
+
+  // ── MIDWEST (Michigan #1) ──
+  M1:{n:'Michigan',s:1,aem:33.2},         M16:{n:'UMBC',s:16,aem:-2.6},           // FF: UMBC def. Howard
+  M8:{n:'Georgia',s:8,aem:11.4},          M9:{n:'Saint Louis',s:9,aem:11.0},
+  M5:{n:'Texas Tech',s:5,aem:15.9},       M12:{n:'Akron',s:12,aem:8.8},
+  M4:{n:'Alabama',s:4,aem:18.1},          M13:{n:'Hofstra',s:13,aem:7.6},
+  M3:{n:'Virginia',s:3,aem:19.9},         M14:{n:'Wright State',s:14,aem:5.8},
+  M6:{n:'Tennessee',s:6,aem:14.7},        M11:{n:'Miami (OH)',s:11,aem:13.6,em:true}, // FF: Miami OH def. SMU, Evan Miya: strong
+  M7:{n:'Kentucky',s:7,aem:14.2},         M10:{n:'Santa Clara',s:10,aem:12.8,em:true}, // Evan Miya underseeded
+  M2:{n:'Iowa State',s:2,aem:24.7},       M15:{n:'Tennessee St.',s:15,aem:1.7},
+};
+
+// R64 matchups per region, top-to-bottom
+const SEEDS = {
+  South:   [['S1','S16'],['S8','S9'],['S5','S12'],['S4','S13'],['S6','S11'],['S3','S14'],['S7','S10'],['S2','S15']],
+  West:    [['W1','W16'],['W8','W9'],['W5','W12'],['W4','W13'],['W6','W11'],['W3','W14'],['W7','W10'],['W2','W15']],
+  East:    [['E1','E16'],['E8','E9'],['E5','E12'],['E4','E13'],['E6','E11'],['E3','E14'],['E7','E10'],['E2','E15']],
+  Midwest: [['M1','M16'],['M8','M9'],['M5','M12'],['M4','M13'],['M6','M11'],['M3','M14'],['M7','M10'],['M2','M15']],
+};
+
+// Region accent colors
+const RC = {South:'#ef4444', West:'#2563eb', East:'#7c3aed', Midwest:'#059669'};
+const ROUND_NAMES = ['R64','R32','S16','E8'];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+function mkState() {
+  const s = {};
+  for (const [reg, mu] of Object.entries(SEEDS)) {
+    s[reg] = [
+      mu.map(([a,b]) => ({t:a,b:b,w:null})),
+      Array.from({length:4}, ()=>({t:null,b:null,w:null})),
+      Array.from({length:2}, ()=>({t:null,b:null,w:null})),
+      [{t:null,b:null,w:null}],
+    ];
+  }
+  s.FF = [{t:null,b:null,w:null},{t:null,b:null,w:null}];
+  s.C  = {t:null,b:null,w:null};
+  return s;
+}
+let S = mkState();
+
+function cascadeClear(reg, r, mi, loser) {
+  if (r < 3) {
+    const nr=r+1, nm=Math.floor(mi/2), ns=mi%2===0?'t':'b';
+    if (S[reg][nr][nm][ns]===loser) {
+      S[reg][nr][nm][ns]=null;
+      if (S[reg][nr][nm].w===loser){S[reg][nr][nm].w=null;cascadeClear(reg,nr,nm,loser);}
+    }
+  } else {
+    const fi=(reg==='South'||reg==='West')?0:1;
+    const side=(reg==='South'||reg==='East')?'t':'b';
+    if (S.FF[fi][side]===loser){
+      S.FF[fi][side]=null;
+      if(S.FF[fi].w===loser){
+        S.FF[fi].w=null;
+        const cs=fi===0?'t':'b';
+        if(S.C[cs]===loser){S.C[cs]=null;S.C.w=null;}
+      }
+    }
+  }
+}
+
+function propagate(reg, r, mi, winner) {
+  if (r < 3) {
+    const nr=r+1, nm=Math.floor(mi/2), ns=mi%2===0?'t':'b';
+    S[reg][nr][nm][ns]=winner;
+  } else {
+    const fi=(reg==='South'||reg==='West')?0:1;
+    const side=(reg==='South'||reg==='East')?'t':'b';
+    S.FF[fi][side]=winner; S.FF[fi].w=null;
+    S.C[fi===0?'t':'b']=null; S.C.w=null;
+  }
+}
+
+// ═══════════════════════════════════════════
+// CHAMPIONSHIP ODDS
+// ═══════════════════════════════════════════
+function calcOdds() {
+  const REGS=['South','West','East','Midwest'], rp={};
+  for (const reg of REGS) {
+    rp[reg]={};
+    function pReg(k,r,mi){
+      if(r>3)return 1;
+      const m=S[reg][r][mi]; if(!m)return 1;
+      const opp=m.t===k?m.b:m.t; if(!opp)return 1;
+      return winP(T[k].aem,T[opp].aem)*pReg(k,r+1,Math.floor(mi/2));
+    }
+    const seen=new Set();
+    for(let r=0;r<4;r++)for(let mi=0;mi<S[reg][r].length;mi++){
+      const m=S[reg][r][mi];
+      for(const side of['t','b']){
+        const k=m[side]; if(!k||seen.has(k))continue; seen.add(k);
+        let alive=true;
+        outer:for(let rr=0;rr<4;rr++)for(const mm of S[reg][rr])
+          if(mm.w&&mm.w!==k&&(mm.t===k||mm.b===k)){alive=false;break outer;}
+        if(alive)rp[reg][k]=pReg(k,r,mi);
+      }
+    }
+  }
+  const odds={};
+  for(const reg of REGS){
+    const fi=(reg==='South'||reg==='West')?0:1;
+    const otherR=fi===0?(reg==='South'?'West':'South'):(reg==='East'?'Midwest':'East');
+    const cfi=1-fi, cRegs=cfi===0?['South','West']:['East','Midwest'];
+    for(const[k,rpr]of Object.entries(rp[reg])){
+      const ffM=S.FF[fi], ffOpp=ffM.t===k?ffM.b:ffM.t;
+      let ffp;
+      if(ffOpp){ffp=winP(T[k].aem,T[ffOpp].aem);}
+      else{const ops=Object.entries(rp[otherR]);if(!ops.length)ffp=1;else{const tot=ops.reduce((s,[,p])=>s+p,0);ffp=ops.reduce((s,[ok,op])=>s+op*winP(T[k].aem,T[ok].aem),0)/tot;}}
+      const cM=S.FF[cfi];let cp;
+      if(cM.w){cp=winP(T[k].aem,T[cM.w].aem);}
+      else{let tot=0,sum=0;for(const cr of cRegs)for(const[ok,op]of Object.entries(rp[cr])){sum+=op*winP(T[k].aem,T[ok].aem);tot+=op;}cp=tot>0?sum/tot:1;}
+      odds[k]=(odds[k]||0)+rpr*ffp*cp;
+    }
+  }
+  return odds;
+}
+
+// ═══════════════════════════════════════════
+// COLORS
+// ═══════════════════════════════════════════
+const SV = {1:28,2:40,3:52,4:64,5:76,6:88,7:100,8:112,9:112,10:124,11:136,12:148,13:160,14:168,15:176,16:188};
+function sc(seed) {
+  const v = SV[seed] || 112;
+  return `rgb(${v},${v},${Math.min(v+6,255)})`;
+}
+function probColor(p) {
+  if(p>=.85) return '#dc2626';
+  if(p>=.75) return '#ea580c';
+  if(p>=.65) return '#d97706';
+  if(p>=.55) return '#ca8a04';
+  if(p>=.45) return '#6b7280';
+  if(p>=.35) return '#2563eb';
+  if(p>=.25) return '#1d4ed8';
+  return '#1e3a8a';
+}
+
+// ═══════════════════════════════════════════
+// BUILD TEAM ROW
+// ═══════════════════════════════════════════
+function buildRow(tk, opp, winner, accent, onClick) {
+  const team=tk?T[tk]:null, oppTeam=opp?T[opp]:null;
+  const won=!!(winner&&winner===tk);
+  const lost=!!(winner&&winner!==tk&&tk);
+  const canPick=!!(tk&&opp);
+  const prob=team&&oppTeam?winP(team.aem,oppTeam.aem):null;
+  const pColor=prob!==null?probColor(prob):'#94a3b8';
+
+  const row=document.createElement('button');
+  row.className='tr'+(canPick?' can':'')+(won?' won':'')+(lost?' lost':'');
+  row.disabled=!canPick;
+
+  if(won) {
+    row.style.borderLeft=`3px solid ${accent}`;
+    row.style.background=`linear-gradient(90deg,${accent}12,${accent}03)`;
+  } else {
+    row.style.borderLeft='3px solid transparent';
+  }
+
+  if(canPick&&onClick) row.addEventListener('click',onClick);
+
+  // subtle win-probability background bar
+  if(prob!==null&&!lost) {
+    const bar=document.createElement('div');
+    bar.className='trbar';
+    bar.style.width=(prob*100)+'%';
+    bar.style.background=won?`${accent}0e`:'rgba(0,0,0,0.022)';
+    row.appendChild(bar);
+  }
+
+  // seed badge
+  const seedEl=document.createElement('span');
+  seedEl.className='tseed';
+  if(won) {
+    seedEl.style.background=`${accent}1c`;
+    seedEl.style.color=accent;
+  } else {
+    seedEl.style.background='#f1f5f9';
+    seedEl.style.color=team?sc(team.s):'#94a3b8';
+  }
+  seedEl.textContent=team?String(team.s):'–';
+  row.appendChild(seedEl);
+
+  // team name
+  const nameEl=document.createElement('span');
+  nameEl.className='tname';
+  if(won) {
+    nameEl.style.color='#0f172a';
+    nameEl.style.fontWeight='600';
+  } else {
+    nameEl.style.color=team?'#334155':'#94a3b8';
+    nameEl.style.fontWeight=team?'500':'400';
+  }
+  nameEl.textContent=team?team.n:'TBD';
+  row.appendChild(nameEl);
+
+  // Evan Miya underseeded indicator
+  if(team&&team.em) {
+    const emEl=document.createElement('span');
+    emEl.className='tem';
+    emEl.textContent='EM↑';
+    emEl.title='Evan Miya rates this team as underseeded';
+    row.appendChild(emEl);
+  }
+
+  // win%
+  if(prob!==null) {
+    const pEl=document.createElement('span');
+    pEl.className='tpct';
+    pEl.style.color=pColor;
+    pEl.textContent=pct(prob)+'%';
+    row.appendChild(pEl);
+  }
+
+  // winner arrow
+  if(won) {
+    const arr=document.createElement('span');
+    arr.className='tarr';
+    arr.style.color=accent;
+    arr.textContent='\u25B6';
+    row.appendChild(arr);
+  }
+
+  return row;
+}
+
+// ═══════════════════════════════════════════
+// BUILD MATCHUP CARD
+// ═══════════════════════════════════════════
+function buildMU(tk, bk, winner, accent, onTop, onBot) {
+  const mu=document.createElement('div');
+  mu.appendChild(buildRow(tk,bk,winner,accent,onTop));
+  const div=document.createElement('div'); div.className='tdiv'; mu.appendChild(div);
+  mu.appendChild(buildRow(bk,tk,winner,accent,onBot));
+  return mu;
+}
+
+// ═══════════════════════════════════════════
+// BUILD ONE ROUND COLUMN
+// ═══════════════════════════════════════════
+function buildRoundCol(reg, round, matches, accent, hdrLabel) {
+  const col=document.createElement('div');
+  col.className='rcol';
+
+  const hdr=document.createElement('div');
+  hdr.className='col-hdr';
+  hdr.style.color=accent+'99';
+  hdr.textContent=hdrLabel;
+  col.appendChild(hdr);
+
+  const body=document.createElement('div');
+  body.className='col-body';
+
+  matches.forEach((m,mi)=>{
+    const wrap=document.createElement('div');
+    wrap.className='mu';
+    const card=buildMU(
+      m.t, m.b, m.w, accent,
+      ()=>{if(m.t&&m.b){const old=m.w;m.w=m.t;if(old&&old!==m.t)cascadeClear(reg,round,mi,old);propagate(reg,round,mi,m.t);render();}},
+      ()=>{if(m.t&&m.b){const old=m.w;m.w=m.b;if(old&&old!==m.b)cascadeClear(reg,round,mi,old);propagate(reg,round,mi,m.b);render();}}
+    );
+    while(card.firstChild) wrap.appendChild(card.firstChild);
+    body.appendChild(wrap);
+  });
+
+  col.appendChild(body);
+  return col;
+}
+
+// ═══════════════════════════════════════════
+// BUILD REGION
+// ═══════════════════════════════════════════
+function buildRegion(rowEl, reg, side) {
+  rowEl.innerHTML='';
+
+  const lbl=document.createElement('div');
+  lbl.className='rlabel';
+  const span=document.createElement('span');
+  span.style.color=RC[reg];
+  span.style.transform=side==='left'?'rotate(180deg)':'none';
+  span.textContent=reg.toUpperCase();
+  lbl.appendChild(span);
+
+  if(side==='left') rowEl.appendChild(lbl);
+
+  const rounds=S[reg];
+  const roundOrder = side==='right' ? [3,2,1,0] : [0,1,2,3];
+  const labels      = side==='right' ? ['E8','S16','R32','R64'] : ['R64','R32','S16','E8'];
+
+  roundOrder.forEach((r,i)=>{
+    rowEl.appendChild(buildRoundCol(reg, r, rounds[r], RC[reg], labels[i]));
+  });
+
+  if(side==='right') rowEl.appendChild(lbl);
+}
+
+// ═══════════════════════════════════════════
+// BUILD CENTER (FF + Championship)
+// ═══════════════════════════════════════════
+function buildCenter() {
+  function buildFFMU(container, fi) {
+    const m=S.FF[fi];
+    container.innerHTML='';
+    const mu=buildMU(
+      m.t,m.b,m.w,'#f59e0b',
+      ()=>{if(m.t&&m.b){m.w=m.t;S.C[fi===0?'t':'b']=m.t;S.C.w=null;render();}},
+      ()=>{if(m.t&&m.b){m.w=m.b;S.C[fi===0?'t':'b']=m.b;S.C.w=null;render();}}
+    );
+    while(mu.firstChild) container.appendChild(mu.firstChild);
+  }
+  buildFFMU(document.getElementById('ff0'),0);
+  buildFFMU(document.getElementById('ff1'),1);
+
+  const champEl=document.getElementById('champ-mu');
+  champEl.innerHTML='';
+  const cm=S.C;
+  const mu=buildMU(
+    cm.t,cm.b,cm.w,'#f59e0b',
+    ()=>{if(cm.t&&cm.b){S.C.w=cm.t;render();}},
+    ()=>{if(cm.t&&cm.b){S.C.w=cm.b;render();}}
+  );
+  while(mu.firstChild) champEl.appendChild(mu.firstChild);
+
+  const wb=document.getElementById('winner-box');
+  if(S.C.w) {
+    const ch=T[S.C.w];
+    document.getElementById('w-name').textContent=ch.n.toUpperCase();
+    document.getElementById('w-sub').textContent=`#${ch.s} Seed \u00B7 AEM +${ch.aem}`;
+    wb.style.display='block';
+  } else {
+    wb.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════
+// UPDATE HEADER
+// ═══════════════════════════════════════════
+function updateHeader() {
+  let c=0;
+  for(const r of['South','West','East','Midwest'])
+    for(const rd of S[r]) for(const m of rd) if(m.w) c++;
+  if(S.FF[0].w)c++;if(S.FF[1].w)c++;if(S.C.w)c++;
+  document.getElementById('pick-num').textContent=c;
+
+  const badge=document.getElementById('champ-badge');
+  if(S.C.w) {
+    badge.style.display='flex';
+    document.getElementById('champ-name').textContent=T[S.C.w].n;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+// ═══════════════════════════════════════════
+// UPDATE SIDEBAR ODDS
+// ═══════════════════════════════════════════
+function updateSidebar() {
+  const body=document.getElementById('sb-body');
+  const empty=document.getElementById('sb-empty');
+  document.querySelectorAll('.or').forEach(r=>r.remove());
+
+  const odds=calcOdds();
+  const sorted=Object.entries(odds).sort((a,b)=>b[1]-a[1]).filter(([,p])=>p>.0005).slice(0,22);
+
+  if(!sorted.length){empty.style.display='block';return;}
+  empty.style.display='none';
+
+  sorted.forEach(([k,prob],i)=>{
+    const team=T[k];
+    const sColor=sc(team.s), pColor=probColor(prob);
+    const bw=Math.min(prob*320,100);
+    const emTag=team.em?'<span style="font-size:7px;color:#7c3aed;font-weight:700;margin-left:2px">EM↑</span>':'';
+    const row=document.createElement('div'); row.className='or';
+    row.innerHTML=`
+      <span class="o-rank">${i+1}</span>
+      <span class="o-seed" style="color:${sColor}">${team.s}</span>
+      <span class="o-name">${team.n}${emTag}</span>
+      <div class="o-bw"><div class="o-bb"><div class="o-bf" style="width:${bw}%;background:${pColor}"></div></div></div>
+      <span class="o-pct" style="color:${pColor}">${prob<.005?'<1%':pct(prob)+'%'}</span>`;
+    body.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════
+function render() {
+  buildRegion(document.getElementById('south-row'),   'South',   'left');
+  buildRegion(document.getElementById('west-row'),    'West',    'left');
+  buildRegion(document.getElementById('east-row'),    'East',    'right');
+  buildRegion(document.getElementById('midwest-row'), 'Midwest', 'right');
+  buildCenter();
+  updateHeader();
+  updateSidebar();
+}
+
+// ═══════════════════════════════════════════
+// DOWNLOAD
+// ═══════════════════════════════════════════
+document.getElementById('dl-btn').addEventListener('click',()=>{
+  const src=document.documentElement.outerHTML;
+  const marker='let S = mkState();';
+  const out=src.includes(marker)?src.replace(marker,`let S = ${JSON.stringify(S)};`):src;
+  const b=new Blob([out],{type:'text/html'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u; a.download='MarchMadness2026.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(u);
+});
+
+// ═══════════════════════════════════════════
+// RESET
+// ═══════════════════════════════════════════
+document.getElementById('reset-btn').addEventListener('click',()=>{S=mkState();render();});
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
