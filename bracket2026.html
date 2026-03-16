@@ -70,6 +70,16 @@ html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-sy
 .tem{font-size:7px;flex-shrink:0;position:relative;z-index:1;color:#7c3aed;font-weight:700;margin-left:1px;line-height:1}
 .tdiv{height:1px;background:#f1f5f9}
 
+/* ── TOOLTIP ── */
+#tt{position:fixed;z-index:9999;background:#0f172a;color:#f8fafc;border-radius:10px;padding:11px 13px;width:236px;font-size:10.5px;line-height:1.55;box-shadow:0 6px 28px rgba(0,0,0,.35);pointer-events:none;opacity:0;transition:opacity .12s;border-left:3px solid #94a3b8}
+#tt.vis{opacity:1}
+#tt .tt-top{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+#tt .tt-seed{font-size:10px;font-weight:800;background:#1e293b;border-radius:4px;padding:2px 6px;flex-shrink:0}
+#tt .tt-name{font-size:12px;font-weight:700;flex:1;line-height:1.2}
+#tt .tt-em{font-size:8px;font-weight:700;background:#4c1d95;color:#ddd6fe;border-radius:3px;padding:1px 5px;flex-shrink:0}
+#tt .tt-rec{font-size:8.5px;color:#64748b;margin-bottom:6px;letter-spacing:.2px}
+#tt .tt-body{font-size:10px;color:#cbd5e1;line-height:1.6}
+
 /* separator between South/West and East/Midwest */
 .region-sep{height:2px;background:#dde3ec;flex-shrink:0}
 
@@ -109,6 +119,7 @@ html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-sy
 </style>
 </head>
 <body>
+<div id="tt" role="tooltip"></div>
 <div id="app">
   <div id="hdr">
     <div>
@@ -243,44 +254,140 @@ function pct(p) { return Math.round(p * 100); }
 // ═══════════════════════════════════════════
 const T = {
   // ── SOUTH (Florida #1) ──
-  S1:{n:'Florida',s:1,aem:29.4},          S16:{n:'Lehigh',s:16,aem:-3.2},        // FF: Lehigh def. Prairie View
-  S8:{n:'Clemson',s:8,aem:12.3},          S9:{n:'Iowa',s:9,aem:10.2},
-  S5:{n:'Vanderbilt',s:5,aem:15.6},       S12:{n:'McNeese',s:12,aem:9.2},
-  S4:{n:'Nebraska',s:4,aem:17.5},         S13:{n:'Troy',s:13,aem:6.8},
-  S6:{n:'N. Carolina',s:6,aem:13.9},      S11:{n:'VCU',s:11,aem:14.6,em:true},   // Evan Miya: 54% vs UNC
-  S3:{n:'Illinois',s:3,aem:21.2},         S14:{n:'Penn',s:14,aem:4.7},
-  S7:{n:"Saint Mary's",s:7,aem:13.2},    S10:{n:'Texas A&M',s:10,aem:11.1},
-  S2:{n:'Houston',s:2,aem:27.1},          S15:{n:'Idaho',s:15,aem:2.1},
+  S1:{n:'Florida',s:1,aem:29.4,rec:'26-7',
+    blurb:'Reigning national champions returning hungry for a repeat. Elite frontcourt with a deep, experienced rotation is among the best in the country. The South Regional is in Houston — a potential "road game" Elite Eight if chalk holds and No. 2 Houston advances.'},
+  S16:{n:'Lehigh',s:16,aem:-3.2,rec:'18-16',
+    blurb:'First Four survivors. Led by junior star Nasir Whitlock (21.1 PPG, 45% from three), one of the most dangerous scorers in the field at his seed. Cinderella odds are slim against Florida, but Whitlock gives them a puncher\'s chance in any game.'},
+  S8:{n:'Clemson',s:8,aem:12.3,rec:'24-10',
+    blurb:'Weathered a tough ACC schedule with a stout defensive identity. Brad Brownell\'s squad plays physical, grinding basketball that can fluster lighter offensive teams. The 8/9 game vs. Iowa is a true coin-flip.'},
+  S9:{n:'Iowa',s:9,aem:10.2,rec:'21-12',
+    blurb:'Veteran Big Ten squad that earned an at-large bid on the strength of quality wins. Historically Iowa performs well in March when their offense is running. The 8/9 is essentially 50-50 — whoever controls the boards likely wins.'},
+  S5:{n:'Vanderbilt',s:5,aem:15.6,rec:'26-8',
+    blurb:'One of the SEC\'s quieter success stories this season, playing efficient, disciplined basketball. Vanderbilt is dangerous enough to threaten Nebraska in the round of 32. Enter as one of the more reliable 5-seeds in the field.'},
+  S12:{n:'McNeese',s:12,aem:9.2,rec:'28-5',
+    blurb:'Southland champion and one of the hotter mid-majors entering March. The 5/12 split goes to the 12 about 35% historically — McNeese has the tempo and perimeter shooting to be that upset team against Vanderbilt.'},
+  S4:{n:'Nebraska',s:4,aem:17.5,rec:'26-6',
+    blurb:'Quietly one of the best defensive teams in the Big Ten this season. The Huskers earned a 4-seed by beating quality opponents consistently. A Sweet 16 run is realistic if they avoid the trap game against Troy.'},
+  S13:{n:'Troy',s:13,aem:6.8,rec:'22-11',
+    blurb:'Sun Belt champion and classic 13-seed long shot. They\'ll need their best game to stay within striking distance of Nebraska. Still, conference tournament champions on this line often have one big scorer who can catch fire.'},
+  S6:{n:'N. Carolina',s:6,aem:13.9,rec:'24-8',
+    blurb:'Traditional powerhouse with Final Four pedigree. Capable of a Sweet 16 run but faces a tricky opener against VCU — Evan Miya rates the Rams as slight favorites. Playing near Tennessee territory in the second round vs. Illinois adds another geographic wrinkle.'},
+  S11:{n:'VCU',s:11,aem:14.6,em:true,rec:'27-7',
+    blurb:'Atlantic 10 champion with an elite defensive system. Evan Miya gives VCU greater than 50% against North Carolina — the bracket\'s most clearly underseeded team. Their scramble defense and transition attack thrive in single-elimination play. Do not fade them.'},
+  S3:{n:'Illinois',s:3,aem:21.2,rec:'24-8',
+    blurb:'Ranked among the top offenses in the country by KenPom entering the tournament. Illinois can put up points in a hurry and is a legitimate Elite Eight contender. Penn is a manageable opener — the real question is their defense against elite South competition.'},
+  S14:{n:'Penn',s:14,aem:4.7,rec:'18-11',
+    blurb:'Ivy League champion and a well-coached, intelligent squad. Penn won the conference tournament when it counted. Illinois should win comfortably, but the Quakers won\'t roll over — expect a competitive first half.'},
+  S7:{n:"Saint Mary's",s:7,aem:13.2,rec:'27-5',
+    blurb:'One of the most underrated programs in the country. The Gaels play suffocating half-court defense, and Joshua Dent makes them 28.3 points per 100 possessions better when on the floor (per EvanMiya). A 7-seed capable of making serious noise in the Sweet 16.'},
+  S10:{n:'Texas A&M',s:10,aem:11.1,rec:'21-11',
+    blurb:'Experienced SEC squad with physical, pro-style post play. The 7/10 matchup against Saint Mary\'s is a clash of styles — A&M\'s bulk vs. the Gaels\' finesse. Whoever controls tempo controls the game.'},
+  S2:{n:'Houston',s:2,aem:27.1,rec:'28-6',
+    blurb:'Kelvin Sampson\'s Cougars are historically elite in March and playing the Regional in Houston is a massive home-court advantage. Defensive intensity and depth are their calling cards. The most dangerous 2-seed in the field — and a potential Final Four lock.'},
+  S15:{n:'Idaho',s:15,aem:2.1,rec:'22-12',
+    blurb:'Big Sky champion making their first NCAA Tournament appearance since 1990. A historic moment for a proud program. The gap to Houston is enormous — Idaho\'s mission is to compete hard and enjoy their moment on the national stage.'},
 
   // ── WEST (Arizona #1) ──
-  W1:{n:'Arizona',s:1,aem:31.1},          W16:{n:'LIU',s:16,aem:-4.3},
-  W8:{n:'Villanova',s:8,aem:12.1},        W9:{n:'Utah State',s:9,aem:12.4,em:true}, // Evan Miya underseeded
-  W5:{n:'Wisconsin',s:5,aem:15.2},        W12:{n:'High Point',s:12,aem:8.3},
-  W4:{n:'Arkansas',s:4,aem:17.1},         W13:{n:'Hawaii',s:13,aem:6.4},
-  W6:{n:'BYU',s:6,aem:13.6},             W11:{n:'NC State',s:11,aem:11.1},        // FF: NC State def. Texas
-  W3:{n:'Gonzaga',s:3,aem:20.9},          W14:{n:'Kennesaw St.',s:14,aem:4.2},
-  W7:{n:'Miami (FL)',s:7,aem:13.4},       W10:{n:'Missouri',s:10,aem:10.0},
-  W2:{n:'Purdue',s:2,aem:23.3},           W15:{n:'Queens',s:15,aem:2.6},
+  W1:{n:'Arizona',s:1,aem:31.1,rec:'32-2',
+    blurb:'Second overall seed with just two losses all season. KenPom rates them top-3 in defense nationally with no obvious weakness on either end. A legitimate national championship favorite — the Wildcats could meet Duke in the title game for a marquee finale.'},
+  W16:{n:'LIU',s:16,aem:-4.3,rec:'24-10',
+    blurb:'NEC champion. A 16-seed has beaten a 1 just once in tournament history (UMBC 2018). Arizona is considerably stronger than that Virginia team. LIU\'s mission is to compete respectably and make it a half of basketball.'},
+  W8:{n:'Villanova',s:8,aem:12.1,rec:'24-8',
+    blurb:'A traditional powerhouse still rebuilding toward another title run. Tournament experience is baked into the program\'s DNA. The 8/9 matchup with Utah State is tricky — Evan Miya considers the Aggies underseeded and rates this as a true toss-up.'},
+  W9:{n:'Utah State',s:9,aem:12.4,em:true,rec:'28-6',
+    blurb:'28-6 record and Evan Miya\'s model sees them as significantly underseeded at the 9-line. Mountain West powerhouse with a winning formula against power conference teams. A 9-over-8 upset against Villanova is very much on the table — treat this as a coin flip.'},
+  W5:{n:'Wisconsin',s:5,aem:15.2,rec:'24-10',
+    blurb:'Methodical, defense-first Big Ten basketball at its finest. Wisconsin rarely beats themselves and grinds teams into submission over 40 minutes. The opener vs. High Point should be manageable — the Badgers\' concern is slow-start syndrome from three-point range.'},
+  W12:{n:'High Point',s:12,aem:8.3,rec:'30-4',
+    blurb:'Big South champion with a stellar 30-4 record. High Point is one of the more accomplished 12-seeds statistically. Wisconsin\'s experience and length are a significant obstacle, but the Panthers are built to shoot their way into upsets.'},
+  W4:{n:'Arkansas',s:4,aem:17.1,rec:'26-8',
+    blurb:'Resurgent Razorbacks playing confident, athletic SEC basketball. Their up-tempo style creates chaos that trips up more disciplined defenses. Hawaii in the opener is a major mismatch — Arkansas should be comfortable heading into a Sweet 16 push.'},
+  W13:{n:'Hawaii',s:13,aem:6.4,rec:'24-8',
+    blurb:'Big West champion making the dance. A long flight from home and a significant jump in competition. Hawaii\'s perimeter attack can be entertaining, but Arkansas\'s athleticism and length make this a difficult first-round game to survive.'},
+  W6:{n:'BYU',s:6,aem:13.6,rec:'23-11',
+    blurb:'Big 12 veteran squad with deep tournament experience. The 6/11 matchup against NC State (First Four survivor) is winnable but never safe after a long season. BYU\'s physicality is their best asset — they need to control the pace.'},
+  W11:{n:'NC State',s:11,aem:11.1,rec:'20-13',
+    blurb:'First Four survivors who beat Texas in Dayton. NC State has tournament magic in their DNA — they made a surprise Final Four run in recent memory. A loose, motivated squad playing with nothing to lose could be the West\'s biggest first-round upset.'},
+  W3:{n:'Gonzaga',s:3,aem:20.9,rec:'30-3',
+    blurb:'WCC dominant at 30-3 and ranked 11th overall — this is among Gonzaga\'s best recent teams. They always face the "can they do it outside the WCC?" question, and the answer so far this season is yes. A Final Four appearance feels like the baseline expectation.'},
+  W14:{n:'Kennesaw St.',s:14,aem:4.2,rec:'22-13',
+    blurb:'Tournament representative from the mid-major ranks facing Gonzaga\'s full arsenal. Kennesaw State will fight hard but faces a significant talent gap. Gonzaga should handle this one efficiently in the first half.'},
+  W7:{n:'Miami (FL)',s:7,aem:13.4,rec:'25-8',
+    blurb:'ACC program playing hard-nosed, physical basketball with tournament experience. Comfortable in the 7-seed role — capable of advancing deep if their perimeter shooting heats up. Missouri in the first round is a winnable and very watchable matchup.'},
+  W10:{n:'Missouri',s:10,aem:10.0,rec:'20-12',
+    blurb:'SEC at-large bid that squeaked into the field on the bubble. Missouri is a 50-50 game against Miami (FL) and has enough athleticism to pull an upset. Lacks the consistent star power to make a deep run, but the first round is very much in play.'},
+  W2:{n:'Purdue',s:2,aem:23.3,rec:'27-8',
+    blurb:'Jumped from a projected 3-seed to a 2 after beating Michigan in the Big Ten Tournament final 80-72. Matt Painter\'s Boilermakers are built for March — big, physical, and disciplined. A legitimate Final Four contender and the West\'s most likely champion.'},
+  W15:{n:'Queens',s:15,aem:2.6,rec:'29-5',
+    blurb:'Atlantic Sun champion making their first-ever NCAA Tournament appearance — in their first year of eligibility, only the fifth school since 1972 to achieve this. A monumental program milestone. The talent gap to Purdue is enormous, but Queens belongs here.'},
 
   // ── EAST (Duke #1) ──
-  E1:{n:'Duke',s:1,aem:35.6},             E16:{n:'Siena',s:16,aem:-1.8},
-  E8:{n:'Ohio State',s:8,aem:12.4},       E9:{n:'TCU',s:9,aem:11.3},
-  E5:{n:"St. John's",s:5,aem:16.3},       E12:{n:'Northern Iowa',s:12,aem:9.6},
-  E4:{n:'Kansas',s:4,aem:18.4},           E13:{n:'Cal Baptist',s:13,aem:7.1},
-  E6:{n:'Louisville',s:6,aem:14.4},       E11:{n:'S. Florida',s:11,aem:10.8,em:true}, // Evan Miya underseeded
-  E3:{n:'Michigan St.',s:3,aem:21.7},     E14:{n:'N. Dakota St.',s:14,aem:5.1},
-  E7:{n:'UCLA',s:7,aem:14.0},             E10:{n:'UCF',s:10,aem:10.5},
-  E2:{n:'UConn',s:2,aem:25.6},            E15:{n:'Furman',s:15,aem:2.4},
+  E1:{n:'Duke',s:1,aem:35.6,rec:'32-2',
+    blurb:'The tournament\'s No. 1 overall seed and title favorite. Cameron Boozer (22.7 PPG, 10.2 RPG, 41% from three) is on pace for the highest offensive rating in KenPom history. Caleb Foster is out with a fractured foot. The East is the toughest region — Duke faces UConn, Michigan State, and Kansas all before the Final Four.'},
+  E16:{n:'Siena',s:16,aem:-1.8,rec:'23-11',
+    blurb:'MAAC champion. Duke should handle this comfortably, but Siena loves the underdog role. Their small-school chemistry and no-fear approach won\'t rattle the Blue Devils — but they\'ll make the opener entertaining.'},
+  E8:{n:'Ohio State',s:8,aem:12.4,rec:'21-12',
+    blurb:'Earned their at-large bid with quality wins in a loaded Big Ten. The Buckeyes have enough talent to give TCU real problems in the 8/9 matchup. A motivated Ohio State team that advances could be a dark horse Sweet 16 spoiler.'},
+  E9:{n:'TCU',s:9,aem:11.3,rec:'22-11',
+    blurb:'Big 12 veteran squad comfortable in high-stakes environments. TCU vs. Ohio State is a genuine toss-up — both teams are capable of a second-round run. Whoever wins steps into the teeth of a Duke or heavy-seed Sweet 16 bracket.'},
+  E5:{n:"St. John's",s:5,aem:16.3,rec:'28-6',
+    blurb:'The Big East\'s surprise team of the year — the Red Storm beat UConn in the conference title game by 20 points. One of the hottest teams entering March. If they\'re still peaking, a round of 32 showdown with Kansas is a genuine 50-50 battle.'},
+  E12:{n:'Northern Iowa',s:12,aem:9.6,rec:'23-12',
+    blurb:'Missouri Valley champion with a grinding defensive identity and experience in big moments. Northern Iowa has pulled off tournament upsets before. Their ability to win close games makes them a credible 12-over-5 threat against St. John\'s.'},
+  E4:{n:'Kansas',s:4,aem:18.4,rec:'23-10',
+    blurb:'Perennial power that underperformed in the regular season but has the talent and coaching to flip a switch in March. The Bill Self system thrives in single-elimination play. Cal Baptist is a formality — a potential St. John\'s second-round clash is the real measuring stick.'},
+  E13:{n:'Cal Baptist',s:13,aem:7.1,rec:'25-8',
+    blurb:'WAC champion making their first-ever NCAA Tournament appearance. One of the tournament\'s most exciting debut stories. The talent gap to Kansas is significant, but Cal Baptist brings fearless energy and perimeter shooting to the big stage.'},
+  E6:{n:'Louisville',s:6,aem:14.4,rec:'23-10',
+    blurb:'ACC veteran squad playing their most complete basketball late in the season. The 6/11 matchup with South Florida is trickier than it looks — Evan Miya rates USF as underseeded. Louisville needs an efficient performance to avoid a first-round stunner.'},
+  E11:{n:'S. Florida',s:11,aem:10.8,em:true,rec:'25-8',
+    blurb:'American Athletic Conference champion and Evan Miya\'s hidden gem in the East. USF has elite athleticism and a disruptive defensive scheme that creates chaos in transition. Don\'t sleep on this team — they are a genuine first-round upset threat over Louisville.'},
+  E3:{n:'Michigan St.',s:3,aem:21.7,rec:'25-7',
+    blurb:'Tom Izzo is the greatest tournament coach of all time, and this is one of his stronger recent squads. The Spartans are a near-lock for the Sweet 16 and should be favored in the Elite Eight against any non-Duke opponent. The most dangerous 3-seed in the entire field.'},
+  E14:{n:'N. Dakota St.',s:14,aem:5.1,rec:'27-7',
+    blurb:'Summit League champion with a respectable 27-7 record. NDSU is among the better 14-seeds statistically in the field. Michigan State\'s tournament experience and depth are a significant barrier, but the Bison will compete.'},
+  E7:{n:'UCLA',s:7,aem:14.0,rec:'23-11',
+    blurb:'Resurgent Bruins program with the talent to go deep in a bracket. UCLA at a 7-seed feels like an undervaluation — they have the personnel to beat UConn in a potential round of 32 matchup. UCF is a manageable opener to get rolling.'},
+  E10:{n:'UCF',s:10,aem:10.5,rec:'21-11',
+    blurb:'Big 12 at-large entry with a capable perimeter attack that kept them competitive all season. UCF pushed quality opponents and enters March with genuine first-round upset aspirations against UCLA. Need a turnover-heavy performance to pull it off.'},
+  E2:{n:'UConn',s:2,aem:25.6,rec:'29-5',
+    blurb:'Two-time defending champion (2023-24) entering the East as the 2-seed after a stunning 20-point loss to St. John\'s in the Big East title game. That blowout raised concern, but UConn\'s championship pedigree means they cannot be faded. The most dangerous 2-seed to face in the bracket.'},
+  E15:{n:'Furman',s:15,aem:2.4,rec:'22-12',
+    blurb:'Just their second NCAA Tournament appearance since 1980. Furman won\'t back down, but faces a significant talent gap against one of the hottest programs in college basketball in UConn. A great story and a tough draw.'},
 
   // ── MIDWEST (Michigan #1) ──
-  M1:{n:'Michigan',s:1,aem:33.2},         M16:{n:'UMBC',s:16,aem:-2.6},           // FF: UMBC def. Howard
-  M8:{n:'Georgia',s:8,aem:11.4},          M9:{n:'Saint Louis',s:9,aem:11.0},
-  M5:{n:'Texas Tech',s:5,aem:15.9},       M12:{n:'Akron',s:12,aem:8.8},
-  M4:{n:'Alabama',s:4,aem:18.1},          M13:{n:'Hofstra',s:13,aem:7.6},
-  M3:{n:'Virginia',s:3,aem:19.9},         M14:{n:'Wright State',s:14,aem:5.8},
-  M6:{n:'Tennessee',s:6,aem:14.7},        M11:{n:'Miami (OH)',s:11,aem:13.6,em:true}, // FF: Miami OH def. SMU, Evan Miya: strong
-  M7:{n:'Kentucky',s:7,aem:14.2},         M10:{n:'Santa Clara',s:10,aem:12.8,em:true}, // Evan Miya underseeded
-  M2:{n:'Iowa State',s:2,aem:24.7},       M15:{n:'Tennessee St.',s:15,aem:1.7},
+  M1:{n:'Michigan',s:1,aem:33.2,rec:'31-3',
+    blurb:'No. 3 overall seed and co-favorite for the title. Michigan set a Big Ten record with 19 conference wins and seven victories by 40+ points. KenPom\'s No. 2 team nationally (O:#4, D:#2). Lost the Big Ten Tournament final to Purdue — they enter the NCAA Tournament with a chip on their shoulder.'},
+  M16:{n:'UMBC',s:16,aem:-2.6,rec:'24-8',
+    blurb:'First Four survivors over Howard. UMBC\'s name is synonymous with the greatest upset in tournament history (defeating Virginia in 2018). Michigan is considerably stronger than that Virginia team, but UMBC knows how to believe in themselves on the big stage.'},
+  M8:{n:'Georgia',s:8,aem:11.4,rec:'22-10',
+    blurb:'SEC at-large entry with enough athleticism to make Saint Louis uncomfortable in the 8/9 matchup. Georgia\'s backcourt can be electric on a good night. Neither team here is expected to advance past the Sweet 16, making this one of the bracket\'s most watchable first-round games.'},
+  M9:{n:'Saint Louis',s:9,aem:11.0,rec:'28-5',
+    blurb:'Atlantic 10\'s sneaky-good program with a 28-5 record loaded with quality road wins. Saint Louis could be this tournament\'s forgotten team — their strength makes the 8/9 a genuine coin flip. Beat a stronger schedule than their seed suggests.'},
+  M5:{n:'Texas Tech',s:5,aem:15.9,rec:'22-10',
+    blurb:'Red Raiders enter with key injury concerns to Chance McMillian and Darrion Williams — Evan Miya has docked their ratings accordingly. Still a dangerous Big 12 squad with elite defensive DNA. Akron is manageable, but injury-depleted Tech is more vulnerable at the 5-seed than any other team on that line.'},
+  M12:{n:'Akron',s:12,aem:8.8,rec:'29-5',
+    blurb:'MAC champion with an impressive 29-5 record — one of the most wins in the field. Akron is quietly one of the better mid-major programs and should be taken seriously as a 5/12 upset candidate, especially against the injury-depleted Red Raiders.'},
+  M4:{n:'Alabama',s:4,aem:18.1,rec:'23-9',
+    blurb:'Grant Nelson\'s injury has been factored into Evan Miya\'s ratings, but Alabama\'s offensive talent runs 10-deep. One of the nation\'s most explosive offenses — if the Tide is healthy, a Michigan matchup in the Sweet 16 would be must-watch TV. Evan Miya views them as a dark title contender.'},
+  M13:{n:'Hofstra',s:13,aem:7.6,rec:'24-10',
+    blurb:'CAA champion who knocked off quality opponents in their conference tournament. Hofstra is athletic and well-coached — not a pushover for Alabama. Their athletic guards can generate chaos, though the talent gap against a healthy Alabama squad is significant.'},
+  M3:{n:'Virginia',s:3,aem:19.9,rec:'29-5',
+    blurb:'ACC Tournament runner-up earns a 3-seed — which felt like a gift at the time, given they seemed destined for a 4. Tony Bennett\'s pack-line defense makes the Cavaliers among the most difficult teams to score against in the nation. A methodical Sweet 16 run is realistic. Virginia is built for March.'},
+  M14:{n:'Wright State',s:14,aem:5.8,rec:'23-11',
+    blurb:'Horizon League champion facing Virginia\'s elite pack-line defense — which is arguably the worst stylistic matchup a 14-seed could draw. Wright State will struggle to generate clean looks. Every team in the tournament deserves their moment on the national stage.'},
+  M6:{n:'Tennessee',s:6,aem:14.7,rec:'22-11',
+    blurb:'SEC defensive powerhouse that plays the kind of physical basketball that makes late March chaotic. The 6/11 matchup against Miami Ohio is potentially the best first-round game in the bracket — Miami went 31-1 in the regular season and Evan Miya loves them.'},
+  M11:{n:'Miami (OH)',s:11,aem:13.6,em:true,rec:'31-1',
+    blurb:'The tournament\'s most captivating story. 31-1 in the regular season with zero Quad 1 wins — forced into a First Four game, they survived and now face Tennessee. Evan Miya rates Miami Ohio as massively underseeded. Their relentless offense and sky-high confidence make them a potential Elite Eight dark horse.'},
+  M7:{n:'Kentucky',s:7,aem:14.2,rec:'21-13',
+    blurb:'The Wildcats\' modest record hides a talented roster hampered all season by Lamont Butler\'s injury. Without Butler, Kentucky leans on athleticism and depth. Santa Clara in the first round is more competitive than the seed suggests — Evan Miya flags the Broncos as underseeded.'},
+  M10:{n:'Santa Clara',s:10,aem:12.8,em:true,rec:'26-8',
+    blurb:'First tournament appearance since 1996 and Evan Miya\'s top underseeded team in the Midwest. Santa Clara plays beautiful ball-movement basketball, and their WCC schedule against Gonzaga has prepared them for physical competition. A genuine 10-over-7 upset threat against a Butler-less Kentucky.'},
+  M2:{n:'Iowa State',s:2,aem:24.7,rec:'27-7',
+    blurb:'The Big 12\'s most complete team — when healthy. Keshon Gilbert\'s absence is a significant blow that Evan Miya has factored into their ratings. The Cyclones are still Final Four-caliber with elite coaching, but they enter the tournament below full strength. Tennessee State is a comfortable opener.'},
+  M15:{n:'Tennessee St.',s:15,aem:1.7,rec:'23-9',
+    blurb:'Ohio Valley champion making just their third-ever NCAA Tournament appearance and first since 1994. A historic program milestone for Tennessee State. Iowa State is a heavy favorite, but the Governors will play with house money and nothing to lose.'},
 };
 
 // R64 matchups per region, top-to-bottom
@@ -392,6 +499,35 @@ function calcOdds() {
 }
 
 // ═══════════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════════
+const ttEl = document.getElementById('tt');
+
+function showTT(team, accent, e) {
+  ttEl.style.borderLeftColor = accent;
+  ttEl.innerHTML = `
+    <div class="tt-top">
+      <span class="tt-seed" style="color:${accent}">${team.s}</span>
+      <span class="tt-name">${team.n}</span>
+      ${team.em ? '<span class="tt-em">EM↑</span>' : ''}
+    </div>
+    ${team.rec ? `<div class="tt-rec">${team.rec} &middot; AEM est. ${team.aem > 0 ? '+' : ''}${team.aem}</div>` : ''}
+    <div class="tt-body">${team.blurb || ''}</div>`;
+  moveTT(e);
+  ttEl.classList.add('vis');
+}
+function moveTT(e) {
+  const pad = 12, tw = 236, th = ttEl.offsetHeight || 130;
+  let x = e.clientX + pad;
+  let y = e.clientY + pad;
+  if (x + tw > window.innerWidth - 8) x = e.clientX - tw - pad;
+  if (y + th > window.innerHeight - 8) y = e.clientY - th - pad;
+  ttEl.style.left = x + 'px';
+  ttEl.style.top  = y + 'px';
+}
+function hideTT() { ttEl.classList.remove('vis'); }
+
+// ═══════════════════════════════════════════
 // COLORS
 // ═══════════════════════════════════════════
 const SV = {1:28,2:40,3:52,4:64,5:76,6:88,7:100,8:112,9:112,10:124,11:136,12:148,13:160,14:168,15:176,16:188};
@@ -430,6 +566,13 @@ function buildRow(tk, opp, winner, accent, onClick) {
     row.style.background=`linear-gradient(90deg,${accent}12,${accent}03)`;
   } else {
     row.style.borderLeft='3px solid transparent';
+  }
+
+  // tooltip — hover shows blurb, follows cursor
+  if(team && team.blurb) {
+    row.addEventListener('mouseenter', e => showTT(team, accent, e));
+    row.addEventListener('mousemove',  e => moveTT(e));
+    row.addEventListener('mouseleave', hideTT);
   }
 
   if(canPick&&onClick) row.addEventListener('click',onClick);
