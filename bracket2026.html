@@ -79,6 +79,7 @@ html,body{height:100%;background:#eef1f7;font-family:'Inter',system-ui,-apple-sy
 #tt .tt-em{font-size:8px;font-weight:700;background:#4c1d95;color:#ddd6fe;border-radius:3px;padding:1px 5px;flex-shrink:0}
 #tt .tt-rec{font-size:8.5px;color:#64748b;margin-bottom:6px;letter-spacing:.2px}
 #tt .tt-body{font-size:10px;color:#cbd5e1;line-height:1.6}
+#tt .tt-ranks{font-size:9px;color:#475569;margin-top:7px;padding-top:6px;border-top:1px solid #1e293b;letter-spacing:.4px;font-weight:600}
 
 /* separator between South/West and East/Midwest */
 .region-sep{height:2px;background:#dde3ec;flex-shrink:0}
@@ -254,8 +255,8 @@ function pct(p) { return Math.round(p * 100); }
 // ═══════════════════════════════════════════
 const T = {
   // ── SOUTH (Florida #1) ──
-  S1:{n:'Florida',s:1,aem:29.4,rec:'26-7',
-    blurb:'Reigning national champions returning hungry for a repeat. Elite frontcourt with a deep, experienced rotation is among the best in the country. The South Regional is in Houston — a potential "road game" Elite Eight if chalk holds and No. 2 Houston advances.'},
+  S1:{n:'Florida',s:1,aem:29.4,rec:'26-7',orank:8,drank:4,
+    blurb:'Reigning champions with the most complete two-way profile in the SEC. Top-10 in both adjusted offensive and defensive efficiency — only Duke, Michigan, and Arizona share that distinction. Their frontcourt depth creates major matchup problems in the half-court; opponents rank 4th-worst in FG% allowed at the rim against them. The South Regional in Houston is a potential near-road Elite Eight vs. the No. 2 Cougars.'},
   S16:{n:'Lehigh',s:16,aem:-3.2,rec:'18-16',
     blurb:'First Four survivors. Led by junior star Nasir Whitlock (21.1 PPG, 45% from three), one of the most dangerous scorers in the field at his seed. Cinderella odds are slim against Florida, but Whitlock gives them a puncher\'s chance in any game.'},
   S8:{n:'Clemson',s:8,aem:12.3,rec:'24-10',
@@ -512,7 +513,8 @@ function showTT(team, accent, e) {
       ${team.em ? '<span class="tt-em">EM↑</span>' : ''}
     </div>
     ${team.rec ? `<div class="tt-rec">${team.rec} &middot; AEM est. ${team.aem > 0 ? '+' : ''}${team.aem}</div>` : ''}
-    <div class="tt-body">${team.blurb || ''}</div>`;
+    <div class="tt-body">${team.blurb || ''}</div>
+    ${(team.orank && team.drank) ? `<div class="tt-ranks">Off &ndash; ${team.orank} &nbsp;/&nbsp; Def &ndash; ${team.drank}</div>` : ''}`;
   moveTT(e);
   ttEl.classList.add('vis');
 }
