@@ -308,8 +308,8 @@ const T = {
     blurb:'Big West champion making the dance. A long flight from home and a significant jump in competition. Hawaii\'s perimeter attack can be entertaining, but Arkansas\'s athleticism and length make this a difficult first-round game to survive.'},
   W6:{n:'BYU',s:6,aem:13.6,rec:'23-11',or:10,dr:57,tr:46,
     blurb:'Big 12 veteran squad with deep tournament experience. The 6/11 matchup against NC State (First Four survivor) is winnable but never safe after a long season. BYU\'s physicality is their best asset — they need to control the pace.'},
-  W11:{n:'NC State',s:11,aem:11.1,rec:'20-13',or:20,dr:86,tr:86,
-    blurb:'First Four survivors who beat Texas in Dayton. NC State has tournament magic in their DNA — they made a surprise Final Four run in recent memory. A loose, motivated squad playing with nothing to lose could be the West\'s biggest first-round upset.'},
+  W11:{n:'Texas',s:11,aem:19.03,rec:'18-14',or:13,dr:112,tr:206,
+    blurb:'First Four survivors who beat NC State in Dayton to earn their spot. Dailyn Swain and veteran guards Tramon Mark &amp; Jordan Pope led Texas to back-to-back upsets — 79–71 over BYU, then 74–68 over Gonzaga. Only 5.52% of brackets had the Longhorns making the second weekend. Sweet 16 for the first time since 2019.'},
   W3:{n:'Gonzaga',s:3,aem:20.9,rec:'30-3',or:29,dr:9,tr:111,
     blurb:'WCC dominant at 30-3 and ranked 11th overall — this is among Gonzaga\'s best recent teams. They always face the "can they do it outside the WCC?" question, and the answer so far this season is yes. A Final Four appearance feels like the baseline expectation.'},
   W14:{n:'Kennesaw St.',s:14,aem:4.2,rec:'22-13',or:105,dr:122,tr:75,
@@ -422,6 +422,70 @@ function mkState() {
   return s;
 }
 let S = mkState();
+
+// ═══════════════════════════════════════════
+// ACTUAL RESULTS — R64 + R32 (through March 22)
+// Sweet 16 begins March 26, 2026
+// ═══════════════════════════════════════════
+function applyResults() {
+  function win(reg, r, mi, key) {
+    S[reg][r][mi].w = key;
+    propagate(reg, r, mi, key);
+  }
+  // ── SOUTH ──
+  win('South',0,0,'S1');  // Florida def. Lehigh
+  win('South',0,1,'S9');  // Iowa 67, Clemson 61
+  win('South',0,2,'S5');  // Vanderbilt 78, McNeese 68
+  win('South',0,3,'S4');  // Nebraska def. Troy
+  win('South',0,4,'S11'); // VCU 82, N. Carolina 78 (OT) ★ UPSET
+  win('South',0,5,'S3');  // Illinois 105, Penn 70
+  win('South',0,6,'S10'); // Texas A&M 63, Saint Mary's 50 ★ UPSET
+  win('South',0,7,'S2');  // Houston 78, Idaho 47
+  win('South',1,0,'S9');  // Iowa def. Florida ★ UPSET (1-seed out)
+  win('South',1,1,'S4');  // Nebraska 74, Vanderbilt 72
+  win('South',1,2,'S3');  // Illinois 76, VCU 55
+  win('South',1,3,'S2');  // Houston 88, Texas A&M 57
+  // ── WEST ──
+  win('West',0,0,'W1');   // Arizona def. LIU (+34)
+  win('West',0,1,'W9');   // Utah State def. Villanova
+  win('West',0,2,'W12');  // High Point 83, Wisconsin 82 ★ UPSET
+  win('West',0,3,'W4');   // Arkansas def. Hawaii
+  win('West',0,4,'W11'); // Texas 79, BYU 71 ★ UPSET
+  win('West',0,5,'W3');   // Gonzaga 73, Kennesaw St. 64
+  win('West',0,6,'W7');   // Miami FL def. Missouri
+  win('West',0,7,'W2');   // Purdue def. Queens
+  win('West',1,0,'W1');   // Arizona def. Utah State (+12)
+  win('West',1,1,'W4');   // Arkansas 94, High Point 88
+  win('West',1,2,'W11'); // Texas 74, Gonzaga 68 ★ UPSET
+  win('West',1,3,'W2');   // Purdue def. Miami FL
+  // ── EAST ──
+  win('East',0,0,'E1');   // Duke def. Siena
+  win('East',0,1,'E9');   // TCU 66, Ohio State 64
+  win('East',0,2,'E5');   // St. John's def. Northern Iowa
+  win('East',0,3,'E4');   // Kansas def. Cal Baptist
+  win('East',0,4,'E6');   // Louisville 83, S. Florida 79
+  win('East',0,5,'E3');   // Michigan St. def. N. Dakota St.
+  win('East',0,6,'E7');   // UCLA 75, UCF 71
+  win('East',0,7,'E2');   // UConn def. Furman
+  win('East',1,0,'E1');   // Duke 81, TCU 58
+  win('East',1,1,'E5');   // St. John's def. Kansas
+  win('East',1,2,'E3');   // Michigan St. 77, Louisville 69
+  win('East',1,3,'E2');   // UConn 73, UCLA 57
+  // ── MIDWEST ──
+  win('Midwest',0,0,'M1'); // Michigan def. UMBC
+  win('Midwest',0,1,'M9'); // Saint Louis 102, Georgia 77 ★ UPSET
+  win('Midwest',0,2,'M5'); // Texas Tech 91, Akron 71
+  win('Midwest',0,3,'M4'); // Alabama def. Hofstra
+  win('Midwest',0,4,'M6'); // Tennessee 78, Miami OH 56
+  win('Midwest',0,5,'M3'); // Virginia 82, Wright State 73
+  win('Midwest',0,6,'M7'); // Kentucky 89, Santa Clara 84 (OT)
+  win('Midwest',0,7,'M2'); // Iowa State def. Tennessee St.
+  win('Midwest',1,0,'M1'); // Michigan 95, Saint Louis 72
+  win('Midwest',1,1,'M4'); // Alabama 90, Texas Tech 67
+  win('Midwest',1,2,'M6'); // Tennessee 79, Virginia 72
+  win('Midwest',1,3,'M2'); // Iowa State 82, Kentucky 63
+}
+applyResults();
 
 function cascadeClear(reg, r, mi, loser) {
   if (r < 3) {
