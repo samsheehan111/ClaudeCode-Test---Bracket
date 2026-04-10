@@ -9,12 +9,8 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            gold: '#F5C518',
-          },
-          fontFamily: {
-            display: ['Georgia', 'serif'],
-          },
+          colors: { gold: '#F5C518' },
+          fontFamily: { display: ['Georgia', 'serif'] },
         }
       }
     }
@@ -24,8 +20,18 @@
     .star-gold { color: #F5C518; }
     .card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(245,197,24,0.15); }
-    .rating-bar { transition: width 1s ease; }
-    .rank-badge { font-size: 0.7rem; letter-spacing: 0.12em; }
+    .rating-bar { transition: width 1.2s ease; }
+    .poster-img { transition: opacity 0.4s ease; }
+    .poster-skeleton {
+      background: linear-gradient(90deg, #1f1f1f 25%, #2a2a2a 50%, #1f1f1f 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .stream-netflix  { background: #E50914; color: #fff; }
+    .stream-max      { background: #002BE7; color: #fff; }
+    .stream-hulu     { background: #1CE783; color: #000; }
+    .stream-prime    { background: #00A8E0; color: #fff; }
   </style>
 </head>
 <body class="min-h-screen text-white font-sans">
@@ -33,7 +39,7 @@
   <!-- Hero -->
   <header class="relative overflow-hidden border-b border-yellow-900/40">
     <div class="absolute inset-0 bg-gradient-to-br from-yellow-950/60 via-black to-black pointer-events-none"></div>
-    <div class="relative max-w-5xl mx-auto px-6 py-16 text-center">
+    <div class="relative max-w-6xl mx-auto px-6 py-16 text-center">
       <p class="text-xs tracking-[0.3em] uppercase text-yellow-500 mb-3 font-semibold">Emmy Awards · Series Finales</p>
       <h1 class="font-display text-5xl md:text-6xl font-bold leading-tight mb-4">
         The <span class="text-yellow-400">Greatest</span> Finale<br class="hidden md:block"/> Episodes Ever Nominated
@@ -41,17 +47,24 @@
       <p class="text-gray-400 text-lg max-w-xl mx-auto mt-4">
         Every show's swan song — ranked by IMDB user scores, filtered to Emmy-nominated series finales.
       </p>
-      <div class="flex items-center justify-center gap-6 mt-8 text-sm text-gray-500">
+      <div class="flex flex-wrap items-center justify-center gap-5 mt-8 text-sm text-gray-500">
         <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-yellow-400"></span> Emmy Win</span>
         <span class="flex items-center gap-1.5"><span class="inline-block w-3 h-3 rounded-full bg-blue-400"></span> Emmy Nominated</span>
         <span class="flex items-center gap-1.5"><span class="star-gold">★</span> IMDB Rating</span>
+        <span class="flex items-center gap-2">
+          <span class="text-xs px-2 py-0.5 rounded stream-netflix font-bold">N</span>
+          <span class="text-xs px-2 py-0.5 rounded stream-max font-bold">MAX</span>
+          <span class="text-xs px-2 py-0.5 rounded stream-hulu font-bold">HULU</span>
+          <span class="text-xs px-2 py-0.5 rounded stream-prime font-bold">PRIME</span>
+          <span class="text-gray-400">Streaming</span>
+        </span>
       </div>
     </div>
   </header>
 
   <!-- Sort Bar -->
-  <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between border-b border-white/5">
-    <p class="text-sm text-gray-500"><span id="total-count" class="text-white font-semibold">13</span> finales ranked</p>
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between border-b border-white/5">
+    <p class="text-sm text-gray-500"><span class="text-white font-semibold">13</span> finales ranked</p>
     <div class="flex gap-2">
       <button onclick="sortBy('rating')" id="btn-rating"
         class="sort-btn text-xs px-3 py-1.5 rounded-full bg-yellow-500 text-black font-semibold">
@@ -69,220 +82,189 @@
   </div>
 
   <!-- Rankings -->
-  <main class="max-w-5xl mx-auto px-6 py-8 space-y-4" id="rankings-list">
-  </main>
+  <main class="max-w-6xl mx-auto px-6 py-8 space-y-4" id="rankings-list"></main>
 
   <!-- Footer -->
   <footer class="border-t border-white/5 mt-12 py-8 text-center text-gray-600 text-xs">
-    <p>Ratings sourced from <a href="https://www.imdb.com" target="_blank" class="text-yellow-600 hover:underline">IMDb.com</a>. Emmy nominations/wins based on Outstanding Drama or Comedy Series categories.</p>
-    <p class="mt-1">Last updated: April 2026</p>
+    <p>Ratings from <a href="https://www.imdb.com" target="_blank" class="text-yellow-600 hover:underline">IMDb</a>. Posters via <a href="https://www.tvmaze.com" target="_blank" class="text-yellow-600 hover:underline">TVmaze</a>. Emmy nominations/wins based on Outstanding Drama or Comedy Series.</p>
+    <p class="mt-1">Streaming availability: US · April 2026</p>
   </footer>
 
   <script>
     const finales = [
       {
-        rank: 1,
-        show: "Breaking Bad",
-        episode: "Felina",
-        season: "S05 E16",
-        year: 2013,
-        genre: ["Drama", "Crime", "Thriller"],
-        rating: 9.8,
-        emmy: "win",
+        show: "Breaking Bad",        tvmazeId: 169,
+        episode: "Felina",           season: "S05 E16", year: 2013,
+        genre: ["Drama","Crime","Thriller"],
+        rating: 9.8, emmy: "win",
         emmyNote: "Won Outstanding Drama Series 2014",
         network: "AMC",
+        streaming: [{ name: "Netflix", cls: "stream-netflix", short: "NETFLIX" }],
         summary: "Walt returns home one final time, determined to put right what he can and settle all debts.",
         imdbUrl: "https://www.imdb.com/title/tt2301455/",
         accent: "from-amber-900/30"
       },
       {
-        rank: 2,
-        show: "Better Call Saul",
-        episode: "Saul Gone",
-        season: "S06 E13",
-        year: 2022,
-        genre: ["Drama", "Crime"],
-        rating: 9.8,
-        emmy: "nominated",
+        show: "Better Call Saul",    tvmazeId: 618,
+        episode: "Saul Gone",        season: "S06 E13", year: 2022,
+        genre: ["Drama","Crime"],
+        rating: 9.8, emmy: "nominated",
         emmyNote: "Emmy Nominated Outstanding Drama Series",
         network: "AMC",
+        streaming: [{ name: "Netflix", cls: "stream-netflix", short: "NETFLIX" }],
         summary: "Jimmy McGill confronts the consequences of a life spent becoming someone else.",
         imdbUrl: "https://www.imdb.com/title/tt11630828/",
         accent: "from-orange-900/30"
       },
       {
-        rank: 3,
-        show: "The Americans",
-        episode: "START",
-        season: "S06 E10",
-        year: 2018,
-        genre: ["Drama", "Crime", "Spy"],
-        rating: 9.7,
-        emmy: "nominated",
+        show: "The Americans",       tvmazeId: 1667,
+        episode: "START",            season: "S06 E10", year: 2018,
+        genre: ["Drama","Crime","Spy"],
+        rating: 9.7, emmy: "nominated",
         emmyNote: "Emmy Nominated Outstanding Drama Series",
         network: "FX",
+        streaming: [{ name: "Hulu", cls: "stream-hulu", short: "HULU" }],
         summary: "Elizabeth and Philip's cover is finally, irrevocably blown — with devastating consequences for their family.",
         imdbUrl: "https://www.imdb.com/title/tt5780830/",
         accent: "from-red-900/30"
       },
       {
-        rank: 4,
-        show: "The Wire",
-        episode: "-30-",
-        season: "S05 E10",
-        year: 2008,
-        genre: ["Drama", "Crime"],
-        rating: 9.6,
-        emmy: "nominated",
+        show: "The Wire",            tvmazeId: 1369,
+        episode: "-30-",             season: "S05 E10", year: 2008,
+        genre: ["Drama","Crime"],
+        rating: 9.6, emmy: "nominated",
         emmyNote: "Emmy Nominated Outstanding Drama Series",
         network: "HBO",
+        streaming: [{ name: "Max", cls: "stream-max", short: "MAX" }],
         summary: "Baltimore keeps turning. The show closes the circle on every corner, precinct, and newsroom it ever knew.",
         imdbUrl: "https://www.imdb.com/title/tt0977179/",
         accent: "from-slate-700/30"
       },
       {
-        rank: 5,
-        show: "Succession",
-        episode: "With Open Eyes",
-        season: "S04 E10",
-        year: 2023,
-        genre: ["Drama", "Comedy"],
-        rating: 9.5,
-        emmy: "win",
+        show: "Succession",          tvmazeId: 37780,
+        episode: "With Open Eyes",   season: "S04 E10", year: 2023,
+        genre: ["Drama","Comedy"],
+        rating: 9.5, emmy: "win",
         emmyNote: "Won Outstanding Drama Series 2023",
         network: "HBO",
+        streaming: [{ name: "Max", cls: "stream-max", short: "MAX" }],
         summary: "The Roy siblings face the final reckoning for Waystar Royco — and for each other.",
         imdbUrl: "https://www.imdb.com/title/tt21152040/",
         accent: "from-zinc-700/30"
       },
       {
-        rank: 6,
-        show: "The Marvelous Mrs. Maisel",
-        episode: "Four Minutes",
-        season: "S05 E09",
-        year: 2023,
-        genre: ["Comedy", "Drama"],
-        rating: 9.5,
-        emmy: "nominated",
+        show: "The Marvelous Mrs. Maisel", tvmazeId: 26766,
+        episode: "Four Minutes",     season: "S05 E09", year: 2023,
+        genre: ["Comedy","Drama"],
+        rating: 9.5, emmy: "nominated",
         emmyNote: "Emmy Nominated Outstanding Comedy Series",
         network: "Amazon Prime",
+        streaming: [{ name: "Prime Video", cls: "stream-prime", short: "PRIME" }],
         summary: "Midge Maisel gets her four minutes on national television — the culmination of a decade of sacrifice.",
         imdbUrl: "https://www.imdb.com/title/tt26897484/",
         accent: "from-pink-900/30"
       },
       {
-        rank: 7,
-        show: "The Sopranos",
-        episode: "Made in America",
-        season: "S06 E21",
-        year: 2007,
-        genre: ["Drama", "Crime"],
-        rating: 9.4,
-        emmy: "win",
+        show: "The Sopranos",        tvmazeId: 1340,
+        episode: "Made in America",  season: "S06 E21", year: 2007,
+        genre: ["Drama","Crime"],
+        rating: 9.4, emmy: "win",
         emmyNote: "Won Outstanding Drama Series 2004, 2007",
         network: "HBO",
+        streaming: [{ name: "Max", cls: "stream-max", short: "MAX" }],
         summary: "Tony Soprano sits in a New Jersey diner. The screen cuts to black. Television was never the same.",
         imdbUrl: "https://www.imdb.com/title/tt0995839/",
         accent: "from-neutral-700/30"
       },
       {
-        rank: 8,
-        show: "Fleabag",
-        episode: "Episode 6",
-        season: "S02 E06",
-        year: 2019,
-        genre: ["Comedy", "Drama"],
-        rating: 9.3,
-        emmy: "win",
+        show: "Fleabag",             tvmazeId: 18697,
+        episode: "Episode 6",        season: "S02 E06", year: 2019,
+        genre: ["Comedy","Drama"],
+        rating: 9.3, emmy: "win",
         emmyNote: "Won Outstanding Comedy Series 2019",
         network: "BBC / Amazon",
+        streaming: [{ name: "Prime Video", cls: "stream-prime", short: "PRIME" }],
         summary: "Fleabag and the Priest say goodbye in the most bittersweet, fourth-wall-shattering finale in modern TV.",
         imdbUrl: "https://www.imdb.com/title/tt6733140/",
         accent: "from-violet-900/30"
       },
       {
-        rank: 9,
-        show: "Mad Men",
-        episode: "Person to Person",
-        season: "S07 E14",
-        year: 2015,
+        show: "Mad Men",             tvmazeId: 582,
+        episode: "Person to Person", season: "S07 E14", year: 2015,
         genre: ["Drama"],
-        rating: 9.3,
-        emmy: "win",
+        rating: 9.3, emmy: "win",
         emmyNote: "Won Outstanding Drama Series 4× (2008–2011)",
         network: "AMC",
+        streaming: [{ name: "Hulu", cls: "stream-hulu", short: "HULU" }],
         summary: "Don Draper meditates at Big Sur — and smiles. Then comes the Coke ad. A perfect, maddening ending.",
         imdbUrl: "https://www.imdb.com/title/tt3756834/",
         accent: "from-yellow-900/30"
       },
       {
-        rank: 10,
-        show: "Lost",
-        episode: "The End",
-        season: "S06 E17-18",
-        year: 2010,
-        genre: ["Drama", "Fantasy", "Mystery"],
-        rating: 9.1,
-        emmy: "win",
+        show: "Lost",                tvmazeId: 123,
+        episode: "The End",          season: "S06 E17-18", year: 2010,
+        genre: ["Drama","Fantasy","Mystery"],
+        rating: 9.1, emmy: "win",
         emmyNote: "Won Outstanding Drama Series 2005",
         network: "ABC",
+        streaming: [{ name: "Hulu", cls: "stream-hulu", short: "HULU" }],
         summary: "The survivors of Oceanic 815 find each other one last time — in the end, it was always about the people.",
         imdbUrl: "https://www.imdb.com/title/tt15049668/",
         accent: "from-teal-900/30"
       },
       {
-        rank: 11,
-        show: "Barry",
-        episode: "wow",
-        season: "S04 E08",
-        year: 2023,
-        genre: ["Comedy", "Crime", "Action"],
-        rating: 8.8,
-        emmy: "win",
+        show: "Barry",               tvmazeId: 37862,
+        episode: "wow",              season: "S04 E08", year: 2023,
+        genre: ["Comedy","Crime","Action"],
+        rating: 8.8, emmy: "win",
         emmyNote: "Won Outstanding Comedy Series 2022",
         network: "HBO",
+        streaming: [{ name: "Max", cls: "stream-max", short: "MAX" }],
         summary: "Barry Berkman's story reaches its darkly inevitable conclusion in a finale that subverts every expectation.",
         imdbUrl: "https://www.imdb.com/title/tt27108909/",
         accent: "from-gray-700/30"
       },
       {
-        rank: 12,
-        show: "Ozark",
-        episode: "A Hard Way to Go",
-        season: "S04 E14",
-        year: 2022,
-        genre: ["Drama", "Crime", "Thriller"],
-        rating: 7.2,
-        emmy: "nominated",
+        show: "Ozark",               tvmazeId: 28984,
+        episode: "A Hard Way to Go", season: "S04 E14", year: 2022,
+        genre: ["Drama","Crime","Thriller"],
+        rating: 7.2, emmy: "nominated",
         emmyNote: "Emmy Nominated (Cinematography for Finale)",
         network: "Netflix",
+        streaming: [{ name: "Netflix", cls: "stream-netflix", short: "NETFLIX" }],
         summary: "The Byrde family's dangerous balancing act crashes to a chaotic, polarizing conclusion.",
         imdbUrl: "https://www.imdb.com/title/tt12621156/",
         accent: "from-blue-900/30"
       },
       {
-        rank: 13,
-        show: "Game of Thrones",
-        episode: "The Iron Throne",
-        season: "S08 E06",
-        year: 2019,
-        genre: ["Drama", "Fantasy", "Action"],
-        rating: 4.8,
-        emmy: "nominated",
+        show: "Game of Thrones",     tvmazeId: 82,
+        episode: "The Iron Throne",  season: "S08 E06", year: 2019,
+        genre: ["Drama","Fantasy","Action"],
+        rating: 4.8, emmy: "nominated",
         emmyNote: "Emmy Nominated Outstanding Drama Series S8",
         network: "HBO",
+        streaming: [{ name: "Max", cls: "stream-max", short: "MAX" }],
         summary: "Daenerys burns King's Landing. Bran becomes King. The internet collectively loses its mind.",
         imdbUrl: "https://www.imdb.com/title/tt6027920/",
         accent: "from-rose-950/30"
       }
     ];
 
+    // Poster cache keyed by tvmazeId
+    const posterCache = {};
+
     function getRatingColor(r) {
-      if (r >= 9.5) return { bg: 'bg-emerald-400', text: 'text-emerald-400', bar: '#34d399' };
-      if (r >= 9.0) return { bg: 'bg-green-400', text: 'text-green-400', bar: '#4ade80' };
-      if (r >= 8.0) return { bg: 'bg-yellow-400', text: 'text-yellow-400', bar: '#facc15' };
-      if (r >= 6.0) return { bg: 'bg-orange-400', text: 'text-orange-400', bar: '#fb923c' };
-      return { bg: 'bg-red-500', text: 'text-red-400', bar: '#f87171' };
+      if (r >= 9.5) return { text: 'text-emerald-400', bar: '#34d399' };
+      if (r >= 9.0) return { text: 'text-green-400',   bar: '#4ade80' };
+      if (r >= 8.0) return { text: 'text-yellow-400',  bar: '#facc15' };
+      if (r >= 6.0) return { text: 'text-orange-400',  bar: '#fb923c' };
+      return          { text: 'text-red-400',           bar: '#f87171' };
+    }
+
+    function streamBadges(streaming) {
+      return streaming.map(s =>
+        `<span class="text-xs font-bold px-2.5 py-1 rounded ${s.cls} whitespace-nowrap">${s.short}</span>`
+      ).join('');
     }
 
     function renderList(data) {
@@ -290,6 +272,8 @@
       list.innerHTML = '';
       data.forEach((item, idx) => {
         const col = getRatingColor(item.rating);
+        const barWidth = Math.round((item.rating / 10) * 100);
+
         const emmyBadge = item.emmy === 'win'
           ? `<span class="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
@@ -304,58 +288,109 @@
           `<span class="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">${g}</span>`
         ).join('');
 
-        const barWidth = Math.round((item.rating / 10) * 100);
+        // Poster: use cached URL or skeleton
+        const cachedPoster = posterCache[item.tvmazeId];
+        const posterHtml = cachedPoster
+          ? `<img src="${cachedPoster}" alt="${item.show} poster"
+               class="poster-img w-full h-full object-cover rounded-l-2xl"
+               onerror="this.parentElement.innerHTML=posterFallback('${item.show}')">`
+          : `<div class="poster-skeleton w-full h-full rounded-l-2xl flex items-end justify-center pb-3"
+               id="skeleton-${item.tvmazeId}">
+               <span class="text-white/20 text-xs font-bold text-center px-2">${item.show}</span>
+             </div>`;
 
         list.innerHTML += `
           <article class="card-hover relative rounded-2xl border border-white/10 bg-gradient-to-r ${item.accent} to-white/5 overflow-hidden">
-            <div class="flex flex-col md:flex-row items-start md:items-center gap-4 p-5 md:p-6">
+            <div class="flex">
 
-              <!-- Rank -->
-              <div class="flex-shrink-0 w-10 text-center">
-                <span class="text-2xl font-bold ${idx < 3 ? 'text-yellow-400' : 'text-white/30'}">#${idx + 1}</span>
-              </div>
-
-              <!-- Main Info -->
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                  <h2 class="text-lg font-bold text-white">${item.show}</h2>
-                  ${emmyBadge}
+              <!-- Poster -->
+              <div class="flex-shrink-0 w-24 md:w-32 h-auto min-h-[9rem] relative overflow-hidden bg-white/5">
+                ${posterHtml}
+                <div class="absolute top-1.5 left-1.5">
+                  <span class="text-base font-black ${idx < 3 ? 'text-yellow-400 drop-shadow' : 'text-white/40'}">#${idx+1}</span>
                 </div>
-                <p class="text-sm text-gray-400 mb-1">
-                  <span class="text-white/70 font-medium">"${item.episode}"</span>
-                  <span class="mx-1.5 text-white/20">·</span>
-                  <span>${item.season}</span>
-                  <span class="mx-1.5 text-white/20">·</span>
-                  <span>${item.year}</span>
-                  <span class="mx-1.5 text-white/20">·</span>
-                  <span>${item.network}</span>
-                </p>
-                <p class="text-sm text-gray-500 mt-2 leading-relaxed max-w-2xl">${item.summary}</p>
-                <div class="flex flex-wrap gap-1.5 mt-3">
-                  ${genrePills}
+              </div>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0 flex flex-col md:flex-row items-start md:items-center gap-3 p-4 md:p-5">
+
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h2 class="text-base md:text-lg font-bold text-white leading-tight">${item.show}</h2>
+                    ${emmyBadge}
+                  </div>
+                  <p class="text-xs md:text-sm text-gray-400 mb-1">
+                    <span class="text-white/70 font-medium">"${item.episode}"</span>
+                    <span class="mx-1 text-white/20">·</span>${item.season}
+                    <span class="mx-1 text-white/20">·</span>${item.year}
+                    <span class="mx-1 text-white/20">·</span>${item.network}
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">${item.summary}</p>
+                  <div class="flex flex-wrap items-center gap-1.5 mt-2.5">
+                    ${genrePills}
+                    <span class="mx-1 text-white/10">|</span>
+                    ${streamBadges(item.streaming)}
+                  </div>
+                  <p class="text-xs text-gray-600 mt-1.5">${item.emmyNote}</p>
                 </div>
-                <p class="text-xs text-gray-600 mt-2">${item.emmyNote}</p>
-              </div>
 
-              <!-- Rating -->
-              <div class="flex-shrink-0 text-right">
-                <a href="${item.imdbUrl}" target="_blank" rel="noopener"
-                   class="group flex flex-col items-end gap-1 hover:opacity-90">
-                  <div class="flex items-baseline gap-1">
-                    <span class="star-gold text-lg">★</span>
-                    <span class="text-3xl font-bold ${col.text}">${item.rating}</span>
-                    <span class="text-gray-600 text-sm">/10</span>
-                  </div>
-                  <div class="w-28 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div class="h-full rounded-full rating-bar" style="width:${barWidth}%; background:${col.bar}"></div>
-                  </div>
-                  <span class="text-xs text-gray-600 group-hover:text-yellow-500 transition-colors">View on IMDB →</span>
-                </a>
-              </div>
+                <!-- Rating -->
+                <div class="flex-shrink-0 text-right ml-auto">
+                  <a href="${item.imdbUrl}" target="_blank" rel="noopener"
+                     class="group flex flex-col items-end gap-1 hover:opacity-90">
+                    <div class="flex items-baseline gap-0.5">
+                      <span class="star-gold">★</span>
+                      <span class="text-2xl md:text-3xl font-black ${col.text}">${item.rating}</span>
+                      <span class="text-gray-600 text-xs">/10</span>
+                    </div>
+                    <div class="w-24 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full rating-bar" style="width:${barWidth}%; background:${col.bar}"></div>
+                    </div>
+                    <span class="text-xs text-gray-600 group-hover:text-yellow-500 transition-colors">IMDB →</span>
+                  </a>
+                </div>
 
+              </div>
             </div>
           </article>`;
       });
+
+      // Fetch any missing posters
+      data.forEach(item => {
+        if (!posterCache[item.tvmazeId]) {
+          fetchPoster(item.tvmazeId, item.show);
+        }
+      });
+    }
+
+    function posterFallback(show) {
+      const initial = show.replace(/^The\s+/i,'').charAt(0).toUpperCase();
+      return `<div class="w-full h-full flex flex-col items-center justify-center bg-white/5 rounded-l-2xl gap-1">
+        <span class="text-4xl font-black text-white/20">${initial}</span>
+        <span class="text-white/15 text-xs text-center px-1 leading-tight">${show}</span>
+      </div>`;
+    }
+
+    async function fetchPoster(tvmazeId, showName) {
+      try {
+        const res = await fetch(`https://api.tvmaze.com/shows/${tvmazeId}`, { cache: 'force-cache' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const url = data?.image?.medium || data?.image?.original;
+        if (!url) return;
+        posterCache[tvmazeId] = url;
+        // Update any skeleton placeholders currently in the DOM
+        document.querySelectorAll(`#skeleton-${tvmazeId}`).forEach(el => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = showName + ' poster';
+          img.className = 'poster-img w-full h-full object-cover rounded-l-2xl';
+          img.style.opacity = 0;
+          img.onerror = () => { el.innerHTML = posterFallback(showName); };
+          img.onload = () => { img.style.opacity = 1; };
+          el.replaceWith(img);
+        });
+      } catch(e) { /* silently ignore */ }
     }
 
     let currentSort = 'rating';
@@ -364,18 +399,17 @@
       document.querySelectorAll('.sort-btn').forEach(b => {
         b.className = 'sort-btn text-xs px-3 py-1.5 rounded-full bg-white/10 text-gray-300 font-semibold hover:bg-white/20';
       });
-      document.getElementById('btn-' + key).className = 'sort-btn text-xs px-3 py-1.5 rounded-full bg-yellow-500 text-black font-semibold';
-
+      document.getElementById('btn-' + key).className =
+        'sort-btn text-xs px-3 py-1.5 rounded-full bg-yellow-500 text-black font-semibold';
       const sorted = [...finales].sort((a, b) => {
         if (key === 'rating') return b.rating - a.rating;
-        if (key === 'year') return b.year - a.year;
-        if (key === 'title') return a.show.localeCompare(b.show);
+        if (key === 'year')   return b.year - a.year;
+        if (key === 'title')  return a.show.localeCompare(b.show);
         return 0;
       });
       renderList(sorted);
     }
 
-    // Initial render
     renderList(finales);
   </script>
 </body>
