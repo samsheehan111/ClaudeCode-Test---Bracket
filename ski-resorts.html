@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US Ski Resorts — Interactive Map</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: #060c1a;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #e0e8f0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+
+h1 {
+  font-size: clamp(18px, 2.4vw, 30px);
+  font-weight: 800;
+  text-align: center;
+  padding: 12px 0 4px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #4db8ff 0%, #a0d8ff 50%, #4db8ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#map-wrap {
+  flex: 1 1 auto;
+  width: 100%; max-width: 1200px;
+  position: relative;
+  min-height: 0;
+}
+#map-wrap svg { display: block; width: 100%; height: 100%; }
+
+/* --- resort dot glow --- */
+.resort-dot {
+  cursor: pointer;
+  transition: r 0.18s ease, fill 0.18s ease;
+}
+.resort-dot:hover { fill: #ff7844; }
+
+/* --- name labels --- */
+.resort-label {
+  font-size: 9px;
+  font-weight: 600;
+  fill: #a8c8e8;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: #060c1a;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* --- tooltip --- */
+#tt {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  background: #0d1b2e;
+  border: 1px solid #1e3a5f;
+  border-top: 3px solid #4db8ff;
+  border-radius: 8px;
+  padding: 14px 16px 12px;
+  width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  transition: opacity 0.18s ease;
+  z-index: 100;
+  font-size: 13px;
+}
+#tt.vis { pointer-events: all; opacity: 1; }
+
+#tt .tt-name {
+  font-size: 16px; font-weight: 700; color: #fff;
+  margin-bottom: 2px;
+}
+#tt .tt-state { font-size: 11px; color: #6a8caa; margin-bottom: 10px; }
+
+#tt .tt-link a {
+  color: #4db8ff; text-decoration: none; font-weight: 600; font-size: 12px;
+}
+#tt .tt-link a:hover { text-decoration: underline; }
+
+/* snow bar */
+.snow-section { margin: 10px 0; }
+.snow-header { display: flex; justify-content: space-between; font-size: 11px; color: #8aa8c0; margin-bottom: 4px; }
+.snow-bar-bg {
+  height: 8px; border-radius: 4px; background: #162a42; overflow: hidden;
+}
+.snow-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, #4db8ff, #82d0ff);
+}
+
+/* forecast grid */
+.fc-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px;
+  margin-top: 10px;
+}
+.fc-day {
+  text-align: center; background: #0a1526; border-radius: 5px; padding: 5px 2px;
+}
+.fc-day .day-label { font-size: 9px; font-weight: 600; color: #6a8caa; }
+.fc-day .wx-icon { font-size: 16px; line-height: 1.4; }
+.fc-day .snow-in  { font-size: 9px; color: #4db8ff; font-weight: 600; }
+.fc-day .temps    { font-size: 9px; color: #8aa8c0; }
+
+footer {
+  font-size: 11px; color: #3a5570; padding: 6px 0 10px; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>US Ski Resorts</h1>
+<div id="map-wrap"></div>
+<div id="tt">
+  <div class="tt-name"></div>
+  <div class="tt-state"></div>
+  <div class="tt-link"></div>
+  <div class="snow-section">
+    <div class="snow-header"><span>Base Snow Depth</span><span class="snow-val"></span></div>
+    <div class="snow-bar-bg"><div class="snow-bar-fill"></div></div>
+  </div>
+  <div class="fc-grid"></div>
+</div>
+<footer>Snow depths &amp; forecasts are illustrative mock data</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+const US_ATLAS = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
+
+const resorts = [
+  { name:"Vail", state:"CO", coords:[-106.3781,39.6433], snow:58, url:"https://www.vail.com/the-mountain/mountain-conditions/trail-map.aspx", lbl:[8,-6] },
+  { name:"Breckenridge", state:"CO", coords:[-106.0384,39.4817], snow:52, url:"https://www.breckenridge.com/the-mountain/trail-map.aspx", lbl:[-80,4] },
+  { name:"Park City", state:"UT", coords:[-111.498,40.6461], snow:44, url:"https://www.parkcitymountain.com/the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Steamboat", state:"CO", coords:[-106.8317,40.485], snow:48, url:"https://www.steamboat.com/the-mountain/trail-map.aspx", lbl:[8,4] },
+  { name:"Jackson Hole", state:"WY", coords:[-110.8279,43.5875], snow:62, url:"https://www.jacksonhole.com/trail-map.html", lbl:[8,-6] },
+  { name:"Sun Valley", state:"ID", coords:[-114.3511,43.6966], snow:36, url:"https://www.sunvalley.com/mountain/trail-maps/", lbl:[-68,4] },
+  { name:"Aspen", state:"CO", coords:[-106.8175,39.1911], snow:55, url:"https://www.aspensnowmass.com/our-mountains/aspen-mountain/trail-map", lbl:[-48,13] },
+  { name:"Mammoth Mtn", state:"CA", coords:[-119.0326,37.6308], snow:78, url:"https://www.mammothmountain.com/mountain/grooming-and-terrain-reports/trail-map", lbl:[-76,-8] },
+  { name:"Heavenly", state:"CA", coords:[-119.9399,38.9353], snow:34, url:"https://www.skiheavenly.com/the-mountain/trail-map.aspx", lbl:[-58,13] },
+  { name:"Palisades Tahoe", state:"CA", coords:[-120.2358,39.1969], snow:42, url:"https://www.palisadestahoe.com/the-mountain/trail-map", lbl:[-88,-8] },
+  { name:"Telluride", state:"CO", coords:[-107.8123,37.9375], snow:47, url:"https://www.tellurideskiresort.com/plan-your-trip/trail-map/", lbl:[-58,13] },
+  { name:"Stowe", state:"VT", coords:[-72.7823,44.5301], snow:22, url:"https://www.stowe.com/the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Killington", state:"VT", coords:[-72.8201,43.6045], snow:28, url:"https://www.killington.com/the-mountain/trail-map", lbl:[8,13] },
+  { name:"Big Sky", state:"MT", coords:[-111.4012,45.286], snow:54, url:"https://www.bigskyresort.com/mountain/trail-map", lbl:[8,-6] },
+  { name:"Snowbird", state:"UT", coords:[-111.6558,40.583], snow:72, url:"https://www.snowbird.com/mountain-report/trail-map/", lbl:[-58,13] },
+  { name:"Alta", state:"UT", coords:[-111.62,40.5983], snow:68, url:"https://www.alta.com/mountain/trail-map", lbl:[8,-6] },
+  { name:"Deer Valley", state:"UT", coords:[-111.4782,40.637], snow:46, url:"https://www.deervalley.com/the-mountain/trail-map", lbl:[8,13] },
+  { name:"Crested Butte", state:"CO", coords:[-106.9878,38.8697], snow:44, url:"https://www.cbmr.com/the-mountain/trail-map/", lbl:[-76,-6] },
+  { name:"Copper Mtn", state:"CO", coords:[-106.15,39.48], snow:50, url:"https://www.coppercolorado.com/the-mountain/trail-map", lbl:[8,13] },
+  { name:"Taos", state:"NM", coords:[-105.4513,36.5952], snow:18, url:"https://www.skitaos.com/mountain-info/trail-map/", lbl:[8,-6] },
+  { name:"Keystone", state:"CO", coords:[-105.9786,39.6064], snow:48, url:"https://www.keystoneresort.com/the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Arapahoe Basin", state:"CO", coords:[-105.8714,39.6425], snow:54, url:"https://www.arapahoebasin.com/the-mountain/trail-map/", labelName:"A-Basin", lbl:[8,13] },
+  { name:"Sugarloaf", state:"ME", coords:[-70.3139,45.0314], snow:14, url:"https://www.sugarloaf.com/the-mountain/trail-map", lbl:[8,-6] },
+  { name:"Loon Mountain", state:"NH", coords:[-71.6248,44.0298], snow:10, url:"https://www.loonmtn.com/mountain/trail-map", labelName:"Loon Mtn", lbl:[-66,13] },
+  { name:"Sunday River", state:"ME", coords:[-70.8607,44.4749], snow:12, url:"https://www.sundayriver.com/the-mountain/trail-map", lbl:[8,13] }
+];
+
+const MAX_SNOW = 80; // for bar scale
+
+// Mock 7-day forecast: Apr 13-19
+const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const dateLabels = ['4/13','4/14','4/15','4/16','4/17','4/18','4/19'];
+
+function mockForecast(snow) {
+  // Seed a repeatable but varied forecast based on snow depth
+  const seed = snow * 7;
+  const icons = ['☀️','⛅','🌨️','❄️','🌤️','🌧️','⛅'];
+  const forecasts = [];
+  for (let i = 0; i < 7; i++) {
+    const v = (seed + i * 13) % 47;
+    const isSnowy = v % 3 === 0;
+    const hi = Math.round(28 + (snow / 78) * 12 + (v % 11) - 5);
+    const lo = hi - Math.round(8 + (v % 7));
+    forecasts.push({
+      day: dayLabels[i],
+      date: dateLabels[i],
+      icon: isSnowy ? (v % 2 === 0 ? '❄️' : '🌨️') : icons[i % icons.length],
+      snowIn: isSnowy ? Math.round(1 + (v % 6)) : 0,
+      hi, lo
+    });
+  }
+  return forecasts;
+}
+
+// --- tooltip refs ---
+const ttEl = document.getElementById('tt');
+const ttName = ttEl.querySelector('.tt-name');
+const ttState = ttEl.querySelector('.tt-state');
+const ttLink = ttEl.querySelector('.tt-link');
+const ttSnowVal = ttEl.querySelector('.snow-val');
+const ttSnowFill = ttEl.querySelector('.snow-bar-fill');
+const ttFcGrid = ttEl.querySelector('.fc-grid');
+
+// --- sticky tooltip logic ---
+let hideTimer = null;
+function cancelHide() { clearTimeout(hideTimer); }
+function scheduleHide() { hideTimer = setTimeout(() => ttEl.classList.remove('vis'), 260); }
+ttEl.addEventListener('mouseenter', cancelHide);
+ttEl.addEventListener('mouseleave', scheduleHide);
+
+function showTooltip(r, px, py) {
+  cancelHide();
+  ttName.textContent = r.name;
+  ttState.textContent = r.state;
+  ttLink.innerHTML = `<a href="${r.url}" target="_blank" rel="noopener">🗺️ View Trail Map ↗</a>`;
+  ttSnowVal.textContent = r.snow + '"';
+  ttSnowFill.style.width = Math.min(100, (r.snow / MAX_SNOW) * 100).toFixed(1) + '%';
+
+  const fc = mockForecast(r.snow);
+  ttFcGrid.innerHTML = fc.map(d =>
+    `<div class="fc-day">
+       <div class="day-label">${d.day}</div>
+       <div class="wx-icon">${d.icon}</div>
+       <div class="snow-in">${d.snowIn > 0 ? d.snowIn + '"' : '—'}</div>
+       <div class="temps">${d.hi}°/${d.lo}°</div>
+     </div>`
+  ).join('');
+
+  // Position tooltip
+  const wrap = document.getElementById('map-wrap');
+  const wRect = wrap.getBoundingClientRect();
+  const ttW = 320;
+  let left = px + 14;
+  let top = py - 30;
+  // Keep within map bounds
+  if (left + ttW > wRect.width - 8) left = px - ttW - 14;
+  if (top < 8) top = 8;
+  if (top + 300 > wRect.height - 8) top = wRect.height - 308;
+
+  ttEl.style.left = left + 'px';
+  ttEl.style.top = top + 'px';
+  ttEl.classList.add('vis');
+}
+
+// --- map rendering ---
+let cachedUS = null;
+
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+async function initMap() {
+  if (!cachedUS) cachedUS = await d3.json(US_ATLAS);
+
+  const wrap = document.getElementById('map-wrap');
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+
+  // Clear previous SVG
+  wrap.querySelectorAll('svg').forEach(s => s.remove());
+
+  const svg = d3.select(wrap).append('svg')
+    .attr('viewBox', `0 0 ${W} ${H}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+
+  // Defs: glow filter
+  const defs = svg.append('defs');
+  const filter = defs.append('filter').attr('id', 'glow');
+  filter.append('feGaussianBlur').attr('stdDeviation', '3').attr('result', 'blur');
+  const merge = filter.append('feMerge');
+  merge.append('feMergeNode').attr('in', 'blur');
+  merge.append('feMergeNode').attr('in', 'SourceGraphic');
+
+  const states = topojson.feature(cachedUS, cachedUS.objects.states);
+  const proj = d3.geoAlbersUsa().fitExtent([[24, 20], [W - 24, H - 20]], states);
+  const path = d3.geoPath().projection(proj);
+
+  // Draw states
+  svg.append('g')
+    .selectAll('path')
+    .data(states.features)
+    .join('path')
+    .attr('d', path)
+    .attr('fill', '#12213a')
+    .attr('stroke', '#1e3a5f')
+    .attr('stroke-width', 0.7);
+
+  // State borders mesh
+  svg.append('path')
+    .datum(topojson.mesh(cachedUS, cachedUS.objects.states, (a, b) => a !== b))
+    .attr('d', path)
+    .attr('fill', 'none')
+    .attr('stroke', '#1e3a5f')
+    .attr('stroke-width', 0.5);
+
+  // Resort groups
+  const g = svg.append('g');
+
+  resorts.forEach(r => {
+    const pt = proj(r.coords);
+    if (!pt) return; // outside projection
+
+    const [cx, cy] = pt;
+
+    // Outer glow circle
+    g.append('circle')
+      .attr('cx', cx).attr('cy', cy).attr('r', 6)
+      .attr('fill', '#4db8ff').attr('opacity', 0.2)
+      .attr('filter', 'url(#glow)')
+      .attr('pointer-events', 'none');
+
+    // Main dot
+    g.append('circle')
+      .attr('class', 'resort-dot')
+      .attr('cx', cx).attr('cy', cy).attr('r', 4)
+      .attr('fill', '#4db8ff')
+      .attr('filter', 'url(#glow)')
+      .on('mouseenter', function () {
+        d3.select(this).attr('r', 6).attr('fill', '#ff7844');
+        showTooltip(r, cx, cy);
+      })
+      .on('mouseleave', function () {
+        d3.select(this).attr('r', 4).attr('fill', '#4db8ff');
+        scheduleHide();
+      });
+
+    // Name label
+    const lblName = r.labelName || r.name;
+    g.append('text')
+      .attr('class', 'resort-label')
+      .attr('x', cx + r.lbl[0])
+      .attr('y', cy + r.lbl[1])
+      .text(lblName);
+  });
+}
+
+initMap();
+window.addEventListener('resize', debounce(initMap, 200));
+</script>
+</body>
+</html>
