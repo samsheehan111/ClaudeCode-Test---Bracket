@@ -141,7 +141,7 @@ const resorts = [
   { name:"Jackson Hole", state:"WY", coords:[-110.8279,43.5875], snow:62, url:"https://www.jacksonhole.com/trail-map.html", lbl:[8,-6] },
   { name:"Sun Valley", state:"ID", coords:[-114.3511,43.6966], snow:36, url:"https://www.sunvalley.com/mountain/trail-maps/", lbl:[-68,4] },
   { name:"Aspen", state:"CO", coords:[-106.8175,39.1911], snow:55, url:"https://www.aspensnowmass.com/our-mountains/aspen-mountain/trail-map", lbl:[-48,13] },
-  { name:"Mammoth Mtn", state:"CA", coords:[-119.0326,37.6308], snow:78, url:"https://www.mammothmountain.com/mountain/grooming-and-terrain-reports/trail-map", lbl:[-76,-8] },
+  { name:"Mammoth Mtn", state:"CA", coords:[-119.0326,37.6308], snow:78, url:"https://www.mammothmountain.com/on-the-mountain/winter-trail-map", lbl:[-76,-8] },
   { name:"Heavenly", state:"CA", coords:[-119.9399,38.9353], snow:34, url:"https://www.skiheavenly.com/the-mountain/trail-map.aspx", lbl:[-58,13] },
   { name:"Palisades Tahoe", state:"CA", coords:[-120.2358,39.1969], snow:42, url:"https://www.palisadestahoe.com/the-mountain/trail-map", lbl:[-88,-8] },
   { name:"Telluride", state:"CO", coords:[-107.8123,37.9375], snow:47, url:"https://www.tellurideskiresort.com/plan-your-trip/trail-map/", lbl:[-58,13] },
@@ -229,9 +229,9 @@ function showTooltip(r, px, py) {
   const searchQ = encodeURIComponent(`${r.name} ${r.state} trail map`);
   const searchUrl = `https://www.google.com/search?q=${searchQ}`;
   ttLink.innerHTML = `
-    <a href="${searchUrl}" target="_blank" rel="noopener">🗺️ Find Trail Map ↗</a><br>
+    <a href="${r.url}" target="_blank" rel="noopener">🗺️ View Trail Map ↗</a><br>
     ${officialSite ? `<a href="${officialSite}" target="_blank" rel="noopener">🏔️ Resort Website ↗</a><br>` : ''}
-    <a href="${r.url}" target="_blank" rel="noopener">🔗 Original Link ↗</a>
+    <a href="${searchUrl}" target="_blank" rel="noopener">🔎 Backup Search ↗</a>
   `;
   ttSnowVal.textContent = r.snow + '"';
   ttSnowFill.style.width = Math.min(100, (r.snow / MAX_SNOW) * 100).toFixed(1) + '%';
