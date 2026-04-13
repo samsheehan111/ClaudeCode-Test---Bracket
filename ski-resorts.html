@@ -9,22 +9,35 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 body {
-  background: #060c1a;
+  background: #020810;
   font-family: 'Inter', system-ui, sans-serif;
   color: #e0e8f0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
 }
 
+/* ── star canvas ── */
+#star-canvas {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+}
+
+/* ── snow canvas ── */
+#snow-canvas {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2;
+}
+
 h1 {
+  position: relative; z-index: 3;
   font-size: clamp(18px, 2.4vw, 30px);
   font-weight: 800;
   text-align: center;
   padding: 12px 0 4px;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #4db8ff 0%, #a0d8ff 50%, #4db8ff 100%);
+  background: linear-gradient(135deg, #a0d8ff 0%, #ffffff 40%, #a0d8ff 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 18px rgba(77,184,255,0.55));
 }
 
 #map-wrap {
@@ -32,51 +45,90 @@ h1 {
   width: 100%; max-width: 1200px;
   position: relative;
   min-height: 0;
+  z-index: 3;
 }
 #map-wrap svg { display: block; width: 100%; height: 100%; }
 
-/* --- resort dot glow --- */
-.resort-dot {
-  cursor: pointer;
-  transition: r 0.18s ease, fill 0.18s ease;
+/* ── pulsing glow on mountain markers ── */
+@keyframes pulse-glow {
+  0%,100% { opacity: 0.25; r: 9; }
+  50%      { opacity: 0.55; r: 13; }
 }
-.resort-dot:hover { fill: #ff7844; }
+.marker-pulse {
+  animation: pulse-glow 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
 
-/* --- name labels --- */
+/* ── twinkling stars animation ── */
+@keyframes twinkle {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.2; }
+}
+
+/* ── state hover ── */
+.state-path {
+  cursor: default;
+  transition: fill 0.2s ease;
+}
+.state-path:hover { fill: #1a3560; }
+
+/* ── name labels ── */
 .resort-label {
   font-size: 9px;
   font-weight: 600;
   fill: #a8c8e8;
   pointer-events: none;
   paint-order: stroke;
-  stroke: #060c1a;
+  stroke: #020810;
   stroke-width: 3px;
   stroke-linejoin: round;
 }
 
-/* --- tooltip --- */
+/* ── tooltip ── */
 #tt {
   position: absolute;
   pointer-events: none;
   opacity: 0;
-  background: #0d1b2e;
+  background: linear-gradient(160deg, #0a1a30 0%, #071222 100%);
   border: 1px solid #1e3a5f;
-  border-top: 3px solid #4db8ff;
-  border-radius: 8px;
-  padding: 14px 16px 12px;
+  border-radius: 10px;
+  padding: 0 0 12px;
   width: 320px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(77,184,255,0.12);
   transition: opacity 0.18s ease;
   z-index: 100;
   font-size: 13px;
+  overflow: hidden;
 }
 #tt.vis { pointer-events: all; opacity: 1; }
 
-#tt .tt-name {
-  font-size: 16px; font-weight: 700; color: #fff;
-  margin-bottom: 2px;
+/* mountain header banner */
+.tt-header {
+  background: linear-gradient(135deg, #0d2040 0%, #142c50 50%, #0a1a30 100%);
+  border-bottom: 1px solid rgba(77,184,255,0.25);
+  padding: 12px 14px 10px;
+  display: flex; align-items: center; gap: 10px;
+  position: relative; overflow: hidden;
 }
-#tt .tt-state { font-size: 11px; color: #6a8caa; margin-bottom: 10px; }
+.tt-header::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 28px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 28'%3E%3Cpath d='M0 28 L30 8 L55 20 L90 0 L120 16 L155 4 L185 18 L220 2 L250 15 L285 3 L320 12 L320 28 Z' fill='%230a1a30'/%3E%3C/svg%3E") no-repeat bottom center / 100% auto;
+}
+.tt-mtn-icon {
+  font-size: 28px; line-height: 1; flex-shrink: 0;
+  filter: drop-shadow(0 0 8px rgba(160,216,255,0.6));
+}
+.tt-header-text { flex: 1; }
+.tt-name {
+  font-size: 16px; font-weight: 700; color: #fff;
+  text-shadow: 0 0 12px rgba(77,184,255,0.5);
+  margin-bottom: 1px;
+}
+.tt-state { font-size: 11px; color: #6a9ec8; }
+
+.tt-body { padding: 10px 14px 0; }
 
 #tt .tt-link a {
   color: #4db8ff; text-decoration: none; font-weight: 600; font-size: 12px;
@@ -87,11 +139,12 @@ h1 {
 .snow-section { margin: 10px 0; }
 .snow-header { display: flex; justify-content: space-between; font-size: 11px; color: #8aa8c0; margin-bottom: 4px; }
 .snow-bar-bg {
-  height: 8px; border-radius: 4px; background: #162a42; overflow: hidden;
+  height: 8px; border-radius: 4px; background: #0d1f35; overflow: hidden;
 }
 .snow-bar-fill {
   height: 100%; border-radius: 4px;
-  background: linear-gradient(90deg, #4db8ff, #82d0ff);
+  background: linear-gradient(90deg, #2d7dd2, #82d0ff, #e0f4ff);
+  box-shadow: 0 0 6px rgba(77,184,255,0.4);
 }
 
 /* forecast grid */
@@ -100,7 +153,8 @@ h1 {
   margin-top: 10px;
 }
 .fc-day {
-  text-align: center; background: #0a1526; border-radius: 5px; padding: 5px 2px;
+  text-align: center; background: #081422; border-radius: 5px; padding: 5px 2px;
+  border: 1px solid rgba(30,58,95,0.6);
 }
 .fc-day .day-label { font-size: 9px; font-weight: 600; color: #6a8caa; }
 .fc-day .wx-icon { font-size: 16px; line-height: 1.4; }
@@ -108,29 +162,141 @@ h1 {
 .fc-day .temps    { font-size: 9px; color: #8aa8c0; }
 
 footer {
+  position: relative; z-index: 3;
   font-size: 11px; color: #3a5570; padding: 6px 0 10px; text-align: center;
 }
 </style>
 </head>
 <body>
 
-<h1>US Ski Resorts</h1>
+<canvas id="star-canvas"></canvas>
+<canvas id="snow-canvas"></canvas>
+
+<h1>❄️ US Ski Resorts ⛷️</h1>
 <div id="map-wrap"></div>
 <div id="tt">
-  <div class="tt-name"></div>
-  <div class="tt-state"></div>
-  <div class="tt-link"></div>
-  <div class="snow-section">
-    <div class="snow-header"><span>Base Snow Depth</span><span class="snow-val"></span></div>
-    <div class="snow-bar-bg"><div class="snow-bar-fill"></div></div>
+  <div class="tt-header">
+    <div class="tt-mtn-icon">🏔️</div>
+    <div class="tt-header-text">
+      <div class="tt-name"></div>
+      <div class="tt-state"></div>
+    </div>
   </div>
-  <div class="fc-grid"></div>
+  <div class="tt-body">
+    <div class="tt-link"></div>
+    <div class="snow-section">
+      <div class="snow-header"><span>❄️ Base Snow Depth</span><span class="snow-val"></span></div>
+      <div class="snow-bar-bg"><div class="snow-bar-fill"></div></div>
+    </div>
+    <div class="fc-grid"></div>
+  </div>
 </div>
-<footer>Snow depths &amp; forecasts are illustrative mock data</footer>
+<footer>⛷️ Snow depths &amp; forecasts are illustrative mock data &nbsp;|&nbsp; 🎿 Hover a resort to explore</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 <script>
+// ══════════════════════════════════════════════════
+//  STAR FIELD
+// ══════════════════════════════════════════════════
+(function initStars() {
+  const canvas = document.getElementById('star-canvas');
+  const ctx = canvas.getContext('2d');
+  let stars = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildStars();
+  }
+
+  function buildStars() {
+    const n = Math.floor((canvas.width * canvas.height) / 3200);
+    stars = Array.from({ length: n }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.3 + Math.random() * 0.9,
+    }));
+  }
+
+  let lastT = 0;
+  function draw(t) {
+    const dt = (t - lastT) / 1000;
+    lastT = t;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const now = t / 1000;
+    for (const s of stars) {
+      const alpha = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(now * s.speed + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,225,255,${alpha.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+// ══════════════════════════════════════════════════
+//  SNOWFALL
+// ══════════════════════════════════════════════════
+(function initSnow() {
+  const canvas = document.getElementById('snow-canvas');
+  const ctx = canvas.getContext('2d');
+  let flakes = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildFlakes();
+  }
+
+  function buildFlakes() {
+    const n = Math.floor((canvas.width * canvas.height) / 9000);
+    flakes = Array.from({ length: n }, () => spawnFlake(true));
+  }
+
+  function spawnFlake(init) {
+    return {
+      x: Math.random() * canvas.width,
+      y: init ? Math.random() * canvas.height : -6,
+      r: Math.random() * 2.8 + 0.8,
+      vy: 0.4 + Math.random() * 1.0,
+      vx: (Math.random() - 0.5) * 0.4,
+      alpha: 0.4 + Math.random() * 0.5,
+      wobbleA: (Math.random() - 0.5) * 0.8,
+      wobbleF: 0.4 + Math.random() * 0.8,
+      phase: Math.random() * Math.PI * 2,
+    };
+  }
+
+  let lastT = 0;
+  function draw(t) {
+    const now = t / 1000;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < flakes.length; i++) {
+      const f = flakes[i];
+      f.x += f.vx + f.wobbleA * Math.sin(now * f.wobbleF + f.phase);
+      f.y += f.vy;
+      if (f.y > canvas.height + 8) flakes[i] = spawnFlake(false);
+      ctx.beginPath();
+      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(220,240,255,${f.alpha.toFixed(2)})`;
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
 const US_ATLAS = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
 
 const resorts = [
@@ -217,14 +383,12 @@ ttEl.addEventListener('mouseleave', scheduleHide);
 function showTooltip(r, px, py) {
   cancelHide();
   ttName.textContent = r.name;
-  ttState.textContent = r.state;
+  ttState.textContent = `🎿 ${r.state}`;
   const officialSite = (() => {
     try {
       const u = new URL(r.url);
       return `${u.protocol}//${u.host}`;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   })();
   const searchQ = encodeURIComponent(`${r.name} ${r.state} trail map`);
   const searchUrl = `https://www.google.com/search?q=${searchQ}`;
@@ -241,22 +405,19 @@ function showTooltip(r, px, py) {
     `<div class="fc-day">
        <div class="day-label">${d.day}</div>
        <div class="wx-icon">${d.icon}</div>
-       <div class="snow-in">${d.snowIn > 0 ? d.snowIn + '"' : '—'}</div>
+       <div class="snow-in">${d.snowIn > 0 ? d.snowIn + '"❄️' : '—'}</div>
        <div class="temps">${d.hi}°/${d.lo}°</div>
      </div>`
   ).join('');
 
-  // Position tooltip
   const wrap = document.getElementById('map-wrap');
   const wRect = wrap.getBoundingClientRect();
   const ttW = 320;
   let left = px + 14;
   let top = py - 30;
-  // Keep within map bounds
   if (left + ttW > wRect.width - 8) left = px - ttW - 14;
   if (top < 8) top = 8;
-  if (top + 300 > wRect.height - 8) top = wRect.height - 308;
-
+  if (top + 340 > wRect.height - 8) top = wRect.height - 348;
   ttEl.style.left = left + 'px';
   ttEl.style.top = top + 'px';
   ttEl.classList.add('vis');
@@ -296,54 +457,155 @@ async function initMap() {
   const proj = d3.geoAlbersUsa().fitExtent([[24, 20], [W - 24, H - 20]], states);
   const path = d3.geoPath().projection(proj);
 
-  // Draw states
+  // Draw states with hover highlight
   svg.append('g')
     .selectAll('path')
     .data(states.features)
     .join('path')
+    .attr('class', 'state-path')
     .attr('d', path)
-    .attr('fill', '#12213a')
+    .attr('fill', '#0e1e36')
     .attr('stroke', '#1e3a5f')
     .attr('stroke-width', 0.7);
 
-  // State borders mesh
+  // State border mesh
   svg.append('path')
     .datum(topojson.mesh(cachedUS, cachedUS.objects.states, (a, b) => a !== b))
     .attr('d', path)
     .attr('fill', 'none')
-    .attr('stroke', '#1e3a5f')
+    .attr('stroke', '#243f60')
     .attr('stroke-width', 0.5);
 
-  // Resort groups
-  const g = svg.append('g');
+  // ── Mountain range silhouettes ──────────────────────────────────────
+  // We approximate ridge lines as polylines of geographic coords
+  const ridges = [
+    // Rockies (N→S spine)
+    { id: 'rockies', color: '#162d4a', coords: [
+      [-113.8,48.6],[-112.5,47.2],[-111.4,46.5],[-110.8,45.3],[-110.1,43.8],
+      [-109.6,41.9],[-107.5,40.2],[-106.8,39.5],[-106.2,39.1],[-106.0,38.5],
+      [-105.9,37.5],[-105.5,36.8],[-105.0,35.8]
+    ]},
+    // Sierra Nevada
+    { id: 'sierra', color: '#162d4a', coords: [
+      [-121.5,40.4],[-120.8,39.6],[-120.1,38.8],[-119.4,38.1],
+      [-118.9,37.5],[-118.5,36.8],[-118.2,36.2]
+    ]},
+    // Appalachians
+    { id: 'appalachians', color: '#112234', coords: [
+      [-70.3,45.0],[-71.3,44.2],[-72.5,43.2],[-73.0,42.5],[-74.5,41.5],
+      [-76.0,40.5],[-77.5,39.5],[-79.0,38.5],[-80.5,37.5],[-82.0,36.5],
+      [-83.5,35.5],[-84.0,34.8]
+    ]},
+  ];
+
+  const ridgeG = svg.append('g').attr('class', 'ridges').attr('pointer-events', 'none');
+
+  ridges.forEach(ridge => {
+    const pts = ridge.coords.map(c => proj(c)).filter(Boolean);
+    if (pts.length < 2) return;
+
+    // Build SVG mountain silhouette: zigzag peaks above the polyline
+    const peakH = 14; // px height of triangular teeth
+    const step = 18;  // px between teeth
+
+    // Smooth the ridge using a rough piecewise path
+    let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for (let i = 1; i < pts.length; i++) {
+      d += ` L ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)}`;
+    }
+
+    // Draw a subtle glow stroke along the ridge
+    ridgeG.append('path')
+      .attr('d', d)
+      .attr('fill', 'none')
+      .attr('stroke', '#2a4f78')
+      .attr('stroke-width', 2.5)
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-linejoin', 'round')
+      .attr('opacity', 0.35);
+
+    ridgeG.append('path')
+      .attr('d', d)
+      .attr('fill', 'none')
+      .attr('stroke', '#1a3558')
+      .attr('stroke-width', 1)
+      .attr('stroke-linecap', 'round')
+      .attr('opacity', 0.6);
+  });
+
+  // ── Resort markers (SVG mountain triangles) ───────────────────────
+  const g = svg.append('g').attr('class', 'resorts');
+
+  // Mountain marker: triangle body + white snowcap
+  function drawMountainMarker(parent, cx, cy, resort) {
+    const bw = 14;   // base half-width
+    const bh = 18;   // total height
+    const capH = 7;  // snowcap height from tip
+
+    const tip  = [cx, cy - bh];
+    const bl   = [cx - bw, cy];
+    const br   = [cx + bw, cy];
+
+    // Snow cap — top fraction of triangle
+    const t = capH / bh;
+    const capL = [cx - bw * t, cy - bh + capH];
+    const capR = [cx + bw * t, cy - bh + capH];
+
+    const triPts = `${tip[0]},${tip[1]} ${bl[0]},${bl[1]} ${br[0]},${br[1]}`;
+    const capPts = `${tip[0]},${tip[1]} ${capL[0]},${capL[1]} ${capR[0]},${capR[1]}`;
+
+    const grp = parent.append('g')
+      .attr('class', 'resort-marker')
+      .style('cursor', 'pointer');
+
+    // Pulsing glow halo
+    grp.append('circle')
+      .attr('class', 'marker-pulse')
+      .attr('cx', cx).attr('cy', cy - bh * 0.5)
+      .attr('r', 9)
+      .attr('fill', '#4db8ff')
+      .attr('opacity', 0.25)
+      .attr('filter', 'url(#glow)');
+
+    // Mountain body
+    grp.append('polygon')
+      .attr('points', triPts)
+      .attr('fill', '#1e4f8a')
+      .attr('stroke', '#4db8ff')
+      .attr('stroke-width', 0.8)
+      .attr('filter', 'url(#glow)');
+
+    // Snow cap
+    grp.append('polygon')
+      .attr('points', capPts)
+      .attr('fill', '#ddf0ff')
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 0.5)
+      .attr('opacity', 0.92);
+
+    // Invisible hit-target circle for easier mouse events
+    grp.append('circle')
+      .attr('cx', cx).attr('cy', cy - bh * 0.45)
+      .attr('r', bw)
+      .attr('fill', 'transparent')
+      .on('mouseenter', function() {
+        grp.select('polygon').attr('fill', '#ff6b2b').attr('stroke', '#ffaa44');
+        showTooltip(resort, cx, cy - bh);
+      })
+      .on('mouseleave', function() {
+        grp.select('polygon').attr('fill', '#1e4f8a').attr('stroke', '#4db8ff');
+        scheduleHide();
+      });
+
+    return grp;
+  }
 
   resorts.forEach(r => {
     const pt = proj(r.coords);
-    if (!pt) return; // outside projection
-
+    if (!pt) return;
     const [cx, cy] = pt;
 
-    // Outer glow circle
-    g.append('circle')
-      .attr('cx', cx).attr('cy', cy).attr('r', 6)
-      .attr('fill', '#4db8ff').attr('opacity', 0.2)
-      .attr('filter', 'url(#glow)')
-      .attr('pointer-events', 'none');
-
-    // Main dot
-    g.append('circle')
-      .attr('class', 'resort-dot')
-      .attr('cx', cx).attr('cy', cy).attr('r', 4)
-      .attr('fill', '#4db8ff')
-      .attr('filter', 'url(#glow)')
-      .on('mouseenter', function () {
-        d3.select(this).attr('r', 6).attr('fill', '#ff7844');
-        showTooltip(r, cx, cy);
-      })
-      .on('mouseleave', function () {
-        d3.select(this).attr('r', 4).attr('fill', '#4db8ff');
-        scheduleHide();
-      });
+    drawMountainMarker(g, cx, cy, r);
 
     // Name label
     const lblName = r.labelName || r.name;
