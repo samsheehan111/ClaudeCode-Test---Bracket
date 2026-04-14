@@ -191,7 +191,7 @@ footer {
     <div class="fc-grid"></div>
   </div>
 </div>
-<footer>⛷️ Snow depths &amp; forecasts are illustrative mock data &nbsp;|&nbsp; 🎿 Hover a resort to explore</footer>
+<footer>❄️ Live snow depth &amp; 7-day forecast via <a href="https://open-meteo.com/" target="_blank" rel="noopener" style="color:#3a7faa;text-decoration:none;">Open-Meteo</a> &nbsp;|&nbsp; 🎿 Hover a resort to explore</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
@@ -300,68 +300,81 @@ footer {
 const US_ATLAS = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json';
 
 const resorts = [
-  { name:"Vail", state:"CO", coords:[-106.3781,39.6433], snow:58, url:"https://www.vail.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
-  { name:"Breckenridge", state:"CO", coords:[-106.0384,39.4817], snow:52, url:"https://www.breckenridge.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[-80,4] },
-  { name:"Park City", state:"UT", coords:[-111.498,40.6461], snow:44, url:"https://www.parkcitymountain.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
-  { name:"Steamboat", state:"CO", coords:[-106.8317,40.485], snow:48, url:"https://www.steamboat.com/the-mountain/trail-map", lbl:[8,4] },
-  { name:"Jackson Hole", state:"WY", coords:[-110.8279,43.5875], snow:62, url:"https://www.jacksonhole.com/maps/mountain-winter", lbl:[8,-6] },
-  { name:"Sun Valley", state:"ID", coords:[-114.3511,43.6966], snow:36, url:"https://www.sunvalley.com/the-mountain/maps-guides/", lbl:[-68,4] },
-  { name:"Aspen", state:"CO", coords:[-106.8175,39.1911], snow:55, url:"https://www.aspensnowmass.com/four-mountains/aspen-mountain/trail-maps", lbl:[-48,13] },
-  { name:"Mammoth Mtn", state:"CA", coords:[-119.0326,37.6308], snow:78, url:"https://www.mammothmountain.com/on-the-mountain/winter-trail-map", lbl:[-76,-8] },
-  { name:"Heavenly", state:"CA", coords:[-119.9399,38.9353], snow:34, url:"https://www.skiheavenly.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[-58,13] },
-  { name:"Palisades Tahoe", state:"CA", coords:[-120.2358,39.1969], snow:42, url:"https://www.palisadestahoe.com/mountain-information/trail-maps", lbl:[-88,-8] },
-  { name:"Telluride", state:"CO", coords:[-107.8123,37.9375], snow:47, url:"https://tellurideskiresort.com/mountain/", lbl:[-58,13] },
-  { name:"Stowe", state:"VT", coords:[-72.7823,44.5301], snow:22, url:"https://www.stowe.com/the-mountain/about-the-mountain/trail-maps.aspx", lbl:[8,-6] },
-  { name:"Killington", state:"VT", coords:[-72.8201,43.6045], snow:28, url:"https://www.killington.com/the-mountain/trail-area-maps/winter-trail-guide/", lbl:[8,13] },
-  { name:"Big Sky", state:"MT", coords:[-111.4012,45.286], snow:54, url:"https://www.bigskyresort.com/trail-maps", lbl:[8,-6] },
-  { name:"Snowbird", state:"UT", coords:[-111.6558,40.583], snow:72, url:"https://www.snowbird.com/the-mountain/maps/winter-trail-map/", lbl:[-58,13] },
-  { name:"Alta", state:"UT", coords:[-111.62,40.5983], snow:68, url:"https://www.alta.com/lift-terrain-status", lbl:[8,-6] },
-  { name:"Deer Valley", state:"UT", coords:[-111.4782,40.637], snow:46, url:"https://www.deervalley.com/explore-the-mountain/interactive-grooming-map", lbl:[8,13] },
-  { name:"Crested Butte", state:"CO", coords:[-106.9878,38.8697], snow:44, url:"https://www.skicb.com/the-mountain/about-the-mountain/trail-maps.aspx", lbl:[-76,-6] },
-  { name:"Copper Mtn", state:"CO", coords:[-106.15,39.48], snow:50, url:"https://www.coppercolorado.com/the-mountain/trail-area-maps/winter-trail-map/", lbl:[8,13] },
-  { name:"Taos", state:"NM", coords:[-105.4513,36.5952], snow:18, url:"https://www.skitaos.com/mountain/lifts-trails", lbl:[8,-6] },
-  { name:"Keystone", state:"CO", coords:[-105.9786,39.6064], snow:48, url:"https://www.keystoneresort.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
-  { name:"Arapahoe Basin", state:"CO", coords:[-105.8714,39.6425], snow:54, url:"https://www.arapahoebasin.com/trail-maps/", labelName:"A-Basin", lbl:[8,13] },
-  { name:"Sugarloaf", state:"ME", coords:[-70.3139,45.0314], snow:14, url:"https://www.sugarloaf.com/mountain-info/mountain-maps", lbl:[8,-6] },
-  { name:"Loon Mountain", state:"NH", coords:[-71.6248,44.0298], snow:10, url:"https://www.loonmtn.com/mountain-maps", labelName:"Loon Mtn", lbl:[-66,13] },
-  { name:"Sunday River", state:"ME", coords:[-70.8607,44.4749], snow:12, url:"https://www.sundayriver.com/resort-maps", lbl:[8,13] }
+  { name:"Vail", state:"CO", coords:[-106.3781,39.6433],url:"https://www.vail.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Breckenridge", state:"CO", coords:[-106.0384,39.4817], url:"https://www.breckenridge.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[-80,4] },
+  { name:"Park City", state:"UT", coords:[-111.498,40.6461], url:"https://www.parkcitymountain.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Steamboat", state:"CO", coords:[-106.8317,40.485], url:"https://www.steamboat.com/the-mountain/trail-map", lbl:[8,4] },
+  { name:"Jackson Hole", state:"WY", coords:[-110.8279,43.5875], url:"https://www.jacksonhole.com/maps/mountain-winter", lbl:[8,-6] },
+  { name:"Sun Valley", state:"ID", coords:[-114.3511,43.6966], url:"https://www.sunvalley.com/the-mountain/maps-guides/", lbl:[-68,4] },
+  { name:"Aspen", state:"CO", coords:[-106.8175,39.1911], url:"https://www.aspensnowmass.com/four-mountains/aspen-mountain/trail-maps", lbl:[-48,13] },
+  { name:"Mammoth Mtn", state:"CA", coords:[-119.0326,37.6308], url:"https://www.mammothmountain.com/on-the-mountain/winter-trail-map", lbl:[-76,-8] },
+  { name:"Heavenly", state:"CA", coords:[-119.9399,38.9353], url:"https://www.skiheavenly.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[-58,13] },
+  { name:"Palisades Tahoe", state:"CA", coords:[-120.2358,39.1969], url:"https://www.palisadestahoe.com/mountain-information/trail-maps", lbl:[-88,-8] },
+  { name:"Telluride", state:"CO", coords:[-107.8123,37.9375], url:"https://tellurideskiresort.com/mountain/", lbl:[-58,13] },
+  { name:"Stowe", state:"VT", coords:[-72.7823,44.5301], url:"https://www.stowe.com/the-mountain/about-the-mountain/trail-maps.aspx", lbl:[8,-6] },
+  { name:"Killington", state:"VT", coords:[-72.8201,43.6045], url:"https://www.killington.com/the-mountain/trail-area-maps/winter-trail-guide/", lbl:[8,13] },
+  { name:"Big Sky", state:"MT", coords:[-111.4012,45.286], url:"https://www.bigskyresort.com/trail-maps", lbl:[8,-6] },
+  { name:"Snowbird", state:"UT", coords:[-111.6558,40.583], url:"https://www.snowbird.com/the-mountain/maps/winter-trail-map/", lbl:[-58,13] },
+  { name:"Alta", state:"UT", coords:[-111.62,40.5983], url:"https://www.alta.com/lift-terrain-status", lbl:[8,-6] },
+  { name:"Deer Valley", state:"UT", coords:[-111.4782,40.637], url:"https://www.deervalley.com/explore-the-mountain/interactive-grooming-map", lbl:[8,13] },
+  { name:"Crested Butte", state:"CO", coords:[-106.9878,38.8697], url:"https://www.skicb.com/the-mountain/about-the-mountain/trail-maps.aspx", lbl:[-76,-6] },
+  { name:"Copper Mtn", state:"CO", coords:[-106.15,39.48], url:"https://www.coppercolorado.com/the-mountain/trail-area-maps/winter-trail-map/", lbl:[8,13] },
+  { name:"Taos", state:"NM", coords:[-105.4513,36.5952], url:"https://www.skitaos.com/mountain/lifts-trails", lbl:[8,-6] },
+  { name:"Keystone", state:"CO", coords:[-105.9786,39.6064], url:"https://www.keystoneresort.com/the-mountain/about-the-mountain/trail-map.aspx", lbl:[8,-6] },
+  { name:"Arapahoe Basin", state:"CO", coords:[-105.8714,39.6425], url:"https://www.arapahoebasin.com/trail-maps/", labelName:"A-Basin", lbl:[8,13] },
+  { name:"Sugarloaf", state:"ME", coords:[-70.3139,45.0314], url:"https://www.sugarloaf.com/mountain-info/mountain-maps", lbl:[8,-6] },
+  { name:"Loon Mountain", state:"NH", coords:[-71.6248,44.0298], url:"https://www.loonmtn.com/mountain-maps", labelName:"Loon Mtn", lbl:[-66,13] },
+  { name:"Sunday River", state:"ME", coords:[-70.8607,44.4749], url:"https://www.sundayriver.com/resort-maps", lbl:[8,13] }
 ];
 
-const MAX_SNOW = 80; // for bar scale
+const MAX_SNOW = 120; // inches — upper bound for snow depth bar
 
-// Build day labels from "today" so they stay accurate without hard-coding.
-const dayLabels = (() => {
-  const labels = [];
-  const dayFmt = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'UTC' });
-  for (let i = 0; i < 7; i++) {
-    const d = new Date();
-    d.setUTCDate(d.getUTCDate() + i);
-    labels.push(dayFmt.format(d));
-  }
-  return labels;
-})();
+// ── WMO weather-code → emoji ─────────────────────────────────────────
+function wmoIcon(code) {
+  if (code === 0)              return '☀️';
+  if (code <= 2)               return '🌤️';
+  if (code === 3)              return '☁️';
+  if (code <= 48)              return '🌫️';
+  if (code <= 55)              return '🌦️';
+  if (code <= 67)              return '🌧️';
+  if (code <= 77)              return '❄️';
+  if (code <= 82)              return '🌧️';
+  if (code <= 86)              return '🌨️';
+  return '⛈️';
+}
 
-function mockForecast(snow) {
-  // Seed a repeatable but varied forecast based on snow depth
-  const seed = snow * 7;
-  const icons = ['☀️','⛅','🌨️','❄️','🌤️','🌧️','⛅'];
-  const forecasts = [];
-  for (let i = 0; i < 7; i++) {
-    const v = (seed + i * 13) % 47;
-    const isSnowy = v % 3 === 0;
-    const hi = Math.round(28 + (snow / 78) * 12 + (v % 11) - 5);
-    const lo = hi - Math.round(8 + (v % 7));
-    const d = new Date();
-    d.setUTCDate(d.getUTCDate() + i);
-    forecasts.push({
-      day: dayLabels[i],
-      date: `${d.getUTCMonth() + 1}/${d.getUTCDate()}`,
-      icon: isSnowy ? (v % 2 === 0 ? '❄️' : '🌨️') : icons[i % icons.length],
-      snowIn: isSnowy ? Math.round(1 + (v % 6)) : 0,
-      hi, lo
-    });
-  }
-  return forecasts;
+// ── Open-Meteo fetch (cached on the resort object as r._wx) ──────────
+// Returns { snowDepthIn, days:[{day,icon,snowIn,hi,lo}] }
+async function fetchWeather(r) {
+  if (r._wx) return r._wx;
+  const [lon, lat] = r.coords;
+  const url =
+    `https://api.open-meteo.com/v1/forecast` +
+    `?latitude=${lat}&longitude=${lon}` +
+    `&daily=weathercode,temperature_2m_max,temperature_2m_min,snowfall_sum` +
+    `&current=snow_depth` +
+    `&temperature_unit=fahrenheit` +
+    `&timezone=auto` +
+    `&forecast_days=7`;
+  const data = await fetch(url).then(res => res.json());
+  // snow_depth is in metres → convert to inches
+  const snowDepthIn = Math.round((data.current?.snow_depth ?? 0) * 39.37);
+  // snowfall_sum is in cm → convert to inches (1 cm = 0.3937 in)
+  const days = (data.daily?.time ?? []).map((t, i) => {
+    const date = new Date(t + 'T12:00:00Z');
+    const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+    const snowCm   = data.daily.snowfall_sum[i] ?? 0;
+    const snowIn   = Math.round(snowCm * 0.3937 * 10) / 10; // one decimal
+    return {
+      day:    dayLabel,
+      icon:   wmoIcon(data.daily.weathercode[i] ?? 0),
+      snowIn,
+      hi:     Math.round(data.daily.temperature_2m_max[i] ?? 0),
+      lo:     Math.round(data.daily.temperature_2m_min[i] ?? 0),
+    };
+  });
+  r._wx = { snowDepthIn, days };
+  return r._wx;
 }
 
 // --- tooltip refs ---
@@ -373,43 +386,22 @@ const ttSnowVal = ttEl.querySelector('.snow-val');
 const ttSnowFill = ttEl.querySelector('.snow-bar-fill');
 const ttFcGrid = ttEl.querySelector('.fc-grid');
 
+// Track which resort the tooltip is currently showing
+let activeResort = null;
+
 // --- sticky tooltip logic ---
 let hideTimer = null;
 function cancelHide() { clearTimeout(hideTimer); }
-function scheduleHide() { hideTimer = setTimeout(() => ttEl.classList.remove('vis'), 260); }
+function scheduleHide() {
+  hideTimer = setTimeout(() => {
+    ttEl.classList.remove('vis');
+    activeResort = null;
+  }, 260);
+}
 ttEl.addEventListener('mouseenter', cancelHide);
 ttEl.addEventListener('mouseleave', scheduleHide);
 
-function showTooltip(r, px, py) {
-  cancelHide();
-  ttName.textContent = r.name;
-  ttState.textContent = `🎿 ${r.state}`;
-  const officialSite = (() => {
-    try {
-      const u = new URL(r.url);
-      return `${u.protocol}//${u.host}`;
-    } catch { return null; }
-  })();
-  const searchQ = encodeURIComponent(`${r.name} ${r.state} trail map`);
-  const searchUrl = `https://www.google.com/search?q=${searchQ}`;
-  ttLink.innerHTML = `
-    <a href="${r.url}" target="_blank" rel="noopener">🗺️ View Trail Map ↗</a><br>
-    ${officialSite ? `<a href="${officialSite}" target="_blank" rel="noopener">🏔️ Resort Website ↗</a><br>` : ''}
-    <a href="${searchUrl}" target="_blank" rel="noopener">🔎 Backup Search ↗</a>
-  `;
-  ttSnowVal.textContent = r.snow + '"';
-  ttSnowFill.style.width = Math.min(100, (r.snow / MAX_SNOW) * 100).toFixed(1) + '%';
-
-  const fc = mockForecast(r.snow);
-  ttFcGrid.innerHTML = fc.map(d =>
-    `<div class="fc-day">
-       <div class="day-label">${d.day}</div>
-       <div class="wx-icon">${d.icon}</div>
-       <div class="snow-in">${d.snowIn > 0 ? d.snowIn + '"❄️' : '—'}</div>
-       <div class="temps">${d.hi}°/${d.lo}°</div>
-     </div>`
-  ).join('');
-
+function positionTooltip(px, py) {
   const wrap = document.getElementById('map-wrap');
   const wRect = wrap.getBoundingClientRect();
   const ttW = 320;
@@ -420,7 +412,64 @@ function showTooltip(r, px, py) {
   if (top + 340 > wRect.height - 8) top = wRect.height - 348;
   ttEl.style.left = left + 'px';
   ttEl.style.top = top + 'px';
+}
+
+function renderWeather(wx) {
+  ttSnowVal.textContent = wx.snowDepthIn + '"';
+  ttSnowFill.style.width = Math.min(100, (wx.snowDepthIn / MAX_SNOW) * 100).toFixed(1) + '%';
+  ttFcGrid.innerHTML = wx.days.map(d =>
+    `<div class="fc-day">
+       <div class="day-label">${d.day}</div>
+       <div class="wx-icon">${d.icon}</div>
+       <div class="snow-in">${d.snowIn > 0 ? d.snowIn + '"❄️' : '—'}</div>
+       <div class="temps">${d.hi}°/${d.lo}°</div>
+     </div>`
+  ).join('');
+}
+
+function showTooltip(r, px, py) {
+  cancelHide();
+  activeResort = r;
+
+  ttName.textContent = r.name;
+  ttState.textContent = `🎿 ${r.state}`;
+
+  const officialSite = (() => {
+    try { const u = new URL(r.url); return `${u.protocol}//${u.host}`; }
+    catch { return null; }
+  })();
+  const searchQ = encodeURIComponent(`${r.name} ${r.state} trail map`);
+  ttLink.innerHTML = `
+    <a href="${r.url}" target="_blank" rel="noopener">🗺️ View Trail Map ↗</a><br>
+    ${officialSite ? `<a href="${officialSite}" target="_blank" rel="noopener">🏔️ Resort Website ↗</a><br>` : ''}
+    <a href="https://www.google.com/search?q=${searchQ}" target="_blank" rel="noopener">🔎 Backup Search ↗</a>
+  `;
+
+  // Show loading state while weather fetches
+  if (!r._wx) {
+    ttSnowVal.textContent = '…';
+    ttSnowFill.style.width = '0%';
+    ttFcGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:8px 0;font-size:11px;color:#4db8ff;">Loading forecast…</div>`;
+  } else {
+    renderWeather(r._wx);
+  }
+
+  positionTooltip(px, py);
   ttEl.classList.add('vis');
+
+  // Fetch real weather if not yet cached
+  if (!r._wx) {
+    fetchWeather(r).then(wx => {
+      // Only update if this resort is still the active one
+      if (activeResort === r && ttEl.classList.contains('vis')) {
+        renderWeather(wx);
+      }
+    }).catch(() => {
+      if (activeResort === r) {
+        ttFcGrid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:8px 0;font-size:11px;color:#c04040;">Forecast unavailable</div>`;
+      }
+    });
+  }
 }
 
 // --- map rendering ---
@@ -538,9 +587,9 @@ async function initMap() {
 
   // Mountain marker: triangle body + white snowcap
   function drawMountainMarker(parent, cx, cy, resort) {
-    const bw = 14;   // base half-width
-    const bh = 18;   // total height
-    const capH = 7;  // snowcap height from tip
+    const bw = 8;    // base half-width
+    const bh = 11;   // total height
+    const capH = 4;  // snowcap height from tip
 
     const tip  = [cx, cy - bh];
     const bl   = [cx - bw, cy];
@@ -562,7 +611,7 @@ async function initMap() {
     grp.append('circle')
       .attr('class', 'marker-pulse')
       .attr('cx', cx).attr('cy', cy - bh * 0.5)
-      .attr('r', 9)
+      .attr('r', 6)
       .attr('fill', '#4db8ff')
       .attr('opacity', 0.25)
       .attr('filter', 'url(#glow)');
@@ -583,10 +632,10 @@ async function initMap() {
       .attr('stroke-width', 0.5)
       .attr('opacity', 0.92);
 
-    // Invisible hit-target circle for easier mouse events
+    // Invisible hit-target — slightly larger than marker for easy clicking
     grp.append('circle')
       .attr('cx', cx).attr('cy', cy - bh * 0.45)
-      .attr('r', bw)
+      .attr('r', 10)
       .attr('fill', 'transparent')
       .on('mouseenter', function() {
         grp.select('polygon').attr('fill', '#ff6b2b').attr('stroke', '#ffaa44');
