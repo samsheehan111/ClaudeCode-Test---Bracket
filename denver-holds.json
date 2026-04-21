@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-21T02:55:24Z",
+  "updated": "2026-04-21T13:51:50Z",
   "books": {
     "o24-01": {
       "status": "error",
@@ -133,7 +133,7 @@
     },
     "r25-01": {
       "status": "error",
-      "text": "HTTP 502",
+      "text": "HTTP 404",
       "available": false
     },
     "r25-02": {
