@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-24T02:00:42Z",
+  "updated": "2026-05-24T12:56:23Z",
   "books": {
     "o24-01": {
       "status": "unknown",
@@ -27,8 +27,8 @@
       "available": false
     },
     "o24-06": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "o25-01": {
@@ -62,8 +62,8 @@
       "available": false
     },
     "o25-07": {
-      "status": "error",
-      "text": "HTTP 500",
+      "status": "unknown",
+      "text": "\u2014",
       "available": false
     },
     "o25-08": {
@@ -97,8 +97,8 @@
       "available": false
     },
     "r24-05": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "r24-06": {
