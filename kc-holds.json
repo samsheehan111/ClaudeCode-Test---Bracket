@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T13:10:45Z",
+  "updated": "2026-06-29T02:11:06Z",
   "books": {
     "o24-01": {
       "status": "unknown",
@@ -102,7 +102,7 @@
       "available": false
     },
     "r24-06": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
@@ -142,7 +142,7 @@
       "available": false
     },
     "r25-03": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
