@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-27T01:47:26Z",
+  "updated": "2026-07-27T14:08:39Z",
   "books": {
     "o24-01": {
       "status": "unknown",
@@ -47,7 +47,7 @@
       "available": false
     },
     "o25-04": {
-      "status": "error",
+      "status": "unknown",
       "text": "\u2014",
       "available": false
     },
@@ -57,7 +57,7 @@
       "available": false
     },
     "o25-06": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
@@ -92,7 +92,7 @@
       "available": false
     },
     "r24-04": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
@@ -142,7 +142,7 @@
       "available": false
     },
     "r25-03": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
@@ -172,7 +172,7 @@
       "available": false
     },
     "r25-09": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     }
