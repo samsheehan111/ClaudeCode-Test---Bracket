@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29T13:41:59Z",
+  "updated": "2026-07-30T01:20:58Z",
   "books": {
     "o24-01": {
       "status": "unknown",
@@ -7,8 +7,8 @@
       "available": false
     },
     "o24-02": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "o24-03": {
@@ -27,13 +27,13 @@
       "available": false
     },
     "o24-06": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "o25-01": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "o25-02": {
@@ -62,12 +62,12 @@
       "available": false
     },
     "o25-07": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "o25-08": {
-      "status": "unknown",
+      "status": "error",
       "text": "\u2014",
       "available": false
     },
@@ -87,8 +87,8 @@
       "available": false
     },
     "r24-03": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "r24-04": {
@@ -102,8 +102,8 @@
       "available": false
     },
     "r24-06": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "r24-07": {
@@ -137,13 +137,13 @@
       "available": false
     },
     "r25-02": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "r25-03": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     },
     "r25-04": {
@@ -172,8 +172,8 @@
       "available": false
     },
     "r25-09": {
-      "status": "unknown",
-      "text": "\u2014",
+      "status": "error",
+      "text": "HTTP 500",
       "available": false
     }
   }
