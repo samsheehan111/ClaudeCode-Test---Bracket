@@ -1,9 +1,9 @@
 {
-  "updated": "2026-08-19T00:32:56Z",
+  "updated": "2026-08-19T12:20:40Z",
   "books": {
     "o24-01": {
-      "status": "error",
-      "text": "HTTP 502",
+      "status": "unknown",
+      "text": "\u2014",
       "available": false
     },
     "o24-02": {
